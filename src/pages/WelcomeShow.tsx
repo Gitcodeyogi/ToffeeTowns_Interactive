@@ -289,14 +289,39 @@ const ROYAL_DECREE_PARAGRAPHS = [
 ];
 
 const TRAVELLER_QUOTES = [
-  { type: "Explorer's Discovery", text: "I once saw the cocoa rivers flowing uphill during the Great Caramel Solstice—a sight you'll never forget!", color: "amber" },
-  { type: "Traveller's Log", text: "Always keep a spare toffee handy; the local squirrels are fierce barters and they won't settle for apologies!", color: "cyan" },
-  { type: "Explorer's Discovery", text: "If you whistle a jazz tune near Peppermint Peak, the mountains might actually echo back in harmony.", color: "amber" },
-  { type: "Traveller's Log", text: "Never ask a Nutwood baker for their 'secret' ingredient unless you're prepared to join their family for Sunday dinner.", color: "cyan" },
-  { type: "Explorer's Discovery", text: "Rumor has it that the trains move faster if you whisper 'sweet dreams' to the locomotive engine.", color: "amber" },
-  { type: "Traveller's Log", text: "If a pigeon offers you a map of the coast, take it—but don't be surprised if it only leads to the nearest fudge stand.", color: "cyan" },
-  { type: "Explorer's Discovery", text: "The golden stars of the province don't just point north; they point toward the nearest fresh batch of pralines.", color: "amber" },
-  { type: "Traveller's Log", text: "In Creamwood, the fog smells like vanilla—don't try to eat the clouds, I’ve already tried for you.", color: "cyan" }
+  // ── Explorer's Discovery (15) ──
+  { type: "Explorer's Discovery", text: "I once saw the cocoa rivers of Cocoawood County flow backwards during the Solstice—a sight you'll never forget!", color: "amber" },
+  { type: "Explorer's Discovery", text: "If you whistle a sweet jazz tune near Peppermint Peak, the icy mountains will echo back a three-part harmony.", color: "amber" },
+  { type: "Explorer's Discovery", text: "The golden stars of Toffee Town don't point north; they pivot toward the nearest batch of hot pralines.", color: "amber" },
+  { type: "Explorer's Discovery", text: "If you leave a marshmallow overnight in Ganache Grove, it will sprout tiny candy wings by sunrise!", color: "amber" },
+  { type: "Explorer's Discovery", text: "The bubbling springs of Lava Cake Lake are actually 70% dark chocolate—highly recommended for warm dips!", color: "amber" },
+  { type: "Explorer's Discovery", text: "During the winter solstice, the stars above Caramel Cove align to form a giant, glowing caramel pretzel.", color: "amber" },
+  { type: "Explorer's Discovery", text: "I discovered that hazelnut trees in Hazelnut Terrace grow faster when you tell them wholesome bedtime stories.", color: "amber" },
+  { type: "Explorer's Discovery", text: "Deep inside the Ganache Grove canopy, there's a secret branch that plays acoustic harp sounds when wind passes.", color: "amber" },
+  { type: "Explorer's Discovery", text: "If you stand still in Caramel Cove at noon, the ocean waves sound like sticky syrup gently bubbling.", color: "amber" },
+  { type: "Explorer's Discovery", text: "The geothermal vents of Lava Cake Lake blow chocolate-scented smoke rings that float for miles.", color: "amber" },
+  { type: "Explorer's Discovery", text: "At the peak of Peppermint Heights, the snow is actually sweet mint-shavings—bring a spoon with you!", color: "amber" },
+  { type: "Explorer's Discovery", text: "The cobblestones of Toffee Town are made of polished hard butterscotch, making step-dancing incredibly clicky!", color: "amber" },
+  { type: "Explorer's Discovery", text: "Underneath Hazelnut Terrace, ancient crystal deposits hum at a pitch that makes squirrels start waltzing.", color: "amber" },
+  { type: "Explorer's Discovery", text: "I found a hidden lagoon near Caramel Cove where the sand is entirely composed of golden brown sugar.", color: "amber" },
+  { type: "Explorer's Discovery", text: "Deep within Peppermint Peaks, the glacial ice holds fossilized mint leaves from the Great Cocoa Flood.", color: "amber" },
+
+  // ── Traveller's Log / Fun Fact (15) ──
+  { type: "Traveller's Log", text: "Always keep a spare piece of toffee handy; the squirrels of Cocoawood County are fierce, sweet-toothed negotiators!", color: "cyan" },
+  { type: "Traveller's Log", text: "Never ask a Hazelnut Terrace elder for their secret recipe unless you're ready to marry into the baking clan!", color: "cyan" },
+  { type: "Traveller's Log", text: "If a beach pigeon in Caramel Cove offers you a map, don't follow it—it only leads to the nearest fudge stand.", color: "cyan" },
+  { type: "Traveller's Log", text: "In the frosted county of Creamwood, the mountain fog smells like pure vanilla—don't try to eat the clouds!", color: "cyan" },
+  { type: "Traveller's Log", text: "Don't try to race the gingerbread rabbits of Hazelnut Terrace. They curl into balls and roll aerodynamically!", color: "cyan" },
+  { type: "Traveller's Log", text: "If Pippa Bolt offers you a test flight on the Bumblebird aircraft, make sure you bring a candy parachute!", color: "cyan" },
+  { type: "Traveller's Log", text: "Never make direct eye contact with a Ganache Grove forest ranger while eating chocolate, or prepare to pay a tax.", color: "cyan" },
+  { type: "Traveller's Log", text: "The street sweepers of Toffee Town are officially paid in caramel drops, which makes it the cleanest capital around.", color: "cyan" },
+  { type: "Traveller's Log", text: "If you drop a marshmallow in the Lava Cake Lake springs, it immediately inflates to the size of a pillow!", color: "cyan" },
+  { type: "Traveller's Log", text: "In Caramel Cove, the sea-crabs walk sideways to avoid getting their little claws stuck in the warm shoreline syrup.", color: "cyan" },
+  { type: "Traveller's Log", text: "The guard towers in Peppermint Peaks are built from giant candy canes—tasty, but terrible in a heatwave!", color: "cyan" },
+  { type: "Traveller's Log", text: "Elders in Hazelnut Terrace claim that holding a toasted nut to your ear lets you hear the local forest gossip.", color: "cyan" },
+  { type: "Traveller's Log", text: "If Chucklebop invites you to race on his rocket-powered raft, wrap your hair tightly—mint cream is hard to wash out!", color: "cyan" },
+  { type: "Traveller's Log", text: "The mayor of Toffee Town once banned broccoli, replacing it with green-colored white chocolate for administrative peace.", color: "cyan" },
+  { type: "Traveller's Log", text: "Acoustic scientist Milo Spark swears the Ganache Grove mushrooms only dance when they hear upbeat jazz tunes.", color: "cyan" }
 ];
 
 // ── Main WelcomeShow ───────────────────────────────────────
@@ -312,10 +337,16 @@ const WelcomeShow: React.FC = () => {
   const [taskProgress, setTaskProgress] = useState<number>(0);
   const [completedTasks, setCompletedTasks] = useState<Record<string, number[]>>({});
 
-  // Pick random quotes once on mount
+  // Pick random quotes once on mount, filtering by type to match layout headers
   const selectedQuotes = useState(() => {
-    const shuffled = [...TRAVELLER_QUOTES].sort(() => 0.5 - Math.random());
-    return [shuffled[0] || TRAVELLER_QUOTES[0], shuffled[1] || TRAVELLER_QUOTES[1]];
+    const discoveries = TRAVELLER_QUOTES.filter(q => q.type === "Explorer's Discovery");
+    const logs = TRAVELLER_QUOTES.filter(q => q.type === "Traveller's Log");
+    const randomDiscovery = discoveries[Math.floor(Math.random() * discoveries.length)];
+    const randomLog = logs[Math.floor(Math.random() * logs.length)];
+    return [
+      randomDiscovery || TRAVELLER_QUOTES[0],
+      randomLog || TRAVELLER_QUOTES[1]
+    ];
   })[0];
 
   const slide = SLIDES[idx];
