@@ -47,6 +47,7 @@ const GlassButton: React.FC<GlassButtonProps> = ({
         fontSize: (className.includes('text-[') || className.includes('text-xs') || className.includes('text-sm') || className.includes('text-base') || className.includes('text-lg') || className.includes('text-xl'))
           ? undefined 
           : '16px',
+        ...props.style,
       }}
       {...props}
     >

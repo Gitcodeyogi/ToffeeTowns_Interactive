@@ -176,22 +176,24 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
               <div className="pt-2 space-y-2.5">
                 <GlassButton
-                  label={authLoading ? 'LOADING...' : (isRegistering ? 'REGISTER' : 'ENTER CHOCOBROOK')}
+                  label={authLoading ? 'Loading...' : (isRegistering ? 'Register' : 'Enter the Town')}
                   type="submit"
                   variant="primary"
-                  className="!w-[70%] !mx-auto !h-14 !min-h-14 !rounded-lg !py-0"
+                  className="!w-[70%] !mx-auto !h-14 !min-h-14 !rounded-lg !py-0 !normal-case text-[15px] md:text-[16px] tracking-wide"
+                  style={{ fontFamily: '"Luckiest Guy", cursive' }}
                   disabled={authLoading}
                 />
 
                 <GlassButton
-                  label={isRegistering ? 'ALREADY A TRAVELLER? LOGIN' : 'NEW TRAVELLER? REGISTER'}
+                  label={isRegistering ? 'Already a Traveler? Login' : 'New Traveler? Register'}
                   type="button"
                   variant="secondary"
                   onClick={() => {
                     setIsRegistering(!isRegistering);
                     setErrorMsg('');
                   }}
-                  className="!w-[70%] !mx-auto !h-14 !min-h-14 !rounded-lg !py-0"
+                  className="!w-[70%] !mx-auto !h-14 !min-h-14 !rounded-lg !py-0 !normal-case text-[14px] md:text-[15px] tracking-wide"
+                  style={{ fontFamily: '"Luckiest Guy", cursive' }}
                 />
               </div>
             </form>
