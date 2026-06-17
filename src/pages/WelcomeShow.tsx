@@ -276,7 +276,7 @@ const SLIDES: StorySlide[] = [
 
 // ── Letter Decree Data ──────────────────────────────────────
 const ROYAL_DECREE_PARAGRAPHS = [
-  'You are now within the Chocolate era, in Confection Year 400, in the royal province of ChocoBrook - a land where the aroma of aged cocoa meets the sea-spray of the Praline coast.',
+  'You are now within the Chocolate era, in Confection Year Cycle, in the royal province of ChocoBrook - a land where the aroma of aged cocoa meets the sea-spray of the Praline coast.',
   'At the heart of this realm stands Toffee Town, the capital, where caramel-lit roads, marble-spun galleries, and ancient trade guilds gather the spirit of the province into one radiant center of gravity.',
   'Beyond the capital lie 4 great counties and 16 distinct towns. From the frozen spires of Peppermint Peak to the bustling docks of Butterscotch Port, each settlement carries its own unique history and secret.',
   'Here, laughter drifts through the markets, carried on the scent of cocoa and spice. Lanterns glow warmly at dusk, guiding travelers toward stories waiting to be discovered. And every street corner holds a promise — that wonder is never far from your touch.',

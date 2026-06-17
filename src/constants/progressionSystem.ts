@@ -271,7 +271,7 @@ export const NARRATIVE_MILESTONE_LETTERS: NarrativeLetter[] = [
     from: 'Office of Provincial Residency',
     fromTitle: 'Imperial Registry — Toffee Town',
     subject: 'CAPITAL HOUSING ELIGIBILITY — Official Notice',
-    body: 'To the Traveller now formally recognised as Capital Candidate. The Office of Provincial Residency has reviewed your Legacy Record and finds it consistent with the requirements for Capital Residency Application in Toffee Town, Grand Harbour District. Your application may now be formally submitted. This notice constitutes the official invitation to proceed. — By authority of the Grand Caramel Council, Confection Year 400.',
+    body: 'To the Traveller now formally recognised as Capital Candidate. The Office of Provincial Residency has reviewed your Legacy Record and finds it consistent with the requirements for Capital Residency Application in Toffee Town, Grand Harbour District. Your application may now be formally submitted. This notice constitutes the official invitation to proceed. — By authority of the Grand Caramel Council, Confection Year Cycle.',
     isImperial: true
   }
 ];

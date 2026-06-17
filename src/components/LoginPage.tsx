@@ -65,10 +65,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             {/* Subheadings Below in Luckiest Guy */}
             <div className="mt-4 space-y-1 font-brand uppercase tracking-wider" style={{ fontFamily: '"Josefin Sans", sans-serif' }}>
               <p className="text-white/60 text-xs md:text-sm">
-                Chocolate Era • Confection Year 400
+                Chocolate Era • Confection Year Cycle
               </p>
               <p className="text-cyan-300 text-xs md:text-sm mt-1">
-                17 towns, 4 counties, 1 Capital
+                16 towns, 4 counties, 1 Capital, 1 Province
               </p>
             </div>
           </div>
@@ -84,10 +84,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
           {/* Motto Section */}
           <div 
-            className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-pink-300 to-yellow-300 font-brand italic tracking-wider text-[10px] md:text-[12px] lg:text-[13px] mt-2 whitespace-nowrap overflow-hidden text-ellipsis"
+            className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-pink-300 to-yellow-300 font-brand italic tracking-wider text-[13px] md:text-[15px] lg:text-[16px] mt-2 whitespace-nowrap overflow-hidden text-ellipsis text-center"
             style={{ fontFamily: '"Josefin Sans", sans-serif' }}
           >
-            choose a home, become a resident, build a legacy, be remembered.
+            Choose a home, Become a resident, Build a legacy, Be remembered.
           </div>
         </div>
 

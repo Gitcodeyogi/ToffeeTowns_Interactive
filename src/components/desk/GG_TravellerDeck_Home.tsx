@@ -1680,7 +1680,7 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
                 </div>
 
                 <div className="flex items-center justify-between text-[9px] text-white/30 border-t border-white/5 pt-3">
-                  <span>🍫 Confection Year 400 • Cocoawood County</span>
+                  <span>🍫 Confection Year Cycle • Cocoawood County</span>
                   <button
                     onClick={() => setActiveRoomPopup(null)}
                     className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 rounded-xl font-black uppercase text-[8px] transition"
