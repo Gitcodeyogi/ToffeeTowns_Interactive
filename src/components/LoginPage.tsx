@@ -104,8 +104,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 </div>
               </div>
 
+              {/* Toffee Towns Title */}
+              <h1 
+                className="text-4xl md:text-5xl font-black text-yellow-300 mb-3 tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+                style={{ fontFamily: '"Luckiest Guy", cursive' }}
+              >
+                Toffee Towns
+              </h1>
+
               <h2
-                className="uppercase tracking-wider text-emerald-300 leading-none font-brand text-3xl"
+                className="uppercase tracking-wider text-emerald-300 leading-none font-brand text-2xl md:text-3xl"
                 style={{ fontFamily: '"Luckiest Guy", cursive' }}
               >
                 {isRegistering ? 'TRAVELLER REGISTER' : 'TRAVELLER LOGIN'}
