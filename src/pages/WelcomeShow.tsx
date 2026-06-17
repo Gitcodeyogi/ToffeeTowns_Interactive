@@ -478,9 +478,9 @@ const WelcomeShow: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Combined Signature & Action Panel */}
+                 {/* Combined Signature & Action Panel */}
                 <div 
-                  className="flex flex-row items-center justify-between gap-6 rounded-3xl border border-white/20 bg-black/60 p-5 shadow-2xl transition-all hover:scale-[1.01] select-none"
+                  className="flex flex-row items-center justify-between gap-6 rounded-3xl border border-white/20 bg-black/60 p-5 shadow-2xl transition-all hover:scale-[1.01] select-none mb-4 md:mb-6"
                   style={{ backdropFilter: 'none', WebkitBackdropFilter: 'none' }}
                 >
                   {/* Left Column: Signature */}
@@ -511,11 +511,15 @@ const WelcomeShow: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Middle Column: 3 Stars in 3 Rows */}
-                  <div className="flex flex-col items-center justify-center gap-1 shrink-0">
-                    <span className="material-icons-round text-yellow-300 text-[1.4rem] hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
-                    <span className="material-icons-round text-emerald-400 text-[1.6rem] hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
-                    <span className="material-icons-round text-cyan-300 text-[1.4rem] hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
+                  {/* Middle Column: 3 Stars horizontally centered between two lines */}
+                  <div className="flex items-center justify-center gap-3 flex-grow mx-4">
+                    <div className="h-px bg-white/20 flex-grow" />
+                    <div className="flex items-center gap-1.5 shrink-0 select-none">
+                      <span className="material-icons-round text-yellow-300 text-[1.4rem] hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
+                      <span className="material-icons-round text-emerald-400 text-[1.6rem] hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
+                      <span className="material-icons-round text-cyan-300 text-[1.4rem] hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
+                    </div>
+                    <div className="h-px bg-white/20 flex-grow" />
                   </div>
 
                   {/* Right Column: Vertically stacked buttons */}
