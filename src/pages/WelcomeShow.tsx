@@ -277,7 +277,8 @@ const SLIDES: StorySlide[] = [
 // ── Letter Decree Data ──────────────────────────────────────
 const ROYAL_DECREE_PARAGRAPHS = [
   'We\'ve been expecting you... Word of your arrival reached us before you did.',
-  'The squirrels on the border reported a new traveller with a suitcase full of dreams (and hopefully, a secret stash of cookies!). Welcome to ChocoBrook, our cozy fantasy province where you can join the fun and write your own story.',
+  'The squirrels on the border reported a new traveller with a suitcase full of dreams (and hopefully, a secret stash of cookies!).',
+  'Welcome to ChocoBrook, our cozy fantasy province where you can join the fun and write your own story.',
   'Here, laughter drifts through the markets, carried on the sweet scent of cocoa and warm spice. Lanterns glow cozy at dusk, guiding you toward stories waiting to be uncovered, while friendly townsfolk wait with open arms. Every single street corner holds a lovely promise of magic, waiting for your touch.',
   'Ready to jump in? Your first task is to pick your favorite starter town and move into a delightful cottage that is yours to customize! Use your styling magic to decorate your new home, making it the coziest nest in the province while you get to know your funny neighbors.',
   'Don\'t get too comfy in that hammock, though! There is plenty of friendly neighborhood drama to help solve. You can team up for daily community construction projects, sniff out curious woodland mysteries, or step up to sponsor grand campaigns at the town hall.',
@@ -421,9 +422,9 @@ const WelcomeShow: React.FC = () => {
                   <div className="h-[3px] w-40 bg-gradient-to-r from-amber-400 via-amber-200 to-transparent mt-3" />
                 </div>
 
-                {/* Decree paragraphs 1-4 */}
+                {/* Decree paragraphs 1-5 */}
                 <div className="space-y-3 text-[0.95rem] leading-relaxed text-white/85 font-body">
-                  {ROYAL_DECREE_PARAGRAPHS.slice(0, 4).map((paragraph, idx) => (
+                  {ROYAL_DECREE_PARAGRAPHS.slice(0, 5).map((paragraph, idx) => (
                     <p key={idx}>
                       {idx === 0 ? (
                         <>
@@ -457,9 +458,9 @@ const WelcomeShow: React.FC = () => {
 
               {/* RIGHT COLUMN: Decree Part 2, Fun Fact, Signature card, Buttons */}
               <div className="flex flex-col gap-3 justify-between">
-                {/* Decree paragraphs 5-7 */}
+                {/* Decree paragraphs 6-9 */}
                 <div className="space-y-3 text-[0.95rem] leading-relaxed text-white/85 font-body">
-                  {ROYAL_DECREE_PARAGRAPHS.slice(4).map((paragraph, idx) => (
+                  {ROYAL_DECREE_PARAGRAPHS.slice(5).map((paragraph, idx) => (
                     <p key={idx}>{paragraph}</p>
                   ))}
                 </div>
