@@ -179,20 +179,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   label={authLoading ? 'Loading...' : (isRegistering ? 'Register' : 'Enter the Town')}
                   type="submit"
                   variant="primary"
-                  className="!w-[70%] !mx-auto !h-14 !min-h-14 !rounded-lg !py-0 !normal-case text-[15px] md:text-[16px] tracking-wide"
+                  className="!w-[70%] !mx-auto !h-14 !min-h-14 !rounded-lg !py-0 !normal-case text-[16px] md:text-[17px] tracking-wide"
                   style={{ fontFamily: '"Luckiest Guy", cursive' }}
                   disabled={authLoading}
                 />
 
                 <GlassButton
-                  label={isRegistering ? 'Already a Traveler? Login' : 'New Traveler? Register'}
+                  label={isRegistering ? 'Already a Traveller? Login' : 'New Traveller? Register'}
                   type="button"
                   variant="secondary"
                   onClick={() => {
                     setIsRegistering(!isRegistering);
                     setErrorMsg('');
                   }}
-                  className="!w-[70%] !mx-auto !h-14 !min-h-14 !rounded-lg !py-0 !normal-case text-[14px] md:text-[15px] tracking-wide"
+                  className="!w-[70%] !mx-auto !h-14 !min-h-14 !rounded-lg !py-0 !normal-case text-[15px] md:text-[16px] tracking-wide"
                   style={{ fontFamily: '"Luckiest Guy", cursive' }}
                 />
               </div>
