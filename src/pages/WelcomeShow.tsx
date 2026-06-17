@@ -276,12 +276,13 @@ const SLIDES: StorySlide[] = [
 
 // ── Letter Decree Data ──────────────────────────────────────
 const ROYAL_DECREE_PARAGRAPHS = [
-  'You are now within the Chocolate era, in Confection Year Cycle, in the royal province of ChocoBrook - a land where the aroma of aged cocoa meets the sea-spray of the Praline coast.',
-  'At the heart of this realm stands Toffee Town, the capital, where caramel-lit roads, marble-spun galleries, and ancient trade guilds gather the spirit of the province into one radiant center of gravity.',
-  'Beyond the capital lie 4 great counties and 16 distinct towns. From the frozen spires of Peppermint Peak to the bustling docks of Butterscotch Port, each settlement carries its own unique history and secret.',
-  'Here, laughter drifts through the markets, carried on the scent of cocoa and spice. Lanterns glow warmly at dusk, guiding travelers toward stories waiting to be discovered. And every street corner holds a promise — that wonder is never far from your touch.',
-  'Within this application, you are invited to explore a living world - a tapestry of stories, trade routes, rail systems, and town level conflicts that turn beauty into narrative stakes.',
-  'ChocoBrook is not merely to be read; it is to be felt. Step forth as a guest of the Crown, and let the province reveal its heart to you.'
+  'You are about to begin a cozy adventure in ChocoBrook, a beautiful province of confectionery towns. As a new resident, you will explore sweet landscapes, meet friendly companions, and become a part of our warm town stories.',
+  'Here, laughter drifts through the markets, carried on the scent of cocoa and spice. Lanterns glow warmly at dusk, guiding travellers toward stories waiting to be discovered. And every street corner holds a promise — that wonder is never far from your touch.',
+  'Choose your starter town, move into a cozy cottage, and help the community solve local matters. You can assist with daily construction projects, investigate curious woodland mysteries, and sponsor grand campaigns at the town hall.',
+  'Collect precious Cocoa Coins by helping out, and use them to buy cute decorations for your cottage. Open your passport to log your daily presence, collect stamps from different towns, and earn prestigious badges for your deeds.',
+  'Work with other residents, earn legacy points to climb the professional ranks (like Builder, Healer, or Explorer), and compete to top the global leaderboard. Your choices today will shape the future and write tomorrow\'s headlines.',
+  'Take a moment to chat with Cocoa the Lore Keeper, get tips from fellow travellers, and consult the daily bulletin boards. ChocoBrook is a living world that grows and changes with your contributions.',
+  'This province is not just a place to explore — it is a lovely community to call your home. Step forward, gather your things, and let ChocoBrook reveal its sweet heart to you!'
 ];
 
 const TRAVELLER_QUOTES = [
@@ -419,23 +420,15 @@ const WelcomeShow: React.FC = () => {
                   <div className="h-[3px] w-40 bg-gradient-to-r from-amber-400 via-amber-200 to-transparent mt-3" />
                 </div>
 
-                {/* Warning box */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 flex flex-col justify-center shrink-0">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-400 mb-0.5">Warning</h3>
-                  <p className="italic text-white/80 text-[0.95rem] leading-snug font-body">
-                    This place is sweet, strange, and slightly unpredictable... Proceed with Smile!
-                  </p>
-                </div>
-
-                {/* Decree paragraphs 1-3 */}
+                {/* Decree paragraphs 1-4 */}
                 <div className="space-y-4 text-[1rem] leading-relaxed text-white/85 font-body">
-                  {ROYAL_DECREE_PARAGRAPHS.slice(0, 3).map((paragraph, idx) => (
+                  {ROYAL_DECREE_PARAGRAPHS.slice(0, 4).map((paragraph, idx) => (
                     <p key={idx}>
                       {idx === 0 ? (
                         <>
                           <span className="text-5xl font-serif italic float-left mt-0.5 mr-3 leading-none text-amber-400 border-b border-amber-200">Y</span>
                           {paragraph.startsWith('You') 
-                            ? `ou are now within the Chocolate era, ${paragraph.split(',').slice(1).join(',')}` 
+                            ? `ou${paragraph.substring(3)}` 
                             : paragraph}
                         </>
                       ) : (
@@ -463,9 +456,9 @@ const WelcomeShow: React.FC = () => {
 
               {/* RIGHT COLUMN: Decree Part 2, Fun Fact, Signature card, Buttons */}
               <div className="flex flex-col gap-4 justify-between">
-                {/* Decree paragraphs 4-6 */}
+                {/* Decree paragraphs 5-7 */}
                 <div className="space-y-4 text-[1rem] leading-relaxed text-white/85 font-body">
-                  {ROYAL_DECREE_PARAGRAPHS.slice(3).map((paragraph, idx) => (
+                  {ROYAL_DECREE_PARAGRAPHS.slice(4).map((paragraph, idx) => (
                     <p key={idx}>{paragraph}</p>
                   ))}
                 </div>
