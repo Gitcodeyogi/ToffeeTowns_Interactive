@@ -1,0 +1,106 @@
+{
+  "title": "THE NUTCRACKER'S SECRET",
+  "description": "A high-stakes whisper in the breezy terraces of Nutwood County. Someone knows where the golden acorns are buried.",
+  "scenes": [
+    {
+      "id": "scene_01",
+      "imageUrl": "/stories/Nutwood County/hazelnut_terrace/Gossipfiles/images/Scene_1.png",
+      "title": "The Whispering Orchards",
+      "description": "An introduction to the heart of Nutwood County.",
+      "dialogues": [
+        { "speaker": "Provincial Guide", "teaser": "Nutwood's green heart powers the total Chocolate Era.", "text": "In the rolling green heart of Nutwood County, Hazelnut Terrace Town doesn’t just grow crops; it powers the Chocolate Era." },
+        { "speaker": "Provincial Guide", "teaser": "Postcard views hide a restless market square.", "text": "Cradled in terraced hills, the town gathers around a grand hazelnut fountain alive with trade." }
+      ]
+    },
+    {
+      "id": "scene_02",
+      "imageUrl": "/stories/Nutwood County/hazelnut_terrace/Gossipfiles/images/Scene_2.png",
+      "title": "The Basement Vault",
+      "description": "Deep within the roots of the terrace, a secret is revealed.",
+      "dialogues": [
+        { "speaker": "Shadow Paw", "teaser": "Did you bring the map? The Bosses are watching.", "text": "Look here. This isn't just a map of the grove. It's the entire County layout." }
+      ]
+    },
+    {
+      "id": "scene_03",
+      "imageUrl": "/stories/Nutwood County/hazelnut_terrace/Gossipfiles/images/Scene_3.png",
+      "title": "The Balcony Reveal",
+      "description": "The true scale of the Nut Elevator is finally seen.",
+      "dialogues": [
+        { "speaker": "The Great Nutcracker", "teaser": "You thought you could hide from the laws of sweetness?", "text": "You thought you could hide from the laws of sweetness?" }
+      ]
+    },
+    {
+      "id": "scene_04",
+      "imageUrl": "/stories/Nutwood County/hazelnut_terrace/Gossipfiles/images/Scene_4.png",
+      "title": "The Golden Grove",
+      "description": "Searching for the legendary crop foundations.",
+      "dialogues": [
+        { "speaker": "Haze the Squirrel", "teaser": "The light is different here...", "text": "The light is different here. It feels like the ground itself is breathing sweetness." }
+      ]
+    },
+    {
+      "id": "scene_05",
+      "imageUrl": "/stories/Nutwood County/hazelnut_terrace/Gossipfiles/images/Scene_5.png",
+      "title": "The Shadow Market",
+      "description": "Trading whispers in the dark corners of the square.",
+      "dialogues": [
+        { "speaker": "The Whisperer", "teaser": "The economy isn't built on nuts alone.", "text": "The economy isn't built on nuts alone, traveler. It's built on who knows who is hungry." }
+      ]
+    },
+    {
+      "id": "scene_06",
+      "imageUrl": "/stories/Nutwood County/hazelnut_terrace/Gossipfiles/images/Scene_6.png",
+      "title": "Terrace Turmoil",
+      "description": "The Bosses exert their influence over the harvest.",
+      "dialogues": [
+        { "speaker": "Clan Rebel", "teaser": "They can't own the sun!", "text": "The Bosses think they own the sun because they own the silos. We say the sweetness belongs to the terrace!" }
+      ]
+    },
+    {
+      "id": "scene_07",
+      "imageUrl": "/stories/Nutwood County/hazelnut_terrace/Gossipfiles/images/Scene_7.png",
+      "title": "The Nut Elevator",
+      "description": "Witnessing the massive vertical transport system.",
+      "dialogues": [
+        { "speaker": "Engineer Oak", "teaser": "She's at full capacity tonight.", "text": "She's at full capacity tonight. Every nut is a ticket to Toffee Town." }
+      ]
+    },
+    {
+      "id": "scene_08",
+      "imageUrl": "/stories/Nutwood County/hazelnut_terrace/Gossipfiles/images/Scene_8.png",
+      "title": "Canal Crossing",
+      "description": "Dangerous waters and precious cargo.",
+      "dialogues": [
+        { "speaker": "Boatman Barley", "teaser": "Keep your head down.", "text": "Keep your head down. The water has ears, and the Bosses have boats." }
+      ]
+    },
+    {
+      "id": "scene_09",
+      "imageUrl": "/stories/Nutwood County/hazelnut_terrace/Gossipfiles/images/Scene_9.png",
+      "title": "The Vault Entrance",
+      "description": "Cracking the code of the Hazelnut Foundation.",
+      "dialogues": [
+        { "speaker": "Shadow Paw", "teaser": "One more click...", "text": "One more click and the history of this town changes forever." }
+      ]
+    },
+    {
+      "id": "scene_10",
+      "imageUrl": "/stories/Nutwood County/hazelnut_terrace/Gossipfiles/images/Scene_10.png",
+      "title": "The Great Reveal",
+      "description": "The hidden hoard of the Nutcracker is found.",
+      "dialogues": [
+        { "speaker": "The Great Nutcracker", "teaser": "You've finally arrived.", "text": "You've finally arrived. But knowing the secret is only half the battle." }
+      ]
+    },
+    {
+      "id": "scene_11",
+      "imageUrl": "/stories/Nutwood County/hazelnut_terrace/Gossipfiles/images/Scene_11.png",
+      "title": "Conclusion of Whispers",
+      "description": "The Terrace returns to its sunlit quiet, for now.",
+      "dialogues": [
+        { "speaker": "Provincial Guide", "teaser": "The story rests, but the roots remain.", "text": "The story rests, but the roots remain. Hazelnut Terrace continues to power the world's sweetness." }
+      ]
+    }
+  ]
+}

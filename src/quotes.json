@@ -1,0 +1,171 @@
+{
+  "quotes": {
+    "excellent": [
+      "Amazing work! You're a natural!",
+      "Spectacular! You crushed it!",
+      "Wow, you're on fire today!",
+      "Perfect! High five!",
+      "Unstoppable! Keep it up!",
+      "You're a legend in the making!",
+      "Beautifully done! 🌟",
+      "By the Golden Gear, that was great!"
+    ],
+    "good": [
+      "Nice job, we're moving fast!",
+      "Solid effort! I'm proud of you.",
+      "You're getting sharper every day!",
+      "Great hustle! Let's keep going.",
+      "Victory for the fun side!",
+      "Pretty smooth escape there!",
+      "Well played, rebel!",
+      "Good show! What's next?"
+    ],
+    "fair": [
+      "Not bad, but you can be sneakier!",
+      "Okay, let's aim for gold next time.",
+      "Close call! Watch your step.",
+      "Warming up? Give it another shot!",
+      "Decent run, let's go again!",
+      "A bit rusty? No worries, try again!",
+      "We'll take it. Try for a faster time?",
+      "Good try! Keep practicing."
+    ],
+    "quit": [
+      "Rest up! I'll guard the fort.",
+      "Heading out? See you soon!",
+      "Taking a break? Smart move.",
+      "Don't be gone too long!",
+      "Bye for now! Catch you later.",
+      "Stay safe out there, hero!",
+      "Rest up for the next adventure!",
+      "Catch you on the flip side!"
+    ],
+    "gameover": [
+      "Oof! Get up and try again!",
+      "The Sheriff got lucky. Retry?",
+      "Don't give up! Rebels never quit.",
+      "Retry? You almost had it!",
+      "Dust off and go again!",
+      "Believe in yourself, you got this!",
+      "Just a practice run. Go again!",
+      "Shake it off! We'll beat 'em."
+    ],
+    "tip": [
+      "Need a hand? Check your Power-Ups!",
+      "Focus and take a deep breath.",
+      "Check your coins for helpful hints!",
+      "Speed is key, watch the timer!",
+      "Keep trying, I believe in you!"
+    ],
+    "login": [
+      "Hey! I've been waiting for you!",
+      "Ready for some fun today?",
+      "Welcome back, fellow rebel!",
+      "Did you bring the snacks? 🍪",
+      "Let's hatch some plans! 🐣",
+      "Shh... ready to sneak in?",
+      "Adventure awaits! Let's go!",
+      "The Mayor's rules won't stop us!"
+    ]
+  },
+  "gameTips": {
+    "general": [
+      "Explore everywhere! Badges are hidden in achievements."
+    ],
+    "memory": [
+      "Memorize shapes, not just colors!",
+      "Focus on one corner of the board.",
+      "Use 'Freeze' if you get stuck!",
+      "Match People to Actions in higher levels."
+    ],
+    "ninja": [
+      "Don't slice the black bombs!",
+      "Group fruits for massive combos!",
+      "Vegetables are worth points too!",
+      "Use AUTO-SLICE if it gets crazy."
+    ],
+    "town": [
+      "Read carefully—who has the skills?",
+      "The Sheriff is rarely useful!",
+      "Use 'Eliminate' if you're stumped.",
+      "Perfect matches get double points!"
+    ],
+    "puzzle": [],
+    "riddle": [],
+    "strategy": [],
+    "bubble": [],
+    "runner": [],
+    "tycoon": [
+      "Hire efficient staff to save long-term.",
+      "Keep a reserve for emergencies!",
+      "Check 'Pros' to see what sells fast.",
+      "Stock at least 3 types of items.",
+      "Brand Evangelists boost loyalty!",
+      "Watch stock levels during the day."
+    ]
+  },
+  "pageQuotes": {
+    "landing": [
+      "Hey! Ready to cause some trouble?",
+      "Town's waiting! Let's go!",
+      "Psst... Sheriff's sleeping. Ideal timing!",
+      "Check the Leaderboard! We winning?",
+      "Let's play! I'm bored of standing still.",
+      "Ready for an epic story? Click 'Start'!",
+      "Don't let the Mayor catch you idling!",
+      "You're a natural adventurer, I can tell!"
+    ],
+    "story-chapters": [
+      "Pick a chapter! Act 2 is crazy.",
+      "The Pie Plot is hilarious, read it!",
+      "Let's see myself being awesome!",
+      "Unlock more to save the town!",
+      "Visuals are cool! Click to start."
+    ],
+    "story": [
+      "I look good in this, don't I?",
+      "Read carefully for hidden clues!",
+      "Want me to read? Click the speaker!",
+      "Best part! Watch what happens next.",
+      "Flip for the script—it's like a play!",
+      "That speech bubble was my best line."
+    ],
+    "characters": [
+      "Look at this crew! I'm the favorite.",
+      "Flip cards for secret avatars!",
+      "Sheriff looks grumpy as usual.",
+      "Lanternella glows in the dark! Cool!",
+      "Jackson makes the best pies. Shh!",
+      "Rebels or Bosses? Pick Rebels!"
+    ],
+    "games-arena": [
+      "Bet I can beat your high score!",
+      "Memory Grove is tough. Keep watch!",
+      "Need coins? This is the place!",
+      "Try 'Town Struggle', show your logic.",
+      "Chuckle Ninja is my favorite! Slice!",
+      "Bored? Never! Pick an activity.",
+      "Let's win big in the Arena!",
+      "Rank yourself in the Royal Court."
+    ],
+    "coin-store": [
+      "Ooh, buy me something cool!",
+      "Imagine all the candy we could buy!",
+      "Stock up on Power-ups to win!",
+      "Spending spree! You've earned it.",
+      "Grab the coins while they're on sale!"
+    ],
+    "leaderboard": [
+      "Are we number one yet? Check it!",
+      "I want to be King! Keep playing!",
+      "Look at those scores! We can win!",
+      "Earn badges for my banner!",
+      "Let's take down the top scorers!"
+    ],
+    "about-us": [
+      "World made with magic code!",
+      "Curious about my story? Read on!",
+      "Join the adventure today!"
+    ]
+  }
+}

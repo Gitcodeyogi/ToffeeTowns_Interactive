@@ -1,0 +1,102 @@
+// Chuckle Mojo Game - Character Definitions
+// These characters replace the colored bubbles with fun Halloween-themed monsters
+// Currently using emoji sprites for maximum compatibility
+
+// Character type definitions
+export interface MojoCharacter {
+    id: string;
+    name: string;
+    profession: string;
+    emoji: string;
+    color: string;          // Theme color for glow effects
+    description: string;
+    imageUrl: string;       // Link to the independent 3D render
+    type: 'boss' | 'rebel'; // To easily distinguish factions
+}
+
+// 9 character slots for the match-3 game using independent 3D assets
+export const MOJO_CHARACTERS: MojoCharacter[] = [
+    // BOSSES
+    { id: 'boss_grimshade', name: 'Grimshade', profession: 'Arch-Mage', emoji: '🧙‍♀️', color: '#8b5cf6', description: 'The cunning dark wizard of the Council.', imageUrl: '/characters/mojo/boss_grimshade.png', type: 'boss' },
+    { id: 'boss_mayor', name: 'Pompelmoose', profession: 'Mayor', emoji: '👑', color: '#fbbf24', description: 'Rules with an iron fist and a cheesy smile.', imageUrl: '/characters/mojo/boss_mayor.png', type: 'boss' },
+    { id: 'boss_matron', name: 'Stoutwood', profession: 'Matron', emoji: '🧹', color: '#0ea5e9', description: 'Enforces strict town curfews.', imageUrl: '/characters/mojo/boss_matron.png', type: 'boss' },
+    { id: 'boss_chief', name: 'Whiskerton', profession: 'Police Chief', emoji: '🚓', color: '#3b82f6', description: 'The long arm of the law.', imageUrl: '/characters/mojo/boss_chief.png', type: 'boss' },
+    { id: 'boss_cop', name: 'Goldwhistle', profession: 'Officer', emoji: '👮', color: '#6366f1', description: 'Collects all the bribes.', imageUrl: '/characters/mojo/boss_cop.png', type: 'boss' },
+
+    // REBELS
+    { id: 'rebel_baker', name: 'Master Baker', profession: 'Head Chef', emoji: '👨‍🍳', color: '#fb923c', description: 'Controls the yeast supply for the revolution.', imageUrl: '/characters/mojo/rebel_baker.png', type: 'rebel' },
+    { id: 'rebel_lumberjack', name: 'Timber Baron', profession: 'Supply Manager', emoji: '🪓', color: '#b45309', description: 'Deforests for the cause of joy.', imageUrl: '/characters/mojo/rebel_lumberjack.png', type: 'rebel' },
+    { id: 'rebel_professor', name: 'Syntax', profession: 'Intel Analyst', emoji: '👓', color: '#10b981', description: 'Calculates the rebellion\'s success.', imageUrl: '/characters/mojo/rebel_professor.png', type: 'rebel' },
+    { id: 'rebel_chucklebop', name: 'Chucklebop', profession: 'Field Leader', emoji: '🏹', color: '#f472b6', description: 'The charismatic young leader of the rebellion.', imageUrl: '/characters/mojo/rebel_chucklebop.png', type: 'rebel' }
+];
+
+// Helper function to get a random character - Naturally balanced with 5 Bosses, 4 Rebels 
+export const getRandomCharacter = (): MojoCharacter => {
+    return MOJO_CHARACTERS[Math.floor(Math.random() * MOJO_CHARACTERS.length)];
+};
+
+// Helper function to get character by ID
+export const getCharacterById = (id: string): MojoCharacter | undefined => {
+    return MOJO_CHARACTERS.find(c => c.id === id);
+};
+
+// Story scenarios connected to game levels
+export interface MojoScenario {
+    level: number;
+    variants: {
+        id: string;
+        title: string;
+        subtitle: string;
+        description: string;
+        targetType: 'rebel' | 'boss' | 'mixed' | 'all' | 'specific' | 'sequential';
+        sequenceIds?: string[]; // Order for sequential matching
+        specificIds?: string[];
+        objectives: string[];
+        intelHint: string;
+        completionMessage: string;
+    }[];
+}
+
+export const MOJO_SCENARIOS: MojoScenario[] = [
+    {
+        level: 1,
+        variants: [
+            {
+                id: 'l1v1',
+                title: "THE BREAD REVOLUTION",
+                subtitle: "Supply Line Logistics",
+                description: "Toffee Town is hungry! Link the Supply Chain in order: Manager -> Head Chef -> Analyst -> Leader to deliver the bread.",
+                targetType: 'sequential',
+                sequenceIds: ['rebel_lumberjack', 'rebel_baker', 'rebel_professor', 'rebel_chucklebop'],
+                objectives: ["Follow the sequence", "Avoid all Bosses", "Immediate XP Penalties"],
+                intelHint: "Link them in order: Manager -> Chef -> Analyst -> Leader.",
+                completionMessage: "The yeast is distributed! Toffee Town will have its bread."
+            },
+            {
+                id: 'l1v2',
+                title: "GOVERNMENT AUDIT",
+                subtitle: "Chain of Command",
+                description: "The Council is mobilizing. Link the Command: Officer -> Matron -> Chief -> Mayor to initiate the sweep.",
+                targetType: 'sequential',
+                sequenceIds: ['boss_cop', 'boss_matron', 'boss_chief', 'boss_mayor'],
+                objectives: ["Sequential match required", "Ignore the Rebels", "High precision"],
+                intelHint: "Start with the Officer and end with the Mayor.",
+                completionMessage: "The sweep is authorized. The streets are under control."
+            },
+            {
+                id: 'l1v3',
+                title: "INTEL EXTRACTION",
+                subtitle: "The Handover",
+                description: "Professor Syntax has the data. Follow the handover: Analyst -> Manager -> Chef -> Leader.",
+                targetType: 'sequential',
+                sequenceIds: ['rebel_professor', 'rebel_lumberjack', 'rebel_baker', 'rebel_chucklebop'],
+                objectives: ["Follow the intel path", "No Boss interference", "Speed bonus active"],
+                intelHint: "Follow the Analyst's lead to the Leader.",
+                completionMessage: "Data extracted. The revolution knows the Mayor's next move."
+            }
+        ]
+    }
+];
+
+export default MOJO_CHARACTERS;
+
