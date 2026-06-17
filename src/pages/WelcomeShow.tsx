@@ -277,11 +277,12 @@ const SLIDES: StorySlide[] = [
 // ── Letter Decree Data ──────────────────────────────────────
 const ROYAL_DECREE_PARAGRAPHS = [
   'We\'ve been expecting you... Word of your arrival reached us before you did.',
-  'Our border squirrels spotted you carrying a suitcase full of big dreams (and hopefully, some cookies!).',
+  'Our border squirrels spotted you carrying a suitcase of big dreams (and hopefully, cookies!).',
   'Welcome to ChocoBrook, our cozy fantasy province where you can join the fun and write your own story.',
   'Here, laughter drifts through the markets on the scent of warm cocoa. Lanterns glow at dusk, guiding you toward cozy stories, while friendly townsfolk wait with open arms. Every corner holds a promise of magic.',
   'Ready to jump in? Pick your favorite starter town, move into a cute customizable cottage, and decorate it to make it the coziest nest in the province!',
   'Don\'t get too comfy in that hammock! There\'s plenty of neighborhood drama to solve. Team up for community construction projects, investigate woodland mysteries, and sponsor grand campaigns.',
+  'Get ready to meet unforgettable characters like Pipkin, Rowan, Julie, and other lovely folks you\'ll adore!',
   'Help out to earn shiny Cocoa Coins for adorable new decor! Keep your passport handy to log your presence, collect colorful stamps, and unlock prestigious badges.',
   'Earn Legacy points to rank up as a master Builder, Healer, or Explorer, and climb the global leaderboard. Your sweet choices will write tomorrow\'s headlines!',
   'Chat with Cocoa the Lore Keeper, swap tips with friends, and check the bulletins. ChocoBrook is a living, growing world shaped by you. Grab a cup of cocoa and let\'s begin!'
@@ -425,7 +426,7 @@ const WelcomeShow: React.FC = () => {
                 {/* Decree paragraphs 1-5 */}
                 <div className="space-y-3 text-[0.95rem] leading-relaxed text-white/85 font-body">
                   {ROYAL_DECREE_PARAGRAPHS.slice(0, 5).map((paragraph, idx) => (
-                    <p key={idx}>
+                    <p key={idx} className={idx === 0 ? "flow-root" : ""}>
                       {idx === 0 ? (
                         <>
                           <span className="text-5xl font-serif italic float-left mt-0.5 mr-3 leading-none text-amber-400 border-b border-amber-200">
