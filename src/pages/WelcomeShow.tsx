@@ -277,14 +277,14 @@ const SLIDES: StorySlide[] = [
 // ── Letter Decree Data ──────────────────────────────────────
 const ROYAL_DECREE_PARAGRAPHS = [
   'We\'ve been expecting you... Word of your arrival reached us before you did.',
-  'The squirrels on the border reported a new traveller with a suitcase full of dreams (and hopefully, a secret stash of cookies!).',
+  'Our border squirrels spotted you carrying a suitcase full of big dreams (and hopefully, some cookies!).',
   'Welcome to ChocoBrook, our cozy fantasy province where you can join the fun and write your own story.',
-  'Here, laughter drifts through the markets, carried on the sweet scent of cocoa and warm spice. Lanterns glow cozy at dusk, guiding you toward stories waiting to be uncovered, while friendly townsfolk wait with open arms. Every single street corner holds a lovely promise of magic, waiting for your touch.',
-  'Ready to jump in? Your first task is to pick your favorite starter town and move into a delightful cottage that is yours to customize! Use your styling magic to decorate your new home, making it the coziest nest in the province while you get to know your funny neighbors.',
-  'Don\'t get too comfy in that hammock, though! There is plenty of friendly neighborhood drama to help solve. You can team up for daily community construction projects, sniff out curious woodland mysteries, or step up to sponsor grand campaigns at the town hall.',
-  'As you help the town thrive, you\'ll collect shiny Cocoa Coins to buy adorable new decorations. Keep your trusty passport handy to log your daily presence, collect colorful stamps from different counties, and earn prestigious badges for your good deeds.',
-  'Join forces with other residents, earn Legacy points to climb the professional ranks (will you be a master Builder, a kind Healer, or a brave Explorer?), and see your name shine on the global leaderboard. Your sweet choices will write tomorrow\'s local headlines!',
-  'Be sure to chat with Cocoa the Lore Keeper for advice, swap tips with fellow travellers, and check the daily bulletin boards. ChocoBrook is a living, growing world shaped entirely by you. Step forward, grab a cup of cocoa, and let the adventure begin!'
+  'Here, laughter drifts through the markets on the scent of warm cocoa. Lanterns glow at dusk, guiding you toward cozy stories, while friendly townsfolk wait with open arms. Every corner holds a promise of magic.',
+  'Ready to jump in? Pick your favorite starter town, move into a cute customizable cottage, and decorate it to make it the coziest nest in the province!',
+  'Don\'t get too comfy in that hammock! There\'s plenty of neighborhood drama to solve. Team up for community construction projects, investigate woodland mysteries, and sponsor grand campaigns.',
+  'Help out to earn shiny Cocoa Coins for adorable new decor! Keep your passport handy to log your presence, collect colorful stamps, and unlock prestigious badges.',
+  'Earn Legacy points to rank up as a master Builder, Healer, or Explorer, and climb the global leaderboard. Your sweet choices will write tomorrow\'s headlines!',
+  'Chat with Cocoa the Lore Keeper, swap tips with friends, and check the bulletins. ChocoBrook is a living, growing world shaped by you. Grab a cup of cocoa and let\'s begin!'
 ];
 
 const TRAVELLER_QUOTES = [
