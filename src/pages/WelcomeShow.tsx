@@ -421,7 +421,7 @@ const WelcomeShow: React.FC = () => {
                 </div>
 
                 {/* Decree paragraphs 1-4 */}
-                <div className="space-y-4 text-[1rem] leading-relaxed text-white/85 font-body">
+                <div className="space-y-3 text-[0.95rem] leading-relaxed text-white/85 font-body">
                   {ROYAL_DECREE_PARAGRAPHS.slice(0, 4).map((paragraph, idx) => (
                     <p key={idx}>
                       {idx === 0 ? (
@@ -455,9 +455,9 @@ const WelcomeShow: React.FC = () => {
               </div>
 
               {/* RIGHT COLUMN: Decree Part 2, Fun Fact, Signature card, Buttons */}
-              <div className="flex flex-col gap-4 justify-between">
+              <div className="flex flex-col gap-3 justify-between">
                 {/* Decree paragraphs 5-7 */}
-                <div className="space-y-4 text-[1rem] leading-relaxed text-white/85 font-body">
+                <div className="space-y-3 text-[0.95rem] leading-relaxed text-white/85 font-body">
                   {ROYAL_DECREE_PARAGRAPHS.slice(4).map((paragraph, idx) => (
                     <p key={idx}>{paragraph}</p>
                   ))}
@@ -479,29 +479,42 @@ const WelcomeShow: React.FC = () => {
                 </div>
 
                 {/* Signature Box */}
-                <div className="flex items-center justify-between gap-6 rounded-2xl border border-white/10 bg-black/40 p-5 shadow-xl backdrop-blur-md transition-all hover:scale-[1.01]">
-                  <div className="space-y-1">
-                    <div className="opacity-40 text-[8px] font-black uppercase tracking-[0.6em] text-white leading-none">
+                <div className="flex items-center justify-between gap-4 md:gap-6 rounded-2xl border border-white/10 bg-black/40 p-4 md:p-5 shadow-xl backdrop-blur-md transition-all hover:scale-[1.01]">
+                  <div className="space-y-2 flex flex-col justify-center">
+                    <div 
+                      className="text-white/80 text-[16px] md:text-[18px] tracking-wide leading-none"
+                      style={{ fontFamily: '"Luckiest Guy", cursive' }}
+                    >
                       With Warm Regards,
                     </div>
                     <div 
-                      className="font-brand text-3xl text-white uppercase tracking-widest leading-none pt-2"
-                      style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+                      className="text-white text-[16px] md:text-[18px] tracking-wide leading-none"
+                      style={{ fontFamily: '"Luckiest Guy", cursive' }}
                     >
                       Yogesh S Iyer
                     </div>
-                    <div className="text-[9px] font-bold text-amber-300/80 tracking-[0.3em] uppercase mt-1">
-                      BONBON STUDIOS
+                    <div 
+                      className="flex items-center text-yellow-300 text-[16px] md:text-[18px] tracking-wide leading-none"
+                      style={{ fontFamily: '"Luckiest Guy", cursive' }}
+                    >
+                      <div className="inline-grid grid-cols-2 gap-[2px] w-[14px] h-[14px] mr-2 shrink-0">
+                        <div className="bg-white rounded-[1px]" />
+                        <div className="bg-orange-500 rounded-[1px]" />
+                        <div className="bg-orange-500 rounded-[1px]" />
+                        <div className="bg-white rounded-[1px]" />
+                      </div>
+                      <span>SparrowX Studios</span>
                     </div>
                   </div>
-                  <div className="h-10 w-px bg-white/10 mx-1" />
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500 shadow-[0_8px_20px_rgba(245,158,11,0.3)] border border-white/20 transition-transform hover:rotate-12 cursor-pointer group">
-                    <span className="material-icons-round text-black text-2xl group-hover:scale-110 transition-transform">star</span>
+                  <div className="flex items-center gap-1.5 shrink-0 select-none">
+                    <span className="material-icons-round text-yellow-300 text-2xl hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
+                    <span className="material-icons-round text-emerald-400 text-3xl hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
+                    <span className="material-icons-round text-cyan-300 text-2xl hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-6 w-full pt-2">
+                <div className="grid grid-cols-2 gap-4 w-full pt-1">
                   <GlassButton
                     label={
                       <span className="flex items-center justify-center gap-2">
@@ -511,13 +524,15 @@ const WelcomeShow: React.FC = () => {
                     }
                     onClick={handleSkip}
                     variant="secondary"
-                    className="!w-full !min-w-0"
+                    className="!w-full !min-w-0 !normal-case text-[14px] md:text-[15px]"
+                    style={{ fontFamily: '"Luckiest Guy", cursive' }}
                   />
                   <GlassButton
                     label="Enter the World →"
                     onClick={() => goTo(1)}
                     variant="primary"
-                    className="!w-full !min-w-0"
+                    className="!w-full !min-w-0 !normal-case text-[14px] md:text-[15px]"
+                    style={{ fontFamily: '"Luckiest Guy", cursive' }}
                   />
                 </div>
               </div>
