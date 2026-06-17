@@ -84,10 +84,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
           {/* Motto Section */}
           <div 
-            className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-pink-300 to-yellow-300 font-brand uppercase tracking-wider text-[12px] md:text-[14px] lg:text-[15px] mt-2 whitespace-nowrap overflow-hidden text-ellipsis"
+            className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-pink-300 to-yellow-300 font-brand italic tracking-wider text-[10px] md:text-[12px] lg:text-[13px] mt-2 whitespace-nowrap overflow-hidden text-ellipsis"
             style={{ fontFamily: '"Josefin Sans", sans-serif' }}
           >
-            Choose a home, Become a resident, Build a legacy, Be remembered.
+            choose a home, become a resident, build a legacy, be remembered.
           </div>
         </div>
 
