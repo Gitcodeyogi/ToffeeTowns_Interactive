@@ -136,9 +136,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-[70%] mx-auto block h-14 px-4 rounded-lg bg-black border border-white/20 text-white placeholder:text-white/55 outline-none focus:border-emerald-400/60"
+                    className="w-[70%] mx-auto block h-14 px-4 rounded-lg bg-black border border-white/20 text-white placeholder:text-neutral-500 outline-none focus:border-emerald-400/60"
                     style={{ fontFamily: '"Josefin Sans", sans-serif' }}
                     placeholder="Captain Giggles"
+                    autoComplete="off"
                     required={isRegistering}
                   />
                 </div>
@@ -152,9 +153,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-[70%] mx-auto block h-14 px-4 rounded-lg bg-black border border-white/20 text-white placeholder:text-white/55 outline-none focus:border-blue-400/60"
+                  className="w-[70%] mx-auto block h-14 px-4 rounded-lg bg-black border border-white/20 text-white placeholder:text-neutral-500 outline-none focus:border-blue-400/60"
                   style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-                  placeholder="hero@example.com"
+                  placeholder="e.g. traveller@chocobrook.com"
+                  autoComplete={isRegistering ? "new-email" : "email"}
                   required
                 />
               </div>
@@ -167,9 +169,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-[70%] mx-auto block h-14 px-4 rounded-lg bg-black border border-white/20 text-white placeholder:text-white/55 outline-none focus:border-yellow-400/60"
+                  className="w-[70%] mx-auto block h-14 px-4 rounded-lg bg-black border border-white/20 text-white placeholder:text-neutral-500 outline-none focus:border-yellow-400/60"
                   style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-                  placeholder="........"
+                  placeholder="e.g. SecretPassword123"
+                  autoComplete={isRegistering ? "new-password" : "current-password"}
                   required
                 />
               </div>
@@ -191,6 +194,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   onClick={() => {
                     setIsRegistering(!isRegistering);
                     setErrorMsg('');
+                    setEmail('');
+                    setPassword('');
+                    setDisplayName('');
                   }}
                   className="!w-[70%] !mx-auto !h-14 !min-h-14 !rounded-lg !py-0 !normal-case text-[15px] md:text-[16px] tracking-wide"
                   style={{ fontFamily: '"Luckiest Guy", cursive' }}
