@@ -75,7 +75,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
           <div className="border-l-2 border-white/20 pl-5 py-1 flex flex-col gap-4 font-body">
             <p className="text-white/90 text-[1.05rem] leading-relaxed max-w-[680px]">
-              Step into a <span className="text-cyan-300 font-semibold">cozy fantasy province</span> where players become residents, build their legacy, and solve evolving town problems. Journey through delightful <span className="text-pink-300 font-semibold">confectionery towns</span>, interact with <span className="text-pink-300 font-semibold">lovely, unforgettable characters</span>, and unlock rich, story-driven rewards.
+              Step into a <span className="text-cyan-300 font-semibold">cozy fantasy province</span> where players become residents, build their legacy, and <span className="text-cyan-300 font-semibold">be part of the town stories</span>. Journey through delightful <span className="text-pink-300 font-semibold">confectionery towns</span>, interact with <span className="text-pink-300 font-semibold">lovely, unforgettable characters</span>, and unlock rich, story-driven rewards.
             </p>
             <p className="text-white/90 text-[1.05rem] leading-relaxed max-w-[680px]">
               Support vital <span className="text-orange-300 font-semibold">community projects</span>, gather unique stamps in your passport, and earn prestigious badges. <span className="text-orange-300 font-semibold">Earn XP, unlock achievements, and compete to top the global leaderboard</span>. The choices you make today shape the province and define your <span className="text-yellow-300 font-semibold">lasting deeds</span>.
