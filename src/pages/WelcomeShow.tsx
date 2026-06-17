@@ -411,10 +411,10 @@ const WelcomeShow: React.FC = () => {
                     ChocoBrook Provincial Entry
                   </p>
                   <h2 
-                    className="text-4xl lg:text-[3.2rem] font-brand text-white uppercase leading-[0.95] tracking-tight"
-                    style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+                    className="text-4xl lg:text-[3.5rem] font-brand uppercase leading-[0.95] tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
+                    style={{ fontFamily: '"Luckiest Guy", cursive' }}
                   >
-                    Welcome <span className="text-amber-300">Traveller,</span>
+                    <span className="text-emerald-400">Welcome</span> <span className="text-yellow-300">Traveller,</span>
                   </h2>
                   <div className="h-[3px] w-40 bg-gradient-to-r from-amber-400 via-amber-200 to-transparent mt-3" />
                 </div>
