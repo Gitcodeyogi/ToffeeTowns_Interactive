@@ -478,26 +478,30 @@ const WelcomeShow: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Signature Box */}
-                <div className="flex items-center justify-between gap-4 md:gap-6 rounded-2xl border border-white/10 bg-black/40 p-4 md:p-5 shadow-xl backdrop-blur-md transition-all hover:scale-[1.01]">
-                  <div className="space-y-2 flex flex-col justify-center">
+                {/* Combined Signature & Action Panel */}
+                <div 
+                  className="flex flex-row items-center justify-between gap-6 rounded-3xl border border-white/20 bg-black/60 p-5 shadow-2xl transition-all hover:scale-[1.01] select-none"
+                  style={{ backdropFilter: 'none', WebkitBackdropFilter: 'none' }}
+                >
+                  {/* Left Column: Signature */}
+                  <div className="space-y-1.5 flex flex-col justify-center shrink-0">
                     <div 
-                      className="text-white/80 text-[16px] md:text-[18px] tracking-wide leading-none"
+                      className="text-white/80 text-[14px] md:text-[16px] tracking-wide leading-none"
                       style={{ fontFamily: '"Luckiest Guy", cursive' }}
                     >
                       With Warm Regards,
                     </div>
                     <div 
-                      className="text-white text-[16px] md:text-[18px] tracking-wide leading-none"
+                      className="text-white text-[14px] md:text-[16px] tracking-wide leading-none"
                       style={{ fontFamily: '"Luckiest Guy", cursive' }}
                     >
                       Yogesh S Iyer
                     </div>
                     <div 
-                      className="flex items-center text-yellow-300 text-[16px] md:text-[18px] tracking-wide leading-none"
+                      className="flex items-center text-yellow-300 text-[14px] md:text-[16px] tracking-wide leading-none"
                       style={{ fontFamily: '"Luckiest Guy", cursive' }}
                     >
-                      <div className="inline-grid grid-cols-2 gap-[2px] w-[14px] h-[14px] mr-2 shrink-0">
+                      <div className="inline-grid grid-cols-2 gap-[2px] w-[12px] h-[12px] mr-1.5 shrink-0">
                         <div className="bg-white rounded-[1px]" />
                         <div className="bg-orange-500 rounded-[1px]" />
                         <div className="bg-orange-500 rounded-[1px]" />
@@ -506,34 +510,36 @@ const WelcomeShow: React.FC = () => {
                       <span>SparrowX Studios</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0 select-none">
-                    <span className="material-icons-round text-yellow-300 text-2xl hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
-                    <span className="material-icons-round text-emerald-400 text-3xl hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
-                    <span className="material-icons-round text-cyan-300 text-2xl hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
-                  </div>
-                </div>
 
-                {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-4 w-full pt-1">
-                  <GlassButton
-                    label={
-                      <span className="flex items-center justify-center gap-2">
-                        <span className="material-icons-round text-base">home</span>
-                        Skip to Homepage
-                      </span>
-                    }
-                    onClick={handleSkip}
-                    variant="secondary"
-                    className="!w-full !min-w-0 !normal-case text-[14px] md:text-[15px]"
-                    style={{ fontFamily: '"Luckiest Guy", cursive' }}
-                  />
-                  <GlassButton
-                    label="Enter the World →"
-                    onClick={() => goTo(1)}
-                    variant="primary"
-                    className="!w-full !min-w-0 !normal-case text-[14px] md:text-[15px]"
-                    style={{ fontFamily: '"Luckiest Guy", cursive' }}
-                  />
+                  {/* Middle Column: 3 Stars in 3 Rows */}
+                  <div className="flex flex-col items-center justify-center gap-1 shrink-0">
+                    <span className="material-icons-round text-yellow-300 text-[1.4rem] hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
+                    <span className="material-icons-round text-emerald-400 text-[1.6rem] hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
+                    <span className="material-icons-round text-cyan-300 text-[1.4rem] hover:scale-125 transition-transform duration-300 cursor-pointer">star</span>
+                  </div>
+
+                  {/* Right Column: Vertically stacked buttons */}
+                  <div className="flex flex-col gap-2.5 w-[180px] sm:w-[220px] shrink-0">
+                    <GlassButton
+                      label="Enter the World →"
+                      onClick={() => goTo(1)}
+                      variant="primary"
+                      className="!w-full !min-w-0 !h-10 !min-h-10 !py-0 !px-4 !normal-case text-[13px] md:text-[14px]"
+                      style={{ fontFamily: '"Luckiest Guy", cursive' }}
+                    />
+                    <GlassButton
+                      label={
+                        <span className="flex items-center justify-center gap-1.5">
+                          <span className="material-icons-round text-sm">home</span>
+                          Skip to Homepage
+                        </span>
+                      }
+                      onClick={handleSkip}
+                      variant="secondary"
+                      className="!w-full !min-w-0 !h-10 !min-h-10 !py-0 !px-4 !normal-case text-[13px] md:text-[14px]"
+                      style={{ fontFamily: '"Luckiest Guy", cursive' }}
+                    />
+                  </div>
                 </div>
               </div>
 
