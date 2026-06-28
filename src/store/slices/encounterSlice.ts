@@ -176,26 +176,6 @@ export const createEncounterSlice: StateCreator<
   },
 
   checkEncounter: () => {
-    const { taskQueue, currentEncounter } = get();
-    if (taskQueue.length === 0 || currentEncounter !== null) return;
-    const active = taskQueue[0];
-    if (active.type !== 'travel' || active.startedAt === null || active.encounterTriggered) return;
-
-    const pct = (Date.now() - active.startedAt) / active.duration;
-    if (pct >= 0.5 && pct < 0.9) {
-      const randomIdx = Math.floor(Math.random() * ENCOUNTERS_DATA.length);
-      const selected = ENCOUNTERS_DATA[randomIdx];
-
-      const updatedQueue = [...taskQueue];
-      updatedQueue[0] = { ...active, encounterTriggered: true };
-
-      set({
-        taskQueue: updatedQueue,
-        currentEncounter: selected,
-      });
-
-      const state = get();
-      if (state.user) saveUserState(state.user.uid, state);
-    }
+    // Roadside encounters completely removed as requested
   },
 });

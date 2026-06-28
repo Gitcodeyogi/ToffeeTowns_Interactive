@@ -16,7 +16,6 @@ interface StorySlide {
   townReaction?: { pct: number; text: string }[];
   actions?: string[];
 }
-
 const SLIDES: StorySlide[] = [
   {
     id: 'letter',
@@ -33,7 +32,7 @@ const SLIDES: StorySlide[] = [
     headline: '"The giant spoon will DEFINE this city!"',
     caption:
       'Mayor Pompelmoose has unveiled his latest grand vision: the legendary <span class="text-yellow-300 font-semibold">Golden Spoon</span>. Standing at sixty feet tall, it would become the largest monument of decorative cutlery in provincial history.\n\nWhile nobody knows its official purpose, registry officers report that <span class="text-amber-300">construction plans</span> are scheduled to begin next Thursday. Many expect it to become the fourth wonder of ChocoBrook.',
-    detail: 'This project would consume 40% of the annual public works funds.',
+    detail: 'Pompelmoose\'s budget: 40% golden spoons, 0% working roads.',
     townReaction: [
       { pct: 42, text: "calling it 'The 4th Wonder'" },
       { pct: 31, text: 'worry if Seawall stands until finished' },
@@ -55,7 +54,7 @@ const SLIDES: StorySlide[] = [
     headline: '"It wasn\'t a rocket. It was a motivational device."',
     caption:
       'Chucklebop attached three pressurised <span class="text-pink-300 font-semibold">mint-cream canisters</span> to his wooden racing raft, crossing the finish line minutes before anyone reached the first bend. The rapids spectator crowd was left completely astounded.\n\nUnfortunately, two riverside guests received an unexpected cream shower, and Chucklebop is now due before the <span class="text-pink-300">Safety Commission</span>. He remains cheerful about his new high-velocity mint engine.',
-    detail: 'Chucklebop has submitted a design proposal for next season.',
+    detail: 'Seeking corporate sponsorship from local dentists after a wild mint-cream crash.',
     townReaction: [
       { pct: 58, text: 'called it the most efficient racing strategy' },
       { pct: 27, text: 'still finding mint cream in their hair' },
@@ -77,7 +76,7 @@ const SLIDES: StorySlide[] = [
     headline: '"Step 1: Take off. Step 2: Figure it out."',
     caption:
       'Pippa Bolt and Hugo Glass have completed construction on the <span class="text-orange-300 font-semibold">Bumblebird</span>, a hand-built aircraft powered entirely by volatile, high-pressure butterscotch fuel. The local pilots are calling it a marvel of back-alley engineering.\n\nPippa\'s pre-flight checklist is noted to be mostly optional, and their flight plan consists of taking off first and <span class="text-orange-300">figuring out the rest</span> in mid-air. Volunteers are requested for the historic test flight.',
-    detail: 'Volunteers are requested to verify control surfaces.',
+    detail: 'Volunteers wanted! Warning: Candy parachutes are mostly decorative.',
     townReaction: [
       { pct: 68, text: 'love the butterscotch fuel scent' },
       { pct: 22, text: 'volunteered despite the candy parachute' },
@@ -99,7 +98,7 @@ const SLIDES: StorySlide[] = [
     headline: '"I\'ve had Volcanic Chocolate Fever three times. It builds character."',
     caption:
       'Dr. Fudge is treating six new cases of <span class="text-red-300 font-semibold">Volcanic Chocolate Fever</span>, caused by breathing in chocolate-steam laced with sulfur from the bubbling geothermal spring. The hot vents have attracted many curious travellers.\n\nHe is actively applying <span class="text-red-300">Cooling Mint Moss</span> compresses and Frost Salamander mucus ointment, cheerfully describing each new geothermal case as more interesting and character-building than the last.',
-    detail: 'The spring geysers are releasing double the usual steam.',
+    detail: 'Volcanic steam warning: May cause severe chocolate cravings and peppermint hair.',
     townReaction: [
       { pct: 54, text: 'boiling drinking water out of caution' },
       { pct: 36, text: 'refuse to wear peppermint moss compresses' },
@@ -121,7 +120,7 @@ const SLIDES: StorySlide[] = [
     headline: '"The mushrooms are not just glowing. They are vibrating at 40 hertz."',
     caption:
       'Forest Scientist Milo Spark has documented acoustic vibrations coming from the oldest <span class="text-cyan-300 font-semibold">cocoa mushroom clusters</span>. These low-frequency hums are measurable only with specialist recording equipment.\n\nThe vibrations are consistent with ancient oral accounts of a sacred <span class="text-cyan-300">"jazz that predates jazz,"</span> though Milo remains cautious about calling it jazz. His forest research boxes need immediate funding.',
-    detail: 'His research needs funding; pigeons are investigating.',
+    detail: 'Forest scientist Milo Spark is looking for people to sing jazz to glowing fungi.',
     townReaction: [
       { pct: 49, text: 'heard "sweet chords" in roots' },
       { pct: 33, text: 'worry mushrooms might collapse roots' },
@@ -143,7 +142,7 @@ const SLIDES: StorySlide[] = [
     headline: '"A Land Shaped by Confectionery Magic"',
     caption:
       'Formed after the Great Cocoa Flood, the majestic province of <span class="text-amber-300 font-semibold">ChocoBrook</span> is built entirely upon edible landforms. Roads, hills, and buildings are woven from sugar and spice.\n\nFrom the frozen peppermint peaks to the sticky caramel tide pools, every single landmark has been <span class="text-amber-300">crafted from magical confection</span>. A neutral Traveller is requested to map and explore this wild frontier.',
-    detail: 'A neutral, external Traveller is needed to explore the land.',
+    detail: 'Caution: Off-trail walking may lead to sticky caramel shoes and crumbs.',
     townReaction: [
       { pct: 71, text: 'claim province grows via chocolate spills' },
       { pct: 19, text: 'tasted a landmark and reported it sweet' },
@@ -165,7 +164,7 @@ const SLIDES: StorySlide[] = [
     headline: '"The Majestic Seat of Confectionery Power"',
     caption:
       'Toffee Town stands as the glorious capital of the province, a busy metropolis of high politics, grand monuments, and the <span class="text-yellow-300 font-semibold">Treasury Bureau</span>. Its streets shine with golden caramel lights.\n\nHowever, gate residency is strictly restricted here. Only recognized Citizens of standing who have earned <span class="text-yellow-300">1200+ Legacy points</span> in the outer counties may apply for a permanent entry permit.',
-    detail: 'Officers monitor capital access; outer county first.',
+    detail: 'Gate security is sweet but strict—no entrance without 1200+ Legacy points!',
     townReaction: [
       { pct: 82, text: 'agree capital restrictions preserve order' },
       { pct: 12, text: 'protest the strict 1200+ Legacy rule' },
@@ -187,7 +186,7 @@ const SLIDES: StorySlide[] = [
     headline: '"Mystical Forests & Glowing Cocoa Mushrooms"',
     caption:
       'Cocoawood County is renowned for its dense, ancient canopy of <span class="text-emerald-300 font-semibold">ganache trees</span> and glowing cocoa mushroom clusters. The forest holds secrets dating back to the flood.\n\nOlive Pine and the Rebel Rangers patrol the canopy to protect travellers, while Milo Spark conducts acoustic research. New arrivals are welcomed at <span class="text-emerald-300">Ganache Grove</span> to build their legacy.',
-    detail: 'Starter Town: Ganache Grove is open to all New Arrivals.',
+    detail: 'Pack your bags for cozy treehouses, glowing trails, and ranger tax collectors.',
     townReaction: [
       { pct: 68, text: 'value ganache timber conservation' },
       { pct: 22, text: 'prefer treehouses over stone houses' },
@@ -209,7 +208,7 @@ const SLIDES: StorySlide[] = [
     headline: '"Perpetual Bonfires & Nut-Crafting Traditions"',
     caption:
       'Nutwood County is home to the ancient nut-crafting elders, who gather every evening around the <span class="text-yellow-300 font-semibold">perpetual bonfire</span> to share gossip, trade tips, and roast fresh hazelnuts.\n\nThe warm community deeply values hard work, cozy campfire circles, and traditional wood-carving crafts. New arrivals can establish residency at the beautiful <span class="text-yellow-300">Hazelnut Terrace</span>.',
-    detail: 'Starter Town: Hazelnut Terrace is open to all New Arrivals.',
+    detail: 'Bring a warm blanket and a big appetite for toasted campfire gossip!',
     townReaction: [
       { pct: 74, text: 'attend campfires every single evening' },
       { pct: 21, text: 'prefer toasted hazelnuts over walnuts' },
@@ -231,7 +230,7 @@ const SLIDES: StorySlide[] = [
     headline: '"Sticky Coastlines & Sweet Tide-Salt Markets"',
     caption:
       'Honeywood County features sticky, sweet saltwater shorelines and busy <span class="text-purple-300 font-semibold">tide-salt markets</span>. Local sailors harvest the sweet surf under a warm golden sun.\n\nMerchants gather daily to trade caramel candies, salt crystals, and maritime goods at the busy docks. New arrivals are invited to explore the trading ports of <span class="text-purple-300">Caramel Cove</span>.',
-    detail: 'Starter Town: Caramel Cove is open to all New Arrivals.',
+    detail: 'Sweet shorelines, sticky sea trade, and endless caramel taffy pools!',
     townReaction: [
       { pct: 79, text: 'trade sticky caramel salt daily' },
       { pct: 15, text: 'hate sticky shoes from shoreline walks' },
@@ -253,7 +252,7 @@ const SLIDES: StorySlide[] = [
     headline: '"Glacial Heights & Geothermal Springs"',
     caption:
       'Creamwood County is a dramatic land of frozen heights, hot chocolate-steam geysers, and freezing <span class="text-cyan-300 font-semibold">mint patrol squads</span> that maintain security along the glacial borders.\n\nDr. Fudge runs the local geothermal clinic near the hot springs, while guards keep watch for Frost Salamanders. New arrivals can begin their journey at the snow-capped <span class="text-cyan-300">Peppermint Peaks</span>.',
-    detail: 'Starter Town: Peppermint Peaks is open to all New Arrivals.',
+    detail: 'Glacial heights and cozy hot springs—bring both a parka and a swimsuit!',
     townReaction: [
       { pct: 65, text: 'complain about freezing mountain winds' },
       { pct: 27, text: 'enjoy hot geysers for winter baths' },
@@ -269,7 +268,7 @@ const SLIDES: StorySlide[] = [
     id: 'choose-town-action',
     type: 'choose-town',
     image: '/Assets/WelcomeShow/ChocoBrook_Map.png',
-  },
+  }
 ];
 
 
@@ -326,16 +325,12 @@ const TRAVELLER_QUOTES = [
 
 // ── Main WelcomeShow ───────────────────────────────────────
 const WelcomeShow: React.FC = () => {
-  const { setPage, setWelcomeDone, homeTown, addCoins, addLegacy } = useTTStore();
+  const { setPage, setWelcomeDone, homeTown } = useTTStore();
   const [idx, setIdx] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
 
-  // Interactive Task & Assignment States
-  const [showAssignment, setShowAssignment] = useState(false);
-  const [executingTaskIdx, setExecutingTaskIdx] = useState<number | null>(null);
-  const [taskProgress, setTaskProgress] = useState<number>(0);
-  const [completedTasks, setCompletedTasks] = useState<Record<string, number[]>>({});
+
 
   // Pick random quotes once on mount, filtering by type to match layout headers
   const selectedQuotes = useState(() => {
@@ -358,50 +353,11 @@ const WelcomeShow: React.FC = () => {
     setTransitioning(true);
     setTimeout(() => {
       setIdx(Math.max(0, Math.min(SLIDES.length - 1, next)));
-      setShowAssignment(false); // Reset assignment view on slide change
-      setExecutingTaskIdx(null); // Reset active task execution
-      setTaskProgress(0);
       setTransitioning(false);
     }, 300);
   }, [transitioning]);
 
-  const handlePerformTask = (taskIdx: number) => {
-    if (executingTaskIdx !== null) return; // Only allow one task at a time
 
-    setExecutingTaskIdx(taskIdx);
-    setTaskProgress(0);
-
-    const duration = 1500; // 1.5s simulation
-    const steps = 15;
-    const intervalTime = duration / steps;
-    let currentStep = 0;
-
-    const interval = setInterval(() => {
-      currentStep++;
-      setTaskProgress((currentStep / steps) * 100);
-
-      if (currentStep >= steps) {
-        clearInterval(interval);
-
-        // Mark as completed
-        setCompletedTasks(prev => {
-          const list = prev[slide.id] || [];
-          if (!list.includes(taskIdx)) {
-            return { ...prev, [slide.id]: [...list, taskIdx] };
-          }
-          return prev;
-        });
-
-        // Reward the player: +15 Coins, +5 Legacy Points
-        const actionText = slide.actions ? slide.actions[taskIdx].replace(/^[□\s-]+/, '') : 'Task';
-        addCoins(15, `Completed Assignment: ${actionText}`);
-        addLegacy(5);
-
-        setExecutingTaskIdx(null);
-        setTaskProgress(0);
-      }
-    }, intervalTime);
-  };
 
   // Keyboard navigation
   useEffect(() => {
@@ -416,13 +372,19 @@ const WelcomeShow: React.FC = () => {
   const handleSkip = () => {
     if (homeTown) {
       setWelcomeDone(true);
-      setPage('desk');
+      setPage('town-talk-entrance');
     } else {
-      setShowWarning(true);
+      setWelcomeDone(true);
+      setPage('choose-town');
     }
   };
 
   const handleChooseTown = () => {
+    setWelcomeDone(true);
+    setPage('choose-town');
+  };
+
+  const handleSkipToSelection = () => {
     setWelcomeDone(true);
     setPage('choose-town');
   };
@@ -433,6 +395,28 @@ const WelcomeShow: React.FC = () => {
         className="relative z-10 w-[92vw] h-[96vh] max-h-[96vh] rounded-[2.5rem] border-2 border-white/35 bg-black/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.25),_0_40px_120px_rgba(0,0,0,0.65)] overflow-hidden flex flex-row"
         style={{ backdropFilter: 'none', WebkitBackdropFilter: 'none' }}
       >
+        {/* Top Absolute Navigation Overlays */}
+        {slide.type !== 'letter' && (
+          <div className="absolute top-6 left-10 right-10 z-30 pointer-events-none flex justify-between items-center">
+            {/* Top Left: Back to Welcome Page */}
+            <button
+              onClick={() => goTo(0)}
+              className="pointer-events-auto flex items-center gap-2 px-4.5 py-2 rounded-full bg-[#111116]/85 hover:bg-[#181822]/90 border border-white/10 hover:border-amber-400/50 text-white font-brand text-[11px] uppercase tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-[0_4px_15px_rgba(0,0,0,0.4)]"
+            >
+              <span className="material-icons-round text-xs text-amber-400">arrow_back</span>
+              <span>Back to Welcome Page</span>
+            </button>
+
+            {/* Top Right: Skip to Town Selection */}
+            <button
+              onClick={handleSkipToSelection}
+              className="pointer-events-auto flex items-center gap-2 px-4.5 py-2 rounded-full bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/35 hover:border-amber-400 text-amber-300 font-brand text-[11px] uppercase tracking-wider transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-[0_4px_15px_rgba(251,191,36,0.15)]"
+            >
+              <span>Skip for Town Selection</span>
+              <span className="material-icons-round text-xs text-amber-300">double_arrow</span>
+            </button>
+          </div>
+        )}
         {/* ── Slide: Letter ── */}
         {slide.type === 'letter' && (
           <div className="h-full w-full flex flex-col p-8 lg:p-12 justify-between select-none font-body overflow-y-auto custom-scrollbar">
@@ -452,6 +436,9 @@ const WelcomeShow: React.FC = () => {
                     <span className="text-emerald-400">Welcome</span> <span className="text-yellow-300">Traveller,</span>
                   </h2>
                   <div className="h-[3px] w-40 bg-gradient-to-r from-amber-400 via-amber-200 to-transparent mt-3" />
+                  <p className="text-[11.5px] font-medium text-amber-100/90 italic leading-relaxed mt-3 bg-white/5 border border-white/10 px-4 py-2.5 rounded-2xl shadow-inner max-w-xl text-left">
+                    "A cozy storybook province where you build a life, experience everyday town tales, and make ChocoBrook your home."
+                  </p>
                 </div>
 
                 {/* Decree paragraphs 1-5 */}
@@ -558,25 +545,51 @@ const WelcomeShow: React.FC = () => {
 
                   {/* Right Column: Vertically stacked buttons */}
                   <div className="flex flex-col gap-2.5 w-[180px] sm:w-[220px] shrink-0">
-                    <GlassButton
-                      label="Enter the World →"
-                      onClick={() => goTo(1)}
-                      variant="primary"
-                      className="!w-full !min-w-0 !h-10 !min-h-10 !py-0 !px-4 !normal-case text-[13px] md:text-[14px]"
-                      style={{ fontFamily: '"Luckiest Guy", cursive' }}
-                    />
-                    <GlassButton
-                      label={
-                        <span className="flex items-center justify-center gap-1.5">
-                          <span className="material-icons-round text-sm">home</span>
-                          Skip to Homepage
-                        </span>
-                      }
-                      onClick={handleSkip}
-                      variant="secondary"
-                      className="!w-full !min-w-0 !h-10 !min-h-10 !py-0 !px-4 !normal-case text-[13px] md:text-[14px]"
-                      style={{ fontFamily: '"Luckiest Guy", cursive' }}
-                    />
+                    {homeTown ? (
+                      <>
+                        <GlassButton
+                          label="Enter the World →"
+                          onClick={() => goTo(1)}
+                          variant="primary"
+                          className="!w-full !min-w-0 !h-10 !min-h-10 !py-0 !px-4 !normal-case text-[13px] md:text-[14px]"
+                          style={{ fontFamily: '"Luckiest Guy", cursive' }}
+                        />
+                        <GlassButton
+                          label={
+                            <span className="flex items-center justify-center gap-1.5">
+                              <span className="material-icons-round text-sm">home</span>
+                              Skip to Home Town
+                            </span>
+                          }
+                          onClick={handleSkip}
+                          variant="secondary"
+                          className="!w-full !min-w-0 !h-10 !min-h-10 !py-0 !px-4 !normal-case text-[13px] md:text-[14px]"
+                          style={{ fontFamily: '"Luckiest Guy", cursive' }}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <GlassButton
+                          label="Choose Your Town →"
+                          onClick={handleChooseTown}
+                          variant="primary"
+                          className="!w-full !min-w-0 !h-10 !min-h-10 !py-0 !px-4 !normal-case text-[13px] md:text-[14px]"
+                          style={{ fontFamily: '"Luckiest Guy", cursive' }}
+                        />
+                        <GlassButton
+                          label={
+                            <span className="flex items-center justify-center gap-1.5">
+                              <span className="material-icons-round text-sm">menu_book</span>
+                              Read Welcome Story
+                            </span>
+                          }
+                          onClick={() => goTo(1)}
+                          variant="secondary"
+                          className="!w-full !min-w-0 !h-10 !min-h-10 !py-0 !px-4 !normal-case text-[13px] md:text-[14px]"
+                          style={{ fontFamily: '"Luckiest Guy", cursive' }}
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -588,73 +601,70 @@ const WelcomeShow: React.FC = () => {
         {/* ── Slide: Choose Town ── */}
         {slide.type === 'choose-town' && (
           <>
-            {/* LEFT: Header + Image panel (Strictly 70%, flex flex-col) */}
-            <div className="relative w-[70%] shrink-0 h-full overflow-hidden bg-black/20 flex flex-col p-8 gap-4">
-              {/* Top Left Header (Two lines) */}
-              <div className="text-left shrink-0">
-                <div className="text-[10px] font-black uppercase tracking-[0.35em] text-white/40">
-                  The Imperial Province of Chocobrook
-                </div>
-                <div className="text-sm font-semibold text-amber-300 font-body mt-1">
-                  Territorial Map
-                </div>
-              </div>
-
-              {/* Image Container */}
-              <div className="flex-1 w-full overflow-hidden flex items-center justify-center">
+            {/* LEFT Panel (70% - Framed Map Container) */}
+            <div className="relative w-[70%] shrink-0 h-full overflow-hidden p-6 lg:p-8 flex items-center justify-center bg-black/10">
+              <div 
+                className="relative w-full h-full rounded-[2.5rem] border-4 border-white/20 bg-neutral-900/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),_inset_0_2px_4px_rgba(255,255,255,0.1)] overflow-hidden flex items-center justify-center p-4"
+                style={{ outline: '1px solid rgba(251, 191, 36, 0.25)', outlineOffset: '-10px' }}
+              >
                 {slide.image && (
                   <img
                     src={slide.image}
                     alt="ChocoBrook Map"
-                    className="max-w-full max-h-full object-contain rounded-2xl"
+                    className="max-w-full max-h-full object-contain rounded-[1.8rem]"
                   />
                 )}
               </div>
             </div>
 
-            {/* RIGHT: Text panel (Strictly 30%) */}
+            {/* RIGHT Panel (30% - Framed Details) */}
             <div
-              className={`w-[30%] shrink-0 h-full overflow-y-auto custom-scrollbar flex flex-col p-6 gap-6 border-l border-white/15 bg-black/25 transition-opacity duration-300 ${transitioning ? 'opacity-0' : 'opacity-100'}`}
+              className={`w-[30%] shrink-0 h-full ml-[-1.5rem] lg:ml-[-2rem] pl-2 lg:pl-3 pr-2 lg:pr-3 py-6 lg:py-8 flex items-center justify-center bg-black/10 transition-opacity duration-300 ${transitioning ? 'opacity-0' : 'opacity-100'}`}
             >
-              <div>
-                <div className="text-[10px] font-black uppercase tracking-[0.35em] text-white/40 mb-1">
-                  The Province Awaits
+              <div 
+                className="relative w-full h-full rounded-[2.5rem] border-4 border-white/20 bg-neutral-900/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),_inset_0_2px_4px_rgba(255,255,255,0.1)] overflow-y-auto custom-scrollbar pt-16 pb-6 px-6 flex flex-col gap-6"
+                style={{ outline: '1px solid rgba(251, 191, 36, 0.25)', outlineOffset: '-10px' }}
+              >
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-[0.35em] text-white/40 mb-1">
+                    The Province Awaits
+                  </div>
+                  <h1
+                    className="font-brand text-3xl uppercase tracking-tight leading-tight bg-gradient-to-r from-emerald-400 to-yellow-300 bg-clip-text text-transparent"
+                    style={{ fontFamily: '"Luckiest Guy", cursive' }}
+                  >
+                    Your Path
+                  </h1>
                 </div>
-                <h1
-                  className="font-brand text-3xl text-white uppercase tracking-tight leading-tight"
-                  style={{ fontFamily: '"Luckiest Guy", cursive' }}
-                >
-                  Your Path
-                </h1>
-              </div>
-              <p className="text-white/80 font-body italic text-sm leading-relaxed flex-grow">
-                You have seen the land, the politics, the characters, and the crises.
-                <br /><br />
-                It is time to choose your home town and begin your Traveller legacy.
-              </p>
+                <p className="text-white/80 font-body italic text-sm leading-relaxed flex-grow">
+                  You have seen the land, the politics, the characters, and the crises.
+                  <br /><br />
+                  It is time to choose your home town and begin your Traveller legacy.
+                </p>
 
-              <div className="flex items-center gap-2 justify-center my-2 shrink-0">
-                {SLIDES.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => goTo(i)}
-                    className={`rounded-full transition-all duration-300 ${i === idx ? 'w-5 h-2 bg-amber-400' : 'w-2 h-2 bg-white/20 hover:bg-white/40'}`}
+                <div className="flex items-center gap-2 justify-center my-2 shrink-0">
+                  {SLIDES.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => goTo(i)}
+                      className={`rounded-full transition-all duration-300 ${i === idx ? 'w-5 h-2 bg-amber-400' : 'w-2 h-2 bg-white/20 hover:bg-white/40'}`}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-auto pt-4 flex flex-col gap-3 shrink-0">
+                  <GlassButton
+                    label="🏘 Choose Your Town →"
+                    onClick={handleChooseTown}
+                    className="w-full !rounded-xl"
                   />
-                ))}
-              </div>
-
-              <div className="mt-auto pt-4 flex flex-col gap-3 shrink-0">
-                <GlassButton
-                  label="🏘 Choose Your Town →"
-                  onClick={handleChooseTown}
-                  className="w-full !rounded-xl"
-                />
-                <button
-                  onClick={() => goTo(idx - 1)}
-                  className="text-white/40 hover:text-white/70 text-xs font-bold uppercase tracking-widest transition-colors mt-2"
-                >
-                  ← Go Back
-                </button>
+                  <button
+                    onClick={() => goTo(idx - 1)}
+                    className="text-white/40 hover:text-white/70 text-xs font-bold uppercase tracking-widest transition-colors mt-2"
+                  >
+                    ← Go Back
+                  </button>
+                </div>
               </div>
             </div>
           </>
@@ -663,286 +673,160 @@ const WelcomeShow: React.FC = () => {
         {/* ── Slide: Standard Narrative Snapshot ── */}
         {slide.type === 'snapshot' && (
           <>
-            {/* Toggle Button on the vertical split edge */}
-            <button
-              onClick={() => {
-                setShowAssignment(!showAssignment);
-                setExecutingTaskIdx(null); // Reset execution states
-              }}
-              className="absolute top-1/2 left-[70%] -translate-y-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-2 px-5 py-2.5 bg-neutral-900 border-2 border-amber-400 text-amber-300 font-brand text-[11px] uppercase tracking-widest rounded-full hover:bg-neutral-800 hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(251,191,36,0.85)] animate-bounce-subtle cursor-pointer"
-              style={{ animationDuration: '4s' }}
-            >
-              <span className="material-icons-round text-sm">
-                {showAssignment ? 'image' : 'assignment'}
-              </span>
-              <span>{showAssignment ? 'View Scene' : 'Perform Tasks'}</span>
-            </button>
-
-            {/* LEFT Panel (70%) */}
-            {!showAssignment ? (
-              /* Image View (Default) */
-              <div className="relative w-[70%] shrink-0 h-full overflow-hidden bg-black/20 flex flex-col p-8 gap-4 animate-fade-in">
-                {/* Top Left Header (Two lines) */}
-                <div className="text-left shrink-0">
-                  <div className="text-[10px] font-black uppercase tracking-[0.35em] text-white/40">
-                    The Imperial Province of Chocobrook
-                  </div>
-                  <div className="text-sm font-semibold text-amber-300 font-body mt-1">
-                    {slide.location}
-                  </div>
-                </div>
-
-                {/* Image Container */}
-                <div
-                  className="flex-1 w-full overflow-hidden flex items-center justify-center transition-opacity duration-300 relative"
-                  style={{ opacity: transitioning ? 0 : 1 }}
-                >
-                  {slide.image && (
-                    <img
-                      src={slide.image}
-                      alt={slide.headline}
-                      className="max-w-full max-h-full object-contain rounded-2xl"
-                    />
-                  )}
-                  {/* Subtle pulsing tip overlay on the image */}
-                  <div className="absolute bottom-4 right-4 bg-black/85 border border-amber-400/40 px-3 py-1.5 rounded-xl text-[10.5px] text-white/90 shadow-md backdrop-blur-sm animate-pulse flex items-center gap-1.5 pointer-events-none select-none">
-                    <span className="material-icons-round text-amber-400 text-xs animate-float">lightbulb</span>
-                    <span>Click <strong>"Perform Tasks"</strong> on the right border to run operations!</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Sub-page View (Text & interactive assignments area - No Image) */
-              <div className="relative w-[70%] shrink-0 h-full overflow-hidden bg-neutral-950/95 border-r border-white/5 flex flex-col p-8 gap-6 justify-between animate-fade-in font-body">
-                {/* Header */}
-                <div className="flex justify-between items-start shrink-0">
-                  <div>
-                    <div className="text-[10px] font-black uppercase tracking-[0.35em] text-amber-400">
-                      Assignment & Action Portal
-                    </div>
-                    <h2 className="text-2xl font-brand text-white uppercase mt-1" style={{ fontFamily: '"Luckiest Guy", cursive' }}>
-                      {slide.character ? `${slide.character}'s Request` : 'Local Assignment'}
-                    </h2>
-                  </div>
-                  {slide.category && (
-                    <span className={`text-[9px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full border ${slide.category.bg} ${slide.category.color}`}>
-                      {slide.category.label}
-                    </span>
-                  )}
-                </div>
-
-                {/* Cooperative alert panel */}
-                <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 px-5 py-3.5 flex items-start gap-3.5 shadow-md shrink-0">
-                  <span className="material-icons-round text-amber-300 text-xl mt-0.5 animate-float">assignment</span>
-                  <div className="flex flex-col gap-0.5 text-left">
-                    <h4 className="text-[11px] font-black uppercase tracking-widest text-amber-300">Cozy Citizen Operation</h4>
-                    <p className="text-[12px] text-white/85 leading-relaxed">
-                      Review the dossier narrative, then perform each assignment to help the local representative. Completing operations rewards you with <span className="text-emerald-400 font-semibold font-sans">+15 Coins</span> and <span className="text-amber-300 font-semibold font-sans">+5 Legacy</span>.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Story Narrative Scroll Box */}
-                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-4 text-white/90 text-sm leading-relaxed">
-                  <div className="border-l-2 border-amber-400/30 pl-4 py-1.5 italic bg-white/5 rounded-r-xl p-3.5">
-                    <h4 className="text-xs font-black uppercase tracking-wider text-amber-300 mb-1">Dossier Narrative</h4>
-                    {slide.caption?.split('\n\n').map((para, i) => (
-                      <p key={i} className="mb-2 last:mb-0" dangerouslySetInnerHTML={{ __html: para }} />
-                    ))}
-                  </div>
-
-                  {/* Assignment Task List */}
-                  <div className="mt-2 flex flex-col gap-3.5">
-                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/50">Tasks & Operations</h3>
-
-                    {slide.actions && slide.actions.length > 0 ? (
-                      slide.actions.map((act, taskIdx) => {
-                        const cleanAct = act.replace(/^[□\s-]+/, '').trim();
-                        const isCompleted = (completedTasks[slide.id] || []).includes(taskIdx);
-                        const isExecuting = executingTaskIdx === taskIdx;
-
-                        return (
-                          <div
-                            key={taskIdx}
-                            className={`relative border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between transition-all duration-300 bg-black/60 hover:scale-[1.01]
-                              ${isCompleted ? 'border-emerald-500/40 bg-emerald-950/5' : isExecuting ? 'border-amber-400/40 bg-amber-950/5' : 'border-white/10 hover:border-amber-400/30'}`}
-                          >
-                            <div className="flex items-start gap-3.5 flex-1 mr-4">
-                              <span className={`material-icons-round text-xl mt-0.5 shrink-0 ${isCompleted ? 'text-emerald-400' : isExecuting ? 'text-amber-400 animate-spin-slow' : 'text-neutral-500'}`}>
-                                {isCompleted ? 'check_circle' : isExecuting ? 'rotate_right' : 'radio_button_unchecked'}
-                              </span>
-                              <div className="flex flex-col">
-                                <span className={`text-[13.5px] font-medium leading-snug ${isCompleted ? 'text-white/60 line-through' : 'text-white'}`}>
-                                  {cleanAct}
-                                </span>
-                                {isCompleted && (
-                                  <div className="flex items-center gap-1 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-lg text-emerald-300 font-bold uppercase tracking-wider text-[9px] mt-2.5 w-fit">
-                                    <span className="material-icons-round text-[11px]">check_circle</span>
-                                    <span>Operation Executed: +15 Coins, +5 Legacy added to Ledger</span>
-                                  </div>
-                                )}
-                                {isExecuting && (
-                                  <div className="w-56 bg-neutral-800 rounded-full h-1 mt-2.5 overflow-hidden">
-                                    <div className="bg-amber-400 h-full transition-all duration-100" style={{ width: `${taskProgress}%` }} />
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            <button
-                              disabled={isCompleted || executingTaskIdx !== null}
-                              onClick={() => handlePerformTask(taskIdx)}
-                              className={`mt-3 sm:mt-0 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 shrink-0 cursor-pointer
-                                ${isCompleted
-                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-default'
-                                  : isExecuting
-                                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 cursor-default'
-                                    : executingTaskIdx !== null
-                                      ? 'bg-neutral-800 text-neutral-500 border border-neutral-700 cursor-not-allowed'
-                                      : 'bg-amber-500 hover:bg-amber-400 text-black shadow-md hover:scale-105 active:scale-95'}`}
-                              style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-                            >
-                              {isCompleted ? 'Finished' : isExecuting ? `Loading ${Math.round(taskProgress)}%` : 'Perform Task'}
-                            </button>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="text-xs text-white/40 italic">No operations listed for this slide.</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Quick tip footer */}
-                <div className="text-[10px] text-white/30 italic text-center shrink-0 border-t border-white/5 pt-2">
-                  Completing tasks boosts your residency standing and rewards you with real coins.
-                </div>
-              </div>
-            )}
-
-            {/* RIGHT Panel (30%) */}
-            <div
-              className={`w-[30%] shrink-0 h-full overflow-y-auto custom-scrollbar flex flex-col p-6 gap-4 border-l border-white/15 bg-black/25 transition-opacity duration-300 ${transitioning ? 'opacity-0' : 'opacity-100'}`}
-            >
-              {/* Header location */}
-              <div className="flex flex-col gap-1 shrink-0">
-                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white/40">
-                  {slide.location ? slide.location.split(' — ')[0].trim() : 'ChocoBrook'}
-                </span>
-                {slide.category && (
-                  <div className="inline-flex w-fit text-[9px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-full border bg-neutral-900 border-white/10 text-amber-300">
-                    {slide.category.label}
-                  </div>
+            {/* LEFT Panel (70% - Framed Image) */}
+            <div className="relative w-[70%] shrink-0 h-full overflow-hidden p-6 lg:p-8 flex items-center justify-center bg-black/10">
+              <div 
+                className="relative w-full h-full rounded-[2.5rem] border-4 border-white/20 bg-neutral-900/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),_inset_0_2px_4px_rgba(255,255,255,0.1)] overflow-hidden flex items-center justify-center p-2"
+                style={{ outline: '1px solid rgba(251, 191, 36, 0.25)', outlineOffset: '-10px' }}
+              >
+                {slide.image && (
+                  <img
+                    src={slide.image}
+                    alt={slide.headline || 'Town View'}
+                    className="w-full h-full object-cover rounded-[1.8rem] transition-transform duration-700 hover:scale-[1.03]"
+                  />
                 )}
               </div>
+            </div>
 
-              {/* Headline */}
-              <h2 className="font-brand text-lg text-white leading-snug shrink-0 font-bold mt-1">
-                {slide.headline}
-              </h2>
-
-              {/* Key Details Summary */}
-              <div className="text-white/80 font-body text-xs leading-relaxed space-y-2">
-                <div className="font-black text-amber-400 uppercase tracking-widest text-[9px] border-b border-white/5 pb-1">
-                  Important Info
+            {/* RIGHT Panel (30% - Framed Details) */}
+            <div
+              className={`w-[30%] shrink-0 h-full ml-[-1.5rem] lg:ml-[-2rem] pl-2 lg:pl-3 pr-2 lg:pr-3 py-6 lg:py-8 flex items-center justify-center bg-black/10 transition-opacity duration-300 ${transitioning ? 'opacity-0' : 'opacity-100'}`}
+            >
+              <div 
+                className="relative w-full h-full rounded-[2.5rem] border-4 border-white/20 bg-neutral-900/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),_inset_0_2px_4px_rgba(255,255,255,0.1)] overflow-y-auto custom-scrollbar pt-16 pb-6 px-6 flex flex-col gap-4"
+                style={{ outline: '1px solid rgba(251, 191, 36, 0.25)', outlineOffset: '-10px' }}
+              >
+                {/* Header location */}
+                <div className="flex flex-col gap-1.5 shrink-0 border-b border-white/10 pb-3">
+                  <span className="font-brand text-[13px] md:text-sm tracking-wide text-amber-400 uppercase">
+                    ✨ What's Happening in {slide.location ? slide.location.split(' — ')[0].replace(/^[^\w\s]+/, '').trim() : 'ChocoBrook'}?
+                  </span>
                 </div>
-                <div className="flex gap-2">
-                  <span className="text-amber-300">✦</span>
-                  <span><strong>Resident Agent:</strong> {slide.character || 'Imperial Registry'}</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-amber-300">✦</span>
-                  <span><strong>Locality:</strong> {slide.location || 'Outer County Area'}</span>
-                </div>
-              </div>
 
-              {/* Town Pulse or Fun Fact */}
-              {slide.detail && (
-                <div className="border border-cyan-400/20 rounded-2xl bg-cyan-500/5 p-3 text-xs">
-                  <div className="text-[9px] font-black uppercase tracking-[0.3em] text-cyan-400 mb-1">Registry Fact</div>
-                  <p className="text-white/70 font-body italic leading-normal">
-                    {slide.detail}
-                  </p>
+                {/* Headline & Tagline */}
+                <div className="shrink-0">
+                  <h2 className={`font-brand text-lg leading-snug font-bold mt-1 tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${slide.category?.color || 'text-white'}`}>
+                    {slide.headline}
+                  </h2>
                 </div>
-              )}
 
-              {slide.townReaction && (
-                <div className="border border-amber-400/20 rounded-2xl bg-amber-500/5 p-3 text-xs">
-                  <div className="text-[9px] font-black uppercase tracking-[0.3em] text-amber-400 mb-2">Town Pulse</div>
-                  <div className="flex flex-col gap-1.5">
-                    {slide.townReaction.slice(0, 2).map((r, i) => (
-                      <div key={i} className="flex gap-2 text-white/80 text-[11px] leading-snug">
-                        <span className="font-black text-amber-300 shrink-0">{r.pct}%</span>
-                        <span className="truncate">{r.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Preview Player Action list */}
-              <div className="border border-white/5 rounded-2xl bg-white/5 p-3 text-xs">
-                <div className="text-[9px] font-black uppercase tracking-[0.3em] text-white/50 mb-2">Assignments List</div>
-                <div className="flex flex-col gap-1.5 font-body text-[11.5px] text-white/70">
-                  {slide.actions && slide.actions.length > 0 ? (
-                    slide.actions.map((act, i) => {
-                      const isCompleted = (completedTasks[slide.id] || []).includes(i);
-                      return (
-                        <div key={i} className="flex items-start gap-1.5">
-                          <span className={`material-icons-round text-[13px] mt-0.5 shrink-0 ${isCompleted ? 'text-emerald-400' : 'text-neutral-500'}`}>
-                            {isCompleted ? 'check_circle' : 'pending_actions'}
-                          </span>
-                          <span className={`truncate ${isCompleted ? 'line-through text-white/40' : ''}`}>
-                            {act.replace(/^[□\s-]+/, '')}
-                          </span>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="italic text-white/40">No actions required.</div>
-                  )}
-                </div>
-              </div>
-
-              {/* Bottom Navigation */}
-              <div className="mt-auto shrink-0 pt-4 flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => goTo(idx - 1)}
-                    disabled={isFirst}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all duration-200
-                      ${isFirst
-                        ? 'border-white/10 text-white/20 cursor-not-allowed'
-                        : 'border-white/20 text-white hover:bg-white/10 hover:scale-110'}`}
-                  >
-                    <span className="material-icons-round text-base">chevron_left</span>
-                  </button>
-
-                  <div className="flex items-center gap-1.5 flex-1 justify-center">
-                    {SLIDES.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => goTo(i)}
-                        className={`rounded-full transition-all duration-300 ${i === idx ? 'w-4 h-1.5 bg-amber-400' : 'w-1.5 h-1.5 bg-white/20 hover:bg-white/40'}`}
+                {/* 2 Paras Narrative Caption */}
+                {slide.caption && (
+                  <div className="font-body text-[12.5px] leading-relaxed text-white/80 space-y-3 shrink-0">
+                    {slide.caption.split('\n\n').map((para, i) => (
+                      <p 
+                        key={i} 
+                        className="first-letter:text-lg first-letter:font-brand first-letter:text-amber-400 first-letter:mr-0.5"
+                        dangerouslySetInnerHTML={{ __html: para }} 
                       />
                     ))}
                   </div>
+                )}
 
-                  <button
-                    onClick={() => isLast ? handleChooseTown() : goTo(idx + 1)}
-                    className="w-9 h-9 rounded-full flex items-center justify-center border border-amber-400/40 text-amber-400 hover:bg-amber-500/10 hover:scale-110 transition-all duration-200"
-                  >
-                    <span className="material-icons-round text-base">{isLast ? 'flag' : 'chevron_right'}</span>
-                  </button>
+                {/* Fun Fact Block */}
+                {slide.detail && (
+                  <div className="rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-cyan-950/40 to-neutral-900/60 p-3.5 flex items-start gap-3 shadow-md shrink-0">
+                    <span className="text-xl select-none filter drop-shadow-[0_2px_8px_rgba(34,211,238,0.4)]">💡</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-black text-cyan-300 uppercase tracking-widest text-[9px] block mb-1">
+                        Town Fun Fact
+                      </span>
+                      <p className="text-[12px] font-body italic text-white/90 leading-relaxed">
+                        "{slide.detail}"
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Few More Details (Agent & Headquarters) */}
+                <div className="grid grid-cols-2 gap-3 shrink-0">
+                  <div className="rounded-2xl border border-white/5 bg-neutral-950/30 p-3 flex flex-col gap-1 shadow-inner">
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-amber-400">
+                      📍 Headquarters
+                    </span>
+                    <span className="text-[11px] font-body text-white/95 font-medium leading-tight mt-0.5">
+                      {slide.location ? slide.location.split(' — ')[1] || slide.location : 'Outer County'}
+                    </span>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/5 bg-neutral-950/30 p-3 flex flex-col gap-1 shadow-inner">
+                    <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-400">
+                      👤 Local Agent
+                    </span>
+                    <span className="text-[11px] font-body text-white/95 font-medium leading-tight mt-0.5">
+                      {slide.character || 'Imperial Registry'}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex justify-center">
-                  <button
-                    onClick={handleSkip}
-                    className="text-white font-black text-[9px] uppercase tracking-[0.25em] px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
-                  >
-                    Skip to Town Selection →
-                  </button>
+                {/* Gossip Poll / Reactions */}
+                {slide.townReaction && (
+                  <div className="rounded-2xl border border-amber-400/20 bg-gradient-to-br from-amber-955/30 to-neutral-900/60 p-4 shrink-0 shadow-lg">
+                    <div className="text-[9px] font-black uppercase tracking-[0.2em] text-amber-400 mb-3 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">📊 Local Gossip Poll</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    </div>
+                    <div className="space-y-3">
+                      {slide.townReaction.slice(0, 3).map((r, i) => (
+                        <div key={i} className="flex flex-col gap-1.5">
+                          <div className="flex justify-between items-center text-[10.5px] leading-snug">
+                            <span className="text-white/80 font-body">{r.text}</span>
+                            <span className="font-bold text-amber-300 font-brand shrink-0 pl-2">{r.pct}%</span>
+                          </div>
+                          {/* Progress bar */}
+                          <div className="w-full h-1.5 bg-black/45 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                            <div 
+                              className="h-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-300 rounded-full" 
+                              style={{ width: `${r.pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom Navigation */}
+                <div className="mt-auto shrink-0 pt-4 flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => goTo(idx - 1)}
+                      disabled={isFirst}
+                      className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all duration-200
+                        ${isFirst
+                          ? 'border-white/10 text-white/20 cursor-not-allowed'
+                          : 'border-white/20 text-white hover:bg-white/10 hover:scale-110'}`}
+                    >
+                      <span className="material-icons-round text-base">chevron_left</span>
+                    </button>
+
+                    <div className="flex items-center gap-1.5 flex-1 justify-center">
+                      {SLIDES.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => goTo(i)}
+                          className={`rounded-full transition-all duration-300 ${i === idx ? 'w-4 h-1.5 bg-amber-400' : 'w-1.5 h-1.5 bg-white/20 hover:bg-white/40'}`}
+                        />
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => isLast ? handleChooseTown() : goTo(idx + 1)}
+                      className="w-9 h-9 rounded-full flex items-center justify-center border border-amber-400/40 text-amber-400 hover:bg-amber-500/10 hover:scale-110 transition-all duration-200"
+                    >
+                      <span className="material-icons-round text-base">{isLast ? 'flag' : 'chevron_right'}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex justify-center">
+                    <button
+                      onClick={handleSkip}
+                      className="text-white font-black text-[9px] uppercase tracking-[0.25em] px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
+                    >
+                      Skip to Town Selection →
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

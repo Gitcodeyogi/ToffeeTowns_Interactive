@@ -6,7 +6,7 @@ import GlassButton from '../components/GlassButton';
 
 // ── Town Data ─────────────────────────────────────────────
 interface Town {
-  id: TownId;
+  id: TownId | string;
   name: string;
   county: string;
   tagline: string;
@@ -18,6 +18,7 @@ interface Town {
   traits: string[];
   professions: string[];
   emoji: string;
+  comingSoon?: boolean;
 }
 
 const TOWNS: Town[] = [
@@ -29,42 +30,12 @@ const TOWNS: Town[] = [
     description:
       'A dense, mystical forest town alive with glowing mushroom clusters and rebel spirit. Olive Pine leads the Ranger patrols. Milo Spark studies acoustic vibrations from ancient mushroom colonies.',
     image: '/Assets/WelcomeShow/CocoawoodCounty.png',
-    color: 'border-emerald-400/40',
+    color: 'border-emerald-500/40',
     accent: 'text-emerald-300',
-    gradient: 'from-emerald-900/60 to-teal-900/60',
+    gradient: 'from-emerald-950/60 to-teal-950/60',
     traits: ['Mystical', 'Rebellious', 'Forested', 'Curious'],
     professions: ['Builder', 'Explorer', 'Scientist'],
     emoji: '🌲',
-  },
-  {
-    id: 'toffee-town',
-    name: 'Hazelnut Terrace',
-    county: 'Nutwood County',
-    tagline: 'Bonfires, Craft, and Ancient Tradition',
-    description:
-      'The warm heart of Nutwood County. Ancient nut-carving elders gather around the eternal bonfire. Known for its tight-knit community and the best roasted hazelnut trade in the province.',
-    image: '/Assets/WelcomeShow/NutwoodCounty.png',
-    color: 'border-amber-400/40',
-    accent: 'text-amber-300',
-    gradient: 'from-amber-900/60 to-orange-900/60',
-    traits: ['Warm', 'Traditional', 'Industrious', 'Political'],
-    professions: ['Politician', 'Architect', 'Trader'],
-    emoji: '🌰',
-  },
-  {
-    id: 'eclair-square',
-    name: 'Caramel Cove',
-    county: 'Honeywood County',
-    tagline: 'Sweet Tides and Busy Markets',
-    description:
-      'A coastal town with sticky saltwater shorelines and golden caramel markets. Sailors and merchants thrive here. The province\'s best harbour is open day and night.',
-    image: '/Assets/WelcomeShow/HoneywoodCounty.png',
-    color: 'border-purple-400/40',
-    accent: 'text-purple-300',
-    gradient: 'from-purple-900/60 to-indigo-900/60',
-    traits: ['Coastal', 'Mercantile', 'Adventurous', 'Sunny'],
-    professions: ['Trader', 'Explorer', 'Healer'],
-    emoji: '🌊',
   },
   {
     id: 'peppermint-peak',
@@ -74,13 +45,111 @@ const TOWNS: Town[] = [
     description:
       'A high-altitude town of frozen peppermint spires and hot chocolate-steam geysers. Dr. Fudge runs the clinic here. The mint patrol guards the upper passes.',
     image: '/Assets/WelcomeShow/CreamwoodCounty.png',
-    color: 'border-cyan-400/40',
+    color: 'border-cyan-500/40',
     accent: 'text-cyan-300',
-    gradient: 'from-cyan-900/60 to-teal-900/60',
+    gradient: 'from-cyan-950/60 to-teal-950/60',
     traits: ['Glacial', 'Medicinal', 'Rugged', 'Precise'],
     professions: ['Healer', 'Social Work', 'Scientist'],
-    emoji: '🏔',
+    emoji: '❄️',
+    comingSoon: true,
   },
+  {
+    id: 'banoffee-valley',
+    name: 'Banoffee Valley',
+    county: 'Nutwood County',
+    tagline: 'Sun-drenched Groves and Creamy Rivers',
+    description:
+      'A tropical valley filled with sweet banana trees, wild cream falls, and golden toffee mines. Milo Spark and other explorers gather exotic spice extracts here.',
+    image: '/Assets/WelcomeShow/NutwoodCounty.png',
+    color: 'border-yellow-500/40',
+    accent: 'text-yellow-300',
+    gradient: 'from-yellow-950/60 to-amber-950/60',
+    traits: ['Tropical', 'Bountiful', 'Cheerful', 'Cozy'],
+    professions: ['Explorer', 'Scientist', 'Chef'],
+    emoji: '🍌',
+    comingSoon: true,
+  },
+  {
+    id: 'eclair-square',
+    name: 'Caramel Cove',
+    county: 'Honeywood County',
+    tagline: 'Sweet Tides and Busy Markets',
+    description:
+      'A coastal town with sticky saltwater shorelines and golden caramel markets. Sailors and merchants thrive here. The province\'s best harbour is open day and night.',
+    image: '/Assets/WelcomeShow/HoneywoodCounty.png',
+    color: 'border-purple-500/40',
+    accent: 'text-purple-300',
+    gradient: 'from-purple-950/60 to-indigo-950/60',
+    traits: ['Coastal', 'Mercantile', 'Adventurous', 'Sunny'],
+    professions: ['Trader', 'Explorer', 'Healer'],
+    emoji: '🌊',
+    comingSoon: true,
+  },
+  // ── Coming Soon Locked Towns ──
+  {
+    id: 'toffee-town',
+    name: 'Hazelnut Terrace',
+    county: 'Nutwood County',
+    tagline: 'Bonfires, Craft, and Ancient Tradition',
+    description:
+      'The warm heart of Nutwood County. Ancient nut-carving elders gather around the eternal bonfire. Known for its tight-knit community and the best roasted hazelnut trade in the province.',
+    image: '/Assets/WelcomeShow/NutwoodCounty.png',
+    color: 'border-amber-500/20',
+    accent: 'text-amber-300/60',
+    gradient: 'from-amber-950/30 to-orange-950/30',
+    traits: ['Warm', 'Traditional', 'Industrious', 'Political'],
+    professions: ['Politician', 'Architect', 'Trader'],
+    emoji: '🌰',
+    comingSoon: true,
+  },
+  {
+    id: 'butterscotch-bay',
+    name: 'Butterscotch Bay',
+    county: 'Honeywood County',
+    tagline: 'Salty Breeze and Butterscotch Docks',
+    description:
+      'A historic port famous for maritime trade, rich butterscotch candies, and massive wood-hulled trade galleons sailing the sweet tides of the province.',
+    image: '/Assets/WelcomeShow/HoneywoodCounty.png',
+    color: 'border-orange-500/20',
+    accent: 'text-orange-300/60',
+    gradient: 'from-orange-950/30 to-amber-950/30',
+    traits: ['Maritime', 'Historic', 'Windy', 'Bustling'],
+    professions: ['Trader', 'Sailor', 'Shipwright'],
+    emoji: '⚓',
+    comingSoon: true,
+  },
+  {
+    id: 'honeycomb-heights',
+    name: 'Honeycomb Heights',
+    county: 'Cocoawood County',
+    tagline: 'Sweet Altitude and Apiary Steppes',
+    description:
+      'A series of terraced cliffside apiaries high above the forest floor. Citizens here specialize in honey harvesting, bee keeping, and crafting medicinal wax balms.',
+    image: '/Assets/WelcomeShow/CocoawoodCounty.png',
+    color: 'border-yellow-500/20',
+    accent: 'text-yellow-300/60',
+    gradient: 'from-yellow-950/30 to-amber-950/30',
+    traits: ['Apiary', 'Terraced', 'Buzzing', 'Highland'],
+    professions: ['Healer', 'Farmer', 'Builder'],
+    emoji: '🍯',
+    comingSoon: true,
+  },
+  {
+    id: 'praline-port',
+    name: 'Praline Port',
+    county: 'Creamwood County',
+    tagline: 'Galleons, Spice Trade, and Sugar Canals',
+    description:
+      'A grand trading hub connected by wide cream canals. Praline Port features beautiful stone bridges, trading houses, and is the gateway to the outer oceans.',
+    image: '/Assets/WelcomeShow/CreamwoodCounty.png',
+    color: 'border-pink-500/20',
+    accent: 'text-pink-300/60',
+    gradient: 'from-pink-950/30 to-purple-950/30',
+    traits: ['Canals', 'Grand', 'Mercantile', 'Regal'],
+    professions: ['Merchant', 'Navigator', 'Diplomat'],
+    emoji: '🚢',
+    comingSoon: true,
+  }
 ];
 
 // ── Welcome Popup ─────────────────────────────────────────
@@ -153,6 +222,10 @@ const ChooseTown: React.FC = () => {
   const [hovered, setHovered] = useState<string | null>(null);
   const [errorFeedback, setErrorFeedback] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    useTTStore.setState({ taskQueue: [], residencyTaskStage: null, activeResidencyTask: null });
+  }, []);
+
   const totalXP = Object.values(skills || {}).reduce((a, b) => a + b, 0);
 
   const handleChoose = (town: Town) => {
@@ -205,16 +278,16 @@ const ChooseTown: React.FC = () => {
       });
 
       setWelcomeDone(true);
-      setPage('desk');
+      setPage('town-talk-entrance');
     } else {
       // First time home selection
-      setHomeTown(selected.id);
+      setHomeTown(selected.id as TownId);
       setWelcomeDone(true);
       if (!townWelcomeShown) {
         addCoins(200, 'Welcome Gift — Starter Purse');
         setTownWelcomeShown(true);
       }
-      setPage('desk');
+      setPage('town-talk-entrance');
     }
   };
 
@@ -267,29 +340,32 @@ const ChooseTown: React.FC = () => {
           </div>
         </div>
 
-        {/* Town Cards — horizontal row */}
-        <div className="w-full flex-1 overflow-hidden flex items-center justify-center my-3">
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up delay-200">
+        {/* Town Cards — scrollable row */}
+        <div className="w-full flex-1 overflow-y-auto custom-scrollbar my-3 pr-2">
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-fade-in-up delay-200 py-2">
             {TOWNS.map((town, i) => {
               const isCurrent = homeTown === town.id;
+              const isComingSoon = town.comingSoon;
               return (
                 <motion.div
                   key={town.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className={`relative flex flex-col rounded-3xl overflow-hidden border-2 transition-all duration-300 cursor-pointer group h-[52vh]
-                    ${isCurrent ? 'border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)]' : town.color} bg-gradient-to-b ${town.gradient}
-                    ${hovered === town.id ? 'scale-[1.03] shadow-[0_0_40px_rgba(0,0,0,0.5)]' : ''}`}
-                  onMouseEnter={() => setHovered(town.id)}
+                  transition={{ delay: i * 0.05 }}
+                  onClick={() => !isComingSoon && !isCurrent && handleChoose(town as any)}
+                  className={`relative flex flex-col rounded-3xl overflow-hidden border-2 transition-all duration-300 h-[52vh] min-h-[360px]
+                    ${isCurrent ? 'border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)]' : isComingSoon ? 'border-white/10 opacity-60 grayscale-[40%] cursor-not-allowed' : town.color} 
+                    bg-gradient-to-b ${town.gradient}
+                    ${hovered === town.id && !isComingSoon ? 'scale-[1.02] shadow-[0_0_30px_rgba(0,0,0,0.5)] cursor-pointer' : ''}`}
+                  onMouseEnter={() => !isComingSoon && setHovered(town.id)}
                   onMouseLeave={() => setHovered(null)}
                 >
                   {/* Image */}
-                  <div className="relative h-[40%] overflow-hidden bg-black/20 flex items-center justify-center">
+                  <div className="relative h-[38%] overflow-hidden bg-black/20 flex items-center justify-center">
                     <img
                       src={town.image}
                       alt={town.name}
-                      className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-115"
+                      className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                     <div className="absolute top-3 right-3 text-3xl">{town.emoji}</div>
@@ -298,37 +374,54 @@ const ChooseTown: React.FC = () => {
                         Current Home
                       </div>
                     )}
+                    {isComingSoon && (
+                      <div className="absolute top-3 left-3 bg-neutral-800 text-neutral-400 border border-white/10 text-[9px] font-brand uppercase tracking-wider px-2 py-0.5 rounded-md shadow-md flex items-center gap-1">
+                        <span>🔒</span> Coming Soon
+                      </div>
+                    )}
                   </div>
 
                   {/* Info */}
-                  <div className="flex flex-col gap-2.5 p-5 flex-1 justify-between">
+                  <div className="flex flex-col gap-2 p-4 flex-1 justify-between text-left">
                     <div>
                       <div className="text-[9px] font-black uppercase tracking-[0.3em] text-white/40">{town.county}</div>
-                      <h3 className={`font-brand text-[1.3rem] ${town.accent} tracking-wider mt-0.5`} style={{ fontFamily: '"Luckiest Guy", cursive' }}>
+                      <h3 className={`font-brand text-[1.2rem] ${town.accent} tracking-wider mt-0.5`} style={{ fontFamily: '"Luckiest Guy", cursive' }}>
                         {town.name}
                       </h3>
-                      <p className="text-[11px] text-white/60 italic font-body mt-0.5 leading-tight">{town.tagline}</p>
+                      <p className="text-[10px] text-white/60 italic font-body mt-0.5 leading-tight">{town.tagline}</p>
                     </div>
 
-                    <p className="text-xs text-white/70 leading-relaxed font-body flex-1 overflow-y-auto custom-scrollbar pr-1">{town.description}</p>
+                    <p className="text-[11px] text-white/70 leading-relaxed font-body flex-1 overflow-y-auto custom-scrollbar pr-1">{town.description}</p>
 
                     {/* Professions */}
                     <div className="flex flex-wrap gap-1 mt-1 shrink-0">
                       {town.professions.map(p => (
-                        <span key={p} className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50">
+                        <span key={p} className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50">
                           {p}
                         </span>
                       ))}
                     </div>
 
                     {/* CTA */}
-                    <GlassButton
-                      label={isCurrent ? "Current Home" : "Choose Town"}
-                      onClick={() => !isCurrent && handleChoose(town)}
-                      disabled={isCurrent}
-                      variant={town.id === 'ganache-grove' ? 'accent' : town.id === 'toffee-town' ? 'primary' : town.id === 'eclair-square' ? 'secondary' : 'accent'}
-                      className={`!w-full !min-w-0 !h-10 !min-h-10 !rounded-xl !py-0 !text-xs mt-2.5 shrink-0 ${isCurrent ? 'opacity-50 cursor-default' : ''}`}
-                    />
+                    {isComingSoon ? (
+                      <GlassButton
+                        label="Coming Soon 🔒"
+                        disabled={true}
+                        variant="primary"
+                        className="!w-full !min-w-0 !h-9 !min-h-9 !rounded-xl !py-0 !text-xs mt-2 shrink-0 opacity-40 cursor-not-allowed"
+                      />
+                    ) : (
+                      <GlassButton
+                        label={isCurrent ? "Current Home" : "Choose Town"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isCurrent) handleChoose(town as any);
+                        }}
+                        disabled={isCurrent}
+                        variant={town.id === 'ganache-grove' ? 'accent' : town.id === 'toffee-town' ? 'primary' : town.id === 'eclair-square' ? 'secondary' : 'accent'}
+                        className={`!w-full !min-w-0 !h-9 !min-h-9 !rounded-xl !py-0 !text-xs mt-2 shrink-0 ${isCurrent ? 'opacity-50 cursor-default' : ''}`}
+                      />
+                    )}
                   </div>
                 </motion.div>
               );

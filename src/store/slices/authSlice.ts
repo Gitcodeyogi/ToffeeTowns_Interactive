@@ -85,7 +85,7 @@ export const createAuthSlice: StateCreator<
             set({
               homeTown: data.homeTown || null,
               welcomeDone: data.welcomeDone || false,
-              coins: data.coins ?? 50,
+              coins: data.coins ?? 100,
               coinHistory: data.coinHistory || [],
               earnedBadges: data.earnedBadges || [],
               legacyPoints: data.legacyPoints || 0,
@@ -95,8 +95,14 @@ export const createAuthSlice: StateCreator<
               mailbox: data.mailbox || [],
               townWelcomeShown: data.townWelcomeShown || false,
               travellerName: data.travellerName || firebaseUser.displayName || '',
+              playerAvatar: data.playerAvatar || null,
+              avatarZoom: data.avatarZoom ?? 1,
+              avatarX: data.avatarX ?? 0,
+              avatarY: data.avatarY ?? 0,
               currentPage: 'welcome',
               authLoading: false,
+              residencyTaskStage: null,
+              activeResidencyTask: null,
               lastStampedDate: data.lastStampedDate || null,
               claimedStamps: data.claimedStamps || [],
               ownedDecorations: data.ownedDecorations || [],
@@ -117,6 +123,16 @@ export const createAuthSlice: StateCreator<
               latestFlashNews: data.latestFlashNews || null,
               completedSeriesSteps: data.completedSeriesSteps || [],
               series1StartDate: data.series1StartDate || null,
+              storyDecisions: data.storyDecisions || {},
+              rentPaidUntil: data.rentPaidUntil || null,
+              isBankrupt: data.isBankrupt || false,
+              communityServiceProgress: data.communityServiceProgress || 0,
+              unlockedFragments: data.unlockedFragments || [],
+              donatedResources: data.donatedResources || {},
+              skippedTaxCount: data.skippedTaxCount ?? 0,
+              lastProvinceTaxTriggerTime: data.lastProvinceTaxTriggerTime || null,
+              currentRoleId: data.currentRoleId || 'newcomer',
+              completedMilestones: data.completedMilestones || [],
             });
           } else {
             // If auth user is created but Firestore document doesn't exist yet
@@ -129,6 +145,8 @@ export const createAuthSlice: StateCreator<
               ...initial,
               currentPage: 'welcome',
               authLoading: false,
+              residencyTaskStage: null,
+              activeResidencyTask: null,
             });
           }
         } catch (err) {

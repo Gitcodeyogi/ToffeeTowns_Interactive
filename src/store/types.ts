@@ -2,18 +2,20 @@
 export type AppPage =
   | 'welcome'
   | 'choose-town'
+  | 'town-talk-entrance'
   | 'desk'
   | 'leaderboard'
   | 'coins'
   | 'characters'
   | 'badges'
-  | 'cocoa-chat';
+  | 'pipkin-chat';
 
 export type TownId =
   | 'toffee-town'
   | 'eclair-square'
   | 'peppermint-peak'
-  | 'ganache-grove';
+  | 'ganache-grove'
+  | 'banoffee-valley';
 
 export interface CoinTransaction {
   id: string;
@@ -54,9 +56,12 @@ export interface TaskItem {
   icon: string;
   targetText: string;
   destinationSubPage?: string;
+  originSubPage?: string;
   destinationTownId?: string;
   encounterTriggered?: boolean;
   actionId?: string;
+  transitFare?: number;
+  hasMiniGame?: boolean;
 }
 
 export interface RewardItem {
@@ -67,6 +72,10 @@ export interface RewardItem {
   xpCat: string;
   legacy: number;
   type: string;
+  destinationSubPage?: string;
+  originSubPage?: string;
+  actionId?: string;
+  transitFare?: number;
 }
 
 export interface StampItem {

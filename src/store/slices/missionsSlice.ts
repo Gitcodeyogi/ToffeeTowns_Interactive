@@ -6,6 +6,7 @@ export interface MissionsSlice {
   completedMissions: string[];
   completedSeriesSteps: string[];
   series1StartDate: string | null;
+  storyDecisions: Record<string, string>;
 
   completeMission: (key: string, titleAward: string, badgeId: number) => void;
   completeSeriesStep: (stepId: string, choiceLabel?: string) => void;
@@ -21,6 +22,7 @@ export const createMissionsSlice: StateCreator<
   completedMissions: [],
   completedSeriesSteps: [],
   series1StartDate: null,
+  storyDecisions: {},
 
   completeMission: (key, titleAward, badgeId) => {
     const s = get();
@@ -33,10 +35,15 @@ export const createMissionsSlice: StateCreator<
     if (current.user) saveUserState(current.user.uid, current);
   },
 
-  completeSeriesStep: (stepId, _choiceLabel) => {
+  completeSeriesStep: (stepId, choiceLabel) => {
     set((s) => {
-      if (s.completedSeriesSteps.includes(stepId)) return {};
-      return { completedSeriesSteps: [...s.completedSeriesSteps, stepId] };
+      const nextSteps = s.completedSeriesSteps.includes(stepId)
+        ? s.completedSeriesSteps
+        : [...s.completedSeriesSteps, stepId];
+      const nextDecisions = choiceLabel
+        ? { ...s.storyDecisions, [stepId]: choiceLabel }
+        : s.storyDecisions;
+      return { completedSeriesSteps: nextSteps, storyDecisions: nextDecisions };
     });
     const state = get();
     if (state.user) saveUserState(state.user.uid, state);
@@ -51,3 +58,4 @@ export const createMissionsSlice: StateCreator<
     if (state.user) saveUserState(state.user.uid, state);
   },
 });
+

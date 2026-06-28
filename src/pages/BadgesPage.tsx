@@ -69,6 +69,27 @@ const BADGES: BadgeDefinition[] = [
     requirement: 'Complete the "Draft Leaflets Against Curfew" mission.',
   },
   {
+    id: 201,
+    name: 'Quick Blink',
+    emoji: '⚡',
+    description: 'Cleared Cocoa Card Memory in the Traveller Deck arcade.',
+    requirement: 'Win Cocoa Card Memory.',
+  },
+  {
+    id: 206,
+    name: 'Puzzle Solver',
+    emoji: '🧩',
+    description: 'Solved a civic mini-game puzzle for the market ledger.',
+    requirement: 'Win Market Crate Sort.',
+  },
+  {
+    id: 208,
+    name: 'Path Finder',
+    emoji: '🛣️',
+    description: 'Tuned a living-world route challenge in the mini-game arcade.',
+    requirement: 'Win Canal Flow Tune.',
+  },
+  {
     id: 1,
     name: 'First Settle In',
     emoji: '🧳',
@@ -85,7 +106,7 @@ const BADGES: BadgeDefinition[] = [
 ];
 
 const BadgesPage: React.FC = () => {
-  const { earnedBadges, setPage, welcomeDone } = useTTStore();
+  const { earnedBadges, setPage, welcomeDone, headerHidden } = useTTStore();
 
   const activeEarned = [...earnedBadges];
   if (welcomeDone && !activeEarned.includes(2)) {
@@ -97,26 +118,34 @@ const BadgesPage: React.FC = () => {
   }
 
   return (
-    <div className="h-full w-full flex items-center justify-center p-6 select-none">
-      <div className="w-[92vw] h-[92vh] max-h-[92vh] rounded-[2.5rem] border border-white/15 bg-black/60 p-6 flex flex-col justify-between overflow-hidden shadow-2xl relative">
+    <div className={`min-h-full w-full flex flex-col items-center justify-start select-none transition-all duration-700 bg-transparent ${headerHidden ? 'pt-2 pb-6 px-2' : 'pt-4 pb-8 px-4'}`}>
+      <div className={`rounded-[2.5rem] border-[3px] border-purple-500/40 bg-black/60 p-6 flex flex-col justify-between overflow-visible shadow-[8px_8px_0px_0px_rgba(168,85,247,0.35)] relative transition-all duration-700 ease-in-out ${
+        headerHidden
+          ? 'w-[92vw] h-auto min-h-[90vh]'
+          : 'w-[92vw] h-auto min-h-[82vh]'
+      }`}>
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-4 shrink-0">
-          <button
-            onClick={() => setPage('desk')}
-            className="px-4 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-full text-xs font-brand uppercase tracking-wider transition duration-200"
-            style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-          >
-            🏠 Back to Desk
-          </button>
-          <h2 className="text-xl md:text-2xl font-brand text-amber-400 uppercase tracking-wider" style={{ fontFamily: FONT }}>
-            🎖️ Confectionery Medallions
-          </h2>
-          <div className="w-[100px]" /> {/* Spacer */}
+        <div className="relative flex items-center justify-between border-b border-white/10 pb-4 shrink-0">
+          <div className="z-10">
+            <button
+              onClick={() => setPage('desk')}
+              className="px-4 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-full text-xs font-brand uppercase tracking-wider transition duration-200"
+              style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+            >
+              🏠 Back to Desk
+            </button>
+          </div>
+          <div className="absolute inset-x-0 top-0 bottom-4 flex items-center justify-center pointer-events-none">
+            <h2 className="text-xl md:text-2xl font-brand text-amber-400 uppercase tracking-wider pointer-events-auto" style={{ fontFamily: FONT }}>
+              🎖️ Confectionery Medallions
+            </h2>
+          </div>
+          <div className="w-[100px] z-10" /> {/* Spacer */}
         </div>
 
         {/* Content Grid */}
-        <div className="flex-1 my-6 overflow-y-auto custom-scrollbar max-w-4xl w-full mx-auto pr-2">
+        <div className="flex-grow my-6 max-w-4xl w-full mx-auto pr-2">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {BADGES.map((b) => {
               const earned = activeEarned.includes(b.id);
@@ -126,7 +155,7 @@ const BadgesPage: React.FC = () => {
                   className={`p-5 rounded-[2rem] border transition duration-300 flex flex-col items-center text-center justify-between min-h-[220px]
                     ${earned 
                       ? 'bg-amber-500/10 border-amber-400/30 shadow-[0_0_20px_rgba(245,158,11,0.1)]' 
-                      : 'bg-black/40 border-white/5 opacity-55'}`}
+                      : 'bg-transparent border-white/10 opacity-55'}`}
                 >
                   <div className="flex flex-col items-center gap-3">
                     <span
@@ -141,14 +170,14 @@ const BadgesPage: React.FC = () => {
                       <h4 className="font-brand text-base text-white uppercase mt-2" style={{ fontFamily: FONT }}>
                         {b.name}
                       </h4>
-                      <p className="text-xs text-white/70 leading-relaxed font-body mt-2">
+                      <p className="text-[15px] text-white/70 leading-relaxed font-body mt-2">
                         {earned ? b.description : 'Locked'}
                       </p>
                     </div>
                   </div>
 
                   <div className="w-full border-t border-white/10 pt-3 mt-3">
-                    <span className="text-[10px] uppercase font-black tracking-wider text-amber-400">
+                    <span className="text-[15px] uppercase font-black tracking-wider text-amber-400">
                       {earned ? '✓ Unlocked' : `Requires: ${b.requirement}`}
                     </span>
                   </div>
@@ -159,7 +188,7 @@ const BadgesPage: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-white/10 flex items-center justify-center text-xs text-white/40 shrink-0">
+        <div className="p-3 border-t border-white/10 flex items-center justify-center text-[15px] text-white/40 shrink-0">
           Unlock medallions by contributing to towns, upgrading your classroom skills, and embarking on missions.
         </div>
 

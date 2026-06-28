@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTTStore } from '../store/useTTStore';
 import GlassButton from './GlassButton';
+import { getChocoDate } from '../utils/chocoCalendar';
 
 interface LoginPageProps {
   onLoginSuccess?: () => void;
@@ -63,14 +64,19 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             </h1>
             
             {/* Subheadings Below in Luckiest Guy */}
-            <div className="mt-4 space-y-1 font-brand uppercase tracking-wider" style={{ fontFamily: '"Josefin Sans", sans-serif' }}>
-              <p className="text-white/60 text-xs md:text-sm">
-                Chocolate Era • Confection Year Cycle
-              </p>
-              <p className="text-cyan-300 text-xs md:text-sm mt-1">
-                16 towns, 4 counties, 1 Capital, 1 Province
-              </p>
-            </div>
+            {(() => {
+              const choco = getChocoDate();
+              return (
+                <div className="mt-4 space-y-1 font-brand uppercase tracking-wider" style={{ fontFamily: '"Josefin Sans", sans-serif' }}>
+                  <p className="text-white/60 text-xs md:text-sm">
+                    {choco.era} • {choco.yearText} ({choco.month} {choco.day})
+                  </p>
+                  <p className="text-cyan-300 text-xs md:text-sm mt-1">
+                    16 towns, 4 counties, 1 Capital, 1 Province
+                  </p>
+                </div>
+              );
+            })()}
           </div>
 
           <div className="border-l-2 border-white/20 pl-5 py-1 flex flex-col gap-4 font-body">
@@ -105,12 +111,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               </div>
 
               {/* Toffee Towns Title */}
-              <h1 
-                className="text-4xl md:text-5xl font-black text-yellow-300 mb-3 tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]"
-                style={{ fontFamily: '"Luckiest Guy", cursive' }}
-              >
-                Toffee Towns
-              </h1>
+              <div className="flex justify-center mb-4">
+                <div className="glassy-logo-container">
+                  <div className="glassy-logo-icon">
+                    <span className="emblem-text">tt</span>
+                  </div>
+                  <span className="glassy-logo-text">Toffee Towns</span>
+                  <span className="glassy-logo-pill">.FUN</span>
+                </div>
+              </div>
 
               <h2
                 className="uppercase tracking-wider text-emerald-300 leading-none font-brand text-2xl md:text-3xl"

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTTStore } from '../../store/useTTStore';
 import { GG_TravellerDeck_Header } from './GG_TravellerDeck_Header';
-import { TRANSPORT_SPEEDS, type SubPage } from '../../pages/TravellersDesk';
+import { TRANSPORT_SPEEDS, type SubPage } from '../../lib/uiConstants';
 
 interface GG_TravellerDeck_ClassroomProps {
   setSubPage: (page: SubPage) => void;
@@ -14,32 +14,40 @@ export const GG_TravellerDeck_Classroom: React.FC<GG_TravellerDeck_ClassroomProp
   popPage,
   triggerFeedback,
 }) => {
-  const { coins, spendCoins, skills, activeTransport, addToQueue } = useTTStore();
+  const { coins, skills, activeTransport, currentLocation, startResidencyTaskFlow } = useTTStore();
 
   const handleTrain = (skillKey: string, name: string, cost: number, xp: number) => {
     if (coins < cost) {
       triggerFeedback('❌ Insufficient Cocoa Coins!');
       return;
     }
-    if (spendCoins(cost, `Attending Academy Seminar: ${name}`)) {
-      const speedMult = TRANSPORT_SPEEDS[activeTransport] || 40;
-      const travelDist = 800; // Academy is 800m
-      const travelDuration = Math.max(2000, Math.round((travelDist / speedMult) * 1000));
-      const studyDuration = 12000; // 12s study class
+    const speedMult = TRANSPORT_SPEEDS[activeTransport] || 40;
+    const travelDist = 800; // Academy is 800m
+    const travelDuration = Math.max(2000, Math.round((travelDist / speedMult) * 1000));
+    const studyDuration = 12000; // 12s study class
 
-      addToQueue({
-        name: `Travel to Academy`,
+    const trainNodes = ['home', 'health', 'classroom', 'newspaper', 'workshop', 'transport'];
+    const isTrain = trainNodes.includes(currentLocation || '') && trainNodes.includes('classroom');
+    const isBalloon = currentLocation === 'politics' || currentLocation === 'theatre';
+    const modeName = isTrain ? 'Train' : isBalloon ? 'Balloon' : 'Wagon';
+    const modeIcon = isTrain ? '🚂' : isBalloon ? '🎈' : '🐎';
+
+    startResidencyTaskFlow({
+      travelTask: {
+        name: `${modeName} to Academy`,
         type: 'travel',
         duration: travelDuration,
         rewardCoins: 0,
         rewardXP: 0,
         rewardXPCat: '',
         rewardLegacy: 0,
-        icon: '🚶',
-        targetText: 'Academy Classroom (800m)',
-      });
-
-      addToQueue({
+        icon: modeIcon,
+        targetText: `Academy Classroom (${modeName}: 800m)`,
+        originSubPage: currentLocation,
+        destinationSubPage: 'classroom',
+        transitFare: 0,
+      },
+      workTask: {
         name: `Attend Seminar: ${name}`,
         type: 'study',
         duration: studyDuration,
@@ -49,10 +57,14 @@ export const GG_TravellerDeck_Classroom: React.FC<GG_TravellerDeck_ClassroomProp
         rewardLegacy: 15,
         icon: '🎓',
         targetText: name,
-      });
+      },
+      startDeductions: {
+        coins: cost,
+        inventory: {}
+      }
+    });
 
-      triggerFeedback(`🎓 Seminar booked! Added travel & study actions to your Residency Queue.`);
-    }
+    triggerFeedback(`🎓 Briefing opened for: ${name}!`);
   };
 
   return (

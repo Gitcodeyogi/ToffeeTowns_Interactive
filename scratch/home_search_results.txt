@@ -1,0 +1,693 @@
+Key 'dispatch': found 12 occurrences
+  Match 0:
+d: (show: boolean) => void;
+  dossierRead: boolean;
+  triggerFeedback: (msg: string) => void;
+  activePuzzleChore: any;
+  setActivePuzzleChore: React.Dispatch<React.SetStateAction<any>>;
+  openTownTalk?: (charId: string) => void;
+  openRoadmap?: (npcData?: { name: string; roleId: string; milestones: string[]; isNPC: boolean }) => void;
+}
+
+export interface ChorePuzzle {
+  title: string;
+  chore: st
+----------------------------------------
+  Match 1:
+ presence in local council meetings.' },
+      { title: 'The Gazette Desk', content: 'She coordinates directly with local scouts to compile the daily dispatches that help residents navigate the changing tides of ChocoBrook.' }
+    ],
+    stats: { mischief: 45, agility: 80, courage: 75, strength: 45 }
+  },
+  {
+    id: 'cedric',
+    name: 'Dr. Cedric Oakenhart',
+    role: 'Town Physician & Herbalist
+----------------------------------------
+  Match 2:
+ icon: '🗣️', color: '#a78bfa', desc: 'Intercept local rumors' },
+  { id: 'transport', label: 'Transit',     icon: '🚂', color: '#22d3ee', desc: 'Cargo dispatch routes' },
+  { id: 'health',    label: 'Clinic',      icon: '🏥', color: '#f43f5e', desc: 'Health & wellness' },
+  { id: 'politics',  label: 'Council',     icon: '🏛️', color: '#eab308', desc: 'Town council affairs' },
+  { id: 'economy',   lab
+----------------------------------------
+  Match 3:
+pedDecorations,
+    equippedPet,
+    activeTransport,
+    taskQueue,
+    currentLocation,
+    setShowHelpModal,
+    setShowTownGuide,
+    setShowDailyDispatch,
+    startResidencyTaskFlow,
+  } = useTTStore();
+
+  // Removed currentHomeSlide state to fix unused warning
+  const [activeRoom, setActiveRoom] = useState<string>('exterior');
+  const [showHomeNav, setShowHomeNav] = useState(false);
+  const 
+----------------------------------------
+  Match 4:
+</span>
+                    <span>❯</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Widget 3: Daily Dispatch */}
+              <div className="relative bg-white/5 border border-white/10 rounded-[2rem] p-4 flex flex-row items-center gap-4 hover:border-pink-400/40 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] min-h-[160px] group">
+
+----------------------------------------
+  Match 5:
+ounded-2xl overflow-hidden bg-black/25 border border-white/5 shrink-0">
+                  <img 
+                    src="/Assets/Icons/cropped/widget_dispatch.png" 
+                    alt="Daily Dispatch" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="fl
+----------------------------------------
+  Match 6:
+border-white/5 shrink-0">
+                  <img 
+                    src="/Assets/Icons/cropped/widget_dispatch.png" 
+                    alt="Daily Dispatch" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="flex-grow flex flex-col justify-between h-full m
+----------------------------------------
+  Match 7:
+        <h4 className="text-xs font-brand text-pink-400 uppercase tracking-wider font-bold" style={{ fontFamily: FONT }}>
+                      Daily Dispatch
+                    </h4>
+                    <p className="text-[9.5px] text-white/60 leading-tight font-sans line-clamp-3">
+                      Claim daily presence allowances and participate in active community dispatches. Complete chec
+----------------------------------------
+  Match 8:
+9.5px] text-white/60 leading-tight font-sans line-clamp-3">
+                      Claim daily presence allowances and participate in active community dispatches. Complete checklists for extra rewards.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowDailyDispatch(true)}
+                    className="w-full mt-2 py-1.5 px-3 bg-gr
+----------------------------------------
+  Match 9:
+cklists for extra rewards.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowDailyDispatch(true)}
+                    className="w-full mt-2 py-1.5 px-3 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500 text-white text-[8.5px] font-black uppercase tracking-wider rounded-xl transition shadow-md active
+----------------------------------------
+  Match 10:
+ustify-between font-bold"
+                    style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+                  >
+                    <span>Open Dispatch</span>
+                    <span>❯</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Widget 4: Help Guide */}
+              <div className="relative bg-white/5 border border-white/10 rounded-[2
+----------------------------------------
+  Match 11:
+              <p className="text-[9.5px] text-white/60 leading-tight font-sans line-clamp-3">
+                      Citizens are leaving calling card dispatches. Open the message logs, chat with resident neighbors, and select action choices.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => _openTownTalk?.('all')}
+                    cla
+----------------------------------------
+Key 'widget': found 19 occurrences
+  Match 0:
+nicles';
+import HomeBox4_Ledger from './home/HomeBox4_Ledger';
+import HomeBox5_Orientation from './home/HomeBox5_Orientation';
+import { CitizenJourneyWidget } from './home/CitizenJourneyWidget';
+import {
+  FONT,
+  TOWN_DETAILS,
+  HOME_ROOMS,
+  getProvincialStanding,
+  getBuilderStanding,
+  getExplorerStanding,
+  getHealerStanding,
+  TRANSPORT_SPEEDS,
+} from '../../pages/TravellersDesk';
+
+// Accept
+----------------------------------------
+  Match 1:
+ './home/HomeBox4_Ledger';
+import HomeBox5_Orientation from './home/HomeBox5_Orientation';
+import { CitizenJourneyWidget } from './home/CitizenJourneyWidget';
+import {
+  FONT,
+  TOWN_DETAILS,
+  HOME_ROOMS,
+  getProvincialStanding,
+  getBuilderStanding,
+  getExplorerStanding,
+  getHealerStanding,
+  TRANSPORT_SPEEDS,
+} from '../../pages/TravellersDesk';
+
+// AcceptedItem interface removed to fix unus
+----------------------------------------
+  Match 2:
+nded-2xl shadow-inner mt-2">
+                  {getRoomDesc(activeRoom)}
+                </p>
+              </div>
+
+              {/* Journey Roadmap Widget */}
+              <div className="my-auto shrink-0">
+                <CitizenJourneyWidget onOpenRoadmap={() => _openRoadmap?.()} />
+              </div>
+
+              {/* Travel Directory Expandable Inline Section */}
+              <div clas
+----------------------------------------
+  Match 3:
+p>
+              </div>
+
+              {/* Journey Roadmap Widget */}
+              <div className="my-auto shrink-0">
+                <CitizenJourneyWidget onOpenRoadmap={() => _openRoadmap?.()} />
+              </div>
+
+              {/* Travel Directory Expandable Inline Section */}
+              <div className="mt-4 pt-3 border-t border-white/5 flex flex-col gap-2 shrink-0">
+                <bu
+----------------------------------------
+  Match 4:
+         </div>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ WIDGET CORNER: 3x2 Grid of Premium Play Cards ═══ */}
+        <div className="flex flex-col space-y-3 shrink-0 animate-fade-in select-none">
+          <div className="text-center shrink-0">
+            <span className="px-3.5 py-1 bg-amber-500 text-b
+----------------------------------------
+  Match 5:
+lassName="px-3.5 py-1 bg-amber-500 text-black rounded-full text-[9px] font-black uppercase tracking-[0.25em] inline-block shadow-md">
+              🧩 Widget Corner
+            </span>
+            <h2 className="text-xl md:text-2xl font-brand uppercase text-amber-400 tracking-tight leading-none mt-2 mb-1" style={{ fontFamily: FONT }}>
+              Desktop Playcard Widgets
+            </h2>
+       
+----------------------------------------
+  Match 6:
+l md:text-2xl font-brand uppercase text-amber-400 tracking-tight leading-none mt-2 mb-1" style={{ fontFamily: FONT }}>
+              Desktop Playcard Widgets
+            </h2>
+            <p className="text-xs text-neutral-300 italic max-w-4xl mx-auto leading-relaxed">
+              Quick access shortcuts to administrative services, navigation guides, and daily county logs.
+            </p>
+      
+----------------------------------------
+  Match 7:
+5 p-6 z-10 flex flex-col justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+              
+              {/* Widget 1: Town Guide Map */}
+              <div className="relative bg-white/5 border border-white/10 rounded-[2rem] p-4 flex flex-row items-center gap-4 hover:border-emerald-400/40 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] min
+----------------------------------------
+  Match 8:
+00px] rounded-2xl overflow-hidden bg-black/25 border border-white/5 shrink-0">
+                  <img 
+                    src="/Assets/Icons/cropped/widget_guide_map.png" 
+                    alt="Guide Map" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className=
+----------------------------------------
+  Match 9:
+>Open Town Guide</span>
+                    <span>❯</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Widget 2: Citizen Journey */}
+              <div className="relative bg-white/5 border border-white/10 rounded-[2rem] p-4 flex flex-row items-center gap-4 hover:border-purple-400/40 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] min
+----------------------------------------
+  Match 10:
+00px] rounded-2xl overflow-hidden bg-black/25 border border-white/5 shrink-0">
+                  <img 
+                    src="/Assets/Icons/cropped/widget_journey.png" 
+                    alt="Citizen Journey" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div classN
+----------------------------------------
+  Match 11:
+an>Check Journey</span>
+                    <span>❯</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Widget 3: Daily Dispatch */}
+              <div className="relative bg-white/5 border border-white/10 rounded-[2rem] p-4 flex flex-row items-center gap-4 hover:border-pink-400/40 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] min-h-
+----------------------------------------
+  Match 12:
+00px] rounded-2xl overflow-hidden bg-black/25 border border-white/5 shrink-0">
+                  <img 
+                    src="/Assets/Icons/cropped/widget_dispatch.png" 
+                    alt="Daily Dispatch" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div classN
+----------------------------------------
+  Match 13:
+an>Open Dispatch</span>
+                    <span>❯</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Widget 4: Help Guide */}
+              <div className="relative bg-white/5 border border-white/10 rounded-[2rem] p-4 flex flex-row items-center gap-4 hover:border-rose-400/40 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] min-h-[160
+----------------------------------------
+  Match 14:
+00px] rounded-2xl overflow-hidden bg-black/25 border border-white/5 shrink-0">
+                  <img 
+                    src="/Assets/Icons/cropped/widget_help.png" 
+                    alt="Help Guide" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="fle
+----------------------------------------
+  Match 15:
+<span>Help Guide</span>
+                    <span>❯</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Widget 5: Townsfolks Calling */}
+              <div className="relative bg-white/5 border border-white/10 rounded-[2rem] p-4 flex flex-row items-center gap-4 hover:border-orange-400/40 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] 
+----------------------------------------
+  Match 16:
+00px] rounded-2xl overflow-hidden bg-black/25 border border-white/5 shrink-0">
+                  <img 
+                    src="/Assets/Icons/cropped/widget_calling.png" 
+                    alt="Townsfolks Calling" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div cla
+----------------------------------------
+  Match 17:
+en Calling Cards</span>
+                    <span>❯</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Widget 6: County Logs */}
+              <div className="relative bg-white/5 border border-white/10 rounded-[2rem] p-4 flex flex-row items-center gap-4 hover:border-blue-400/40 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] min-h-[16
+----------------------------------------
+  Match 18:
+00px] rounded-2xl overflow-hidden bg-black/25 border border-white/5 shrink-0">
+                  <img 
+                    src="/Assets/Icons/cropped/widget_logs.png" 
+                    alt="County Logs" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="fl
+----------------------------------------
+Key 'HomeBox': found 12 occurrences
+  Match 0:
+useTTStore';
+import { GanacheGroveTownData } from '../../data/towns/ganache-grove';
+import type { SubPage } from '../../pages/TravellersDesk';
+import HomeBox2_Census from './home/HomeBox2_Census';
+import HomeBox3_Chronicles from './home/HomeBox3_Chronicles';
+import HomeBox4_Ledger from './home/HomeBox4_Ledger';
+import HomeBox5_Orientation from './home/HomeBox5_Orientation';
+import { CitizenJourney
+----------------------------------------
+  Match 1:
+GroveTownData } from '../../data/towns/ganache-grove';
+import type { SubPage } from '../../pages/TravellersDesk';
+import HomeBox2_Census from './home/HomeBox2_Census';
+import HomeBox3_Chronicles from './home/HomeBox3_Chronicles';
+import HomeBox4_Ledger from './home/HomeBox4_Ledger';
+import HomeBox5_Orientation from './home/HomeBox5_Orientation';
+import { CitizenJourneyWidget } from './home/Citizen
+----------------------------------------
+  Match 2:
+../data/towns/ganache-grove';
+import type { SubPage } from '../../pages/TravellersDesk';
+import HomeBox2_Census from './home/HomeBox2_Census';
+import HomeBox3_Chronicles from './home/HomeBox3_Chronicles';
+import HomeBox4_Ledger from './home/HomeBox4_Ledger';
+import HomeBox5_Orientation from './home/HomeBox5_Orientation';
+import { CitizenJourneyWidget } from './home/CitizenJourneyWidget';
+import {
+
+----------------------------------------
+  Match 3:
+ort type { SubPage } from '../../pages/TravellersDesk';
+import HomeBox2_Census from './home/HomeBox2_Census';
+import HomeBox3_Chronicles from './home/HomeBox3_Chronicles';
+import HomeBox4_Ledger from './home/HomeBox4_Ledger';
+import HomeBox5_Orientation from './home/HomeBox5_Orientation';
+import { CitizenJourneyWidget } from './home/CitizenJourneyWidget';
+import {
+  FONT,
+  TOWN_DETAILS,
+  HOME_RO
+----------------------------------------
+  Match 4:
+/../pages/TravellersDesk';
+import HomeBox2_Census from './home/HomeBox2_Census';
+import HomeBox3_Chronicles from './home/HomeBox3_Chronicles';
+import HomeBox4_Ledger from './home/HomeBox4_Ledger';
+import HomeBox5_Orientation from './home/HomeBox5_Orientation';
+import { CitizenJourneyWidget } from './home/CitizenJourneyWidget';
+import {
+  FONT,
+  TOWN_DETAILS,
+  HOME_ROOMS,
+  getProvincialStanding,
+----------------------------------------
+  Match 5:
+port HomeBox2_Census from './home/HomeBox2_Census';
+import HomeBox3_Chronicles from './home/HomeBox3_Chronicles';
+import HomeBox4_Ledger from './home/HomeBox4_Ledger';
+import HomeBox5_Orientation from './home/HomeBox5_Orientation';
+import { CitizenJourneyWidget } from './home/CitizenJourneyWidget';
+import {
+  FONT,
+  TOWN_DETAILS,
+  HOME_ROOMS,
+  getProvincialStanding,
+  getBuilderStanding,
+  getE
+----------------------------------------
+  Match 6:
+ './home/HomeBox2_Census';
+import HomeBox3_Chronicles from './home/HomeBox3_Chronicles';
+import HomeBox4_Ledger from './home/HomeBox4_Ledger';
+import HomeBox5_Orientation from './home/HomeBox5_Orientation';
+import { CitizenJourneyWidget } from './home/CitizenJourneyWidget';
+import {
+  FONT,
+  TOWN_DETAILS,
+  HOME_ROOMS,
+  getProvincialStanding,
+  getBuilderStanding,
+  getExplorerStanding,
+  getHea
+----------------------------------------
+  Match 7:
+HomeBox3_Chronicles from './home/HomeBox3_Chronicles';
+import HomeBox4_Ledger from './home/HomeBox4_Ledger';
+import HomeBox5_Orientation from './home/HomeBox5_Orientation';
+import { CitizenJourneyWidget } from './home/CitizenJourneyWidget';
+import {
+  FONT,
+  TOWN_DETAILS,
+  HOME_ROOMS,
+  getProvincialStanding,
+  getBuilderStanding,
+  getExplorerStanding,
+  getHealerStanding,
+  TRANSPORT_SPEEDS,
+}
+----------------------------------------
+  Match 8:
+in this sweet sweet county. Flip through their profiles, read their secrets, and check their strengths.
+            </p>
+          </div>
+
+          <HomeBox2_Census
+            characters={GANACHE_CHARACTERS}
+            activeIndex={activeCharIndex}
+            setActiveIndex={setActiveCharIndex}
+            charTab={charContentTab}
+            setCharTab={setCharContentTab}
+            setPage=
+----------------------------------------
+  Match 9:
+critical matters of the parish. Earn unique badges, valuable coins, and rank standing by participating.
+            </p>
+          </div>
+
+          <HomeBox3_Chronicles
+            selectedProj={selectedProj}
+            selectedMyst={selectedMyst}
+            selectedCamp={selectedCamp}
+            completedActions={completedActions}
+            handleExecuteMatter={handleExecuteMatter}
+        
+----------------------------------------
+  Match 10:
+nsportation, and equipped pets. Pay your housing dues on time and track your progressive ranks in town.
+            </p>
+          </div>
+
+          <HomeBox4_Ledger
+            coins={coins}
+            legacyPoints={legacyPoints}
+            skills={skills}
+            rentPaid={rentPaid}
+            setRentPaid={setRentPaid}
+            spendCoins={spendCoins}
+            townName={townName}
+  
+----------------------------------------
+  Match 11:
+y active and log your daily presence. Claim your administrative coin allowances and keep streaks alive.
+            </p>
+          </div>
+
+          <HomeBox5_Orientation
+            dossierRead={dossierRead}
+            lastStampedDate={lastStampedDate}
+            completedActions={completedActions}
+            selectedProj={selectedProj}
+            selectedMyst={selectedMyst}
+            selec
+----------------------------------------
+Key 'playcard': found 4 occurrences
+  Match 0:
+setSubPage: (page: SubPage) => void;
+  pushPage: (page: SubPage) => void;
+  popPage: () => void;
+  inventory: Record<string, number>;
+  setShowDossierPlaycard: (show: boolean) => void;
+  dossierRead: boolean;
+  triggerFeedback: (msg: string) => void;
+  activePuzzleChore: any;
+  setActivePuzzleChore: React.Dispatch<React.SetStateAction<any>>;
+  openTownTalk?: (charId: string) => void;
+  openRoadmap
+----------------------------------------
+  Match 1:
+m ${secs}s`;
+};
+
+export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
+  setSubPage,
+  pushPage,
+  inventory,
+  setShowDossierPlaycard: _setShowDossierPlaycard,
+  dossierRead,
+  triggerFeedback,
+  setActivePuzzleChore,
+  openTownTalk: _openTownTalk,
+  openRoadmap: _openRoadmap,
+}) => {
+  const {
+    homeTown,
+    coins,
+    spendCoins,
+    skills,
+    completedActions,
+    
+----------------------------------------
+  Match 2:
+onst GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
+  setSubPage,
+  pushPage,
+  inventory,
+  setShowDossierPlaycard: _setShowDossierPlaycard,
+  dossierRead,
+  triggerFeedback,
+  setActivePuzzleChore,
+  openTownTalk: _openTownTalk,
+  openRoadmap: _openRoadmap,
+}) => {
+  const {
+    homeTown,
+    coins,
+    spendCoins,
+    skills,
+    completedActions,
+    legacyPoints,
+    setPage
+----------------------------------------
+  Match 3:
+e="text-xl md:text-2xl font-brand uppercase text-amber-400 tracking-tight leading-none mt-2 mb-1" style={{ fontFamily: FONT }}>
+              Desktop Playcard Widgets
+            </h2>
+            <p className="text-xs text-neutral-300 italic max-w-4xl mx-auto leading-relaxed">
+              Quick access shortcuts to administrative services, navigation guides, and daily county logs.
+            </
+----------------------------------------
+Key 'Guide': found 13 occurrences
+  Match 0:
+tStampedDate,
+    equippedDecorations,
+    equippedPet,
+    activeTransport,
+    taskQueue,
+    currentLocation,
+    setShowHelpModal,
+    setShowTownGuide,
+    setShowDailyDispatch,
+    startResidencyTaskFlow,
+  } = useTTStore();
+
+  // Removed currentHomeSlide state to fix unused warning
+  const [activeRoom, setActiveRoom] = useState<string>('exterior');
+  const [showHomeNav, setShowHomeNav] = us
+----------------------------------------
+  Match 1:
+Name="text-xs text-neutral-300 italic max-w-4xl mx-auto leading-relaxed">
+              Quick access shortcuts to administrative services, navigation guides, and daily county logs.
+            </p>
+          </div>
+
+          {/* Main container */}
+          <div className="mr-2 mb-2 w-[calc(100%-8px)] rounded-[2.5rem] border-[3px] border-amber-500/25 bg-black/75 p-6 z-10 flex flex-col justify-cen
+----------------------------------------
+  Match 2:
+ flex-col justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+              
+              {/* Widget 1: Town Guide Map */}
+              <div className="relative bg-white/5 border border-white/10 rounded-[2rem] p-4 flex flex-row items-center gap-4 hover:border-emerald-400/40 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] min-h-[160px] grou
+----------------------------------------
+  Match 3:
+ounded-2xl overflow-hidden bg-black/25 border border-white/5 shrink-0">
+                  <img 
+                    src="/Assets/Icons/cropped/widget_guide_map.png" 
+                    alt="Guide Map" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="flex-g
+----------------------------------------
+  Match 4:
+rder border-white/5 shrink-0">
+                  <img 
+                    src="/Assets/Icons/cropped/widget_guide_map.png" 
+                    alt="Guide Map" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="flex-grow flex flex-col justify-between h-full 
+----------------------------------------
+  Match 5:
+      <h4 className="text-xs font-brand text-emerald-400 uppercase tracking-wider font-bold" style={{ fontFamily: FONT }}>
+                      Town Guide Map
+                    </h4>
+                    <p className="text-[9.5px] text-white/60 leading-tight font-sans line-clamp-3">
+                      Access the interactive county coordinate map. View current location landmarks, calculate rou
+----------------------------------------
+  Match 6:
+ and queue travel transits.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowTownGuide(true)}
+                    className="w-full mt-2 py-1.5 px-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white text-[8.5px] font-black uppercase tracking-wider rounded-xl transition shadow-md a
+----------------------------------------
+  Match 7:
+y-between font-bold"
+                    style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+                  >
+                    <span>Open Town Guide</span>
+                    <span>❯</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Widget 2: Citizen Journey */}
+              <div className="relative bg-white/5 border border-white/10 rounded-
+----------------------------------------
+  Match 8:
+h</span>
+                    <span>❯</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Widget 4: Help Guide */}
+              <div className="relative bg-white/5 border border-white/10 rounded-[2rem] p-4 flex flex-row items-center gap-4 hover:border-rose-400/40 hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] min-h-[160px] group">
+   
+----------------------------------------
+  Match 9:
+rder border-white/5 shrink-0">
+                  <img 
+                    src="/Assets/Icons/cropped/widget_help.png" 
+                    alt="Help Guide" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="flex-grow flex flex-col justify-between h-full min-
+----------------------------------------
+  Match 10:
+         <h4 className="text-xs font-brand text-rose-400 uppercase tracking-wider font-bold" style={{ fontFamily: FONT }}>
+                      Help Guide
+                    </h4>
+                    <p className="text-[9.5px] text-white/60 leading-tight font-sans line-clamp-3">
+                      Access official documentation on game rules, progression rates, and county systems guide. Perfec
+----------------------------------------
+  Match 11:
+te/60 leading-tight font-sans line-clamp-3">
+                      Access official documentation on game rules, progression rates, and county systems guide. Perfect reference lookup.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowHelpModal(true)}
+                    className="w-full mt-2 py-1.5 px-3 bg-gradient-to-r from-red-5
+----------------------------------------
+  Match 12:
+ustify-between font-bold"
+                    style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+                  >
+                    <span>Help Guide</span>
+                    <span>❯</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Widget 5: Townsfolks Calling */}
+              <div className="relative bg-white/5 border border-white/10 round
+----------------------------------------

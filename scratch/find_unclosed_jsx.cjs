@@ -1,83 +1,44 @@
 const fs = require('fs');
 const path = require('path');
 
-const filePath = path.join(__dirname, '../src/pages/TravellersDesk.tsx');
-let content = fs.readFileSync(filePath, 'utf8');
+const filePath = path.resolve(__dirname, '../src/components/desk/GG_TravellerDeck_Home.tsx');
+const content = fs.readFileSync(filePath, 'utf8');
 
-// Strip standard JS comments
-content = content.replace(/\/\*[\s\S]*?\*\//g, '');
-content = content.replace(/\/\/.*$/gm, '');
+const lines = content.split('\n');
+let tagStack = [];
 
-// Strip string literals to avoid tags in strings
-content = content.replace(/'[^']*'/g, "''");
-content = content.replace(/"[^"]*"/g, '""');
-content = content.replace(/`[^`]*`/g, '``');
-
-const lines = content.replace(/\r\n/g, '\n').split('\n');
-
-let stack = [];
-
-// Match JSX tags
-const tagRegex = /<(\/?[a-zA-Z0-9_]+)(?:\s+[^>]*?)?>/g;
-
+// Simple tag parsing using regex
 for (let i = 0; i < lines.length; i++) {
   const line = lines[i];
-  const lineNum = i + 1;
-  
-  let match;
-  // We need to be careful with self-closing tags like <img ... /> or <input ... />
-  // So let's find tags on the line
-  const cleanLine = line.trim();
-  
-  let pos = 0;
-  while (pos < cleanLine.length) {
-    const nextTagIdx = cleanLine.indexOf('<', pos);
-    if (nextTagIdx === -1) break;
+  // Match both opening/closing tags or comments
+  const matches = line.matchAll(/<\/?([a-zA-Z0-9_]+)(?:\s+[^>]*?)?>/g);
+  for (const match of matches) {
+    const fullTag = match[0];
+    const tagName = match[1];
     
-    // Find matching '>'
-    const closeTagIdx = cleanLine.indexOf('>', nextTagIdx);
-    if (closeTagIdx === -1) {
-      pos = nextTagIdx + 1;
+    // Ignore self-closing tags
+    if (fullTag.endsWith('/>')) {
       continue;
     }
     
-    const tagText = cleanLine.substring(nextTagIdx, closeTagIdx + 1);
-    pos = closeTagIdx + 1;
-    
-    // Check if self-closing
-    if (tagText.endsWith('/>')) {
-      continue;
-    }
-    
-    // Extract tag name
-    const nameMatch = tagText.match(/<(\/?[a-zA-Z0-9_:\.]+)/);
-    if (!nameMatch) continue;
-    
-    const name = nameMatch[1];
-    
-    // Ignore html tags inside JSX style templates or non-JSX entities
-    if (name.includes('.') || name.includes(':') || name.startsWith('!') || name === 'h' || name === 'p') {
-      // Custom filtering if needed, but let's keep it simple
-    }
-    
-    if (name.startsWith('/')) {
-      const closingName = name.slice(1);
-      if (stack.length === 0) {
-        console.log(`Unmatched closing tag </${closingName}> at line ${lineNum}`);
-      } else {
-        const last = stack.pop();
-        if (last.name !== closingName) {
-          console.log(`Mismatched JSX tags: Opened <${last.name}> at line ${last.lineNum}, but closed with </${closingName}> at line ${lineNum}`);
+    if (fullTag.startsWith('</')) {
+      // Closing tag
+      if (tagStack.length > 0) {
+        const top = tagStack[tagStack.length - 1];
+        if (top.name === tagName) {
+          tagStack.pop();
+        } else {
+          console.log(`Mismatch on line ${i + 1}: found closing tag </${tagName}>, but expected </${top.name}> (opened on line ${top.line})`);
         }
+      } else {
+        console.log(`Mismatch on line ${i + 1}: found closing tag </${tagName}> with empty stack`);
       }
     } else {
-      stack.push({ name, lineNum });
+      // Opening tag (excluding self-closing checked before)
+      tagStack.push({ name: tagName, line: i + 1 });
     }
   }
 }
 
-console.log('Finished tag analysis.');
-console.log('Remaining open tags in stack:');
-stack.forEach(t => {
-  console.log(`  <${t.name}> opened at line ${t.lineNum}`);
-});
+console.log("Remaining tags in stack at end of file:");
+console.log(tagStack);

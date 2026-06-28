@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTTStore } from '../../store/useTTStore';
 import { GG_TravellerDeck_Header } from './GG_TravellerDeck_Header';
-import { FONT, getChocolateDate, type SubPage } from '../../pages/TravellersDesk';
+import { FONT, getChocolateDate, type SubPage } from '../../lib/uiConstants';
 import { GanacheGroveTownData } from '../../data/towns/ganache-grove';
 import { DAILY_ROTATION_DATA } from '../../data/newspaper_rotation';
+import { updateResidentJournal } from '../../utils/journalHelper';
+import { cozyAudio } from '../../utils/audioHelper';
 
 interface GG_TravellerDeck_NewsPaperProps {
   setSubPage: (page: SubPage) => void;
@@ -28,8 +30,31 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
   setInventory: _setInventory,
   triggerFeedback,
 }) => {
-  const { coins, spendCoins, addCoins, addLegacy, user } = useTTStore();
-  const [paperPage, setPaperPage] = useState<1 | 2 | 3 | 4>(1);
+  const { 
+    coins, 
+    spendCoins, 
+    addCoins, 
+    addLegacy, 
+    user, 
+    raffleTickets, 
+    buyRaffleTicket, 
+    drawRaffle, 
+    gems 
+  } = useTTStore();
+  const [paperPage, setPaperPage] = useState<1 | 2 | 3 | 4 | 5>(() => {
+    const saved = localStorage.getItem('tt_initial_paper_page');
+    localStorage.removeItem('tt_initial_paper_page');
+    if (saved === '2') return 2;
+    if (saved === '3') return 3;
+    if (saved === '4') return 4;
+    if (saved === '5') return 5;
+    return 1;
+  });
+
+  const [cookoffBase, setCookoffBase] = useState('Ganache');
+  const [cookoffInfusion, setCookoffInfusion] = useState('Honeyberry');
+  const [cookoffName, setCookoffName] = useState('');
+  const [gossipRumor, setGossipRumor] = useState('');
   const [riddleAnswer, setRiddleAnswer] = useState('');
   const [riddleSolved, setRiddleSolved] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -45,6 +70,12 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
+    }
+  }, [paperPage]);
+
+  useEffect(() => {
+    if (paperPage === 3) {
+      localStorage.setItem('tt_goosebump_read', 'true');
     }
   }, [paperPage]);
 
@@ -69,13 +100,120 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
   const dayIndex = (new Date().getDate() % 10) + 1;
   const dayContent = DAILY_ROTATION_DATA.find(d => d.day === dayIndex) || DAILY_ROTATION_DATA[0];
 
-  const getPage1DetailedStory = (briefStory: string, day: number): string => {
+
+
+  const renderDetailedStoryBlocks = (day: number) => {
     if (day === 1 || day === 2 || day === 3) {
-      return `${briefStory} Forester Sir Goldwhistle has officially called an emergency town council meeting to resolve the walkway debate, urging both factions to compromise for regional stability. Blacksmith Crumblewise was seen unloading heavy timber planks near the central plaza, declaring that local commerce cannot wait for seasonal bugs. Meanwhile, Mrs. Petalworth has set up warning banners to guide travelers away from the sensitive glowcap habitats, insisting that preserving the grove's ecology is paramount.`;
+      return (
+        <div className="space-y-4 mt-3 font-sans">
+          <div>
+            <h4 className="text-[11px] font-black uppercase tracking-wider text-amber-900 border-b border-amber-900/10 pb-0.5 mb-1.5">
+              🏛️ Town Hall & Trade Stance
+            </h4>
+            <ul className="list-disc pl-4 text-[11px] text-amber-950/85 space-y-1">
+              <li>
+                <strong>Sir Goldwhistle:</strong> Reviewing walkways and urging both factions to compromise for regional stability.
+              </li>
+              <li>
+                <strong>Blacksmith Crumblewise:</strong> Unloading timber planks and insisting local commerce cannot wait for seasonal bugs.
+              </li>
+              <li>
+                <strong>Julie Frost:</strong> Noting high tension as opinions are indexed for today's council presentation.
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-[11px] font-black uppercase tracking-wider text-emerald-900 border-b border-emerald-900/10 pb-0.5 mb-1.5">
+              🌳 Conservation & Ecology
+            </h4>
+            <ul className="list-disc pl-4 text-[11px] text-amber-950/85 space-y-1">
+              <li>
+                <strong>Mrs. Petalworth:</strong> Setting up warning banners to steer travelers away from sensitive glowcap butterfly habitats.
+              </li>
+              <li>
+                <strong>Rowan Thistle:</strong> Collecting resident surveys and drafting construction blueprints for the elevated walkway.
+              </li>
+              <li>
+                <strong>Glowcap Watch:</strong> Warning that heavy steel machinery could disturb the fragile forest ecology.
+              </li>
+            </ul>
+          </div>
+        </div>
+      );
     } else if (day === 4 || day === 5 || day === 6) {
-      return `${briefStory} Dr. Cedric Oakenhart has warned that if fresh mint leaves are not dried quickly, the outbreak could double in size. Forester Sir Goldwhistle has authorized a special fund to purchase clean linen masks for all affected students. Meanwhile, Blacksmith Crumblewise is helping construct temporary isolation chambers in the academy courtyard, and Mrs. Petalworth has organized foraging groups to seek out hidden herbal patches near the riverbanks.`;
+      return (
+        <div className="space-y-4 mt-3 font-sans">
+          <div>
+            <h4 className="text-[11px] font-black uppercase tracking-wider text-amber-900 border-b border-amber-900/10 pb-0.5 mb-1.5">
+              🏥 Clinic Advisory & Health
+            </h4>
+            <ul className="list-disc pl-4 text-[11px] text-amber-950/85 space-y-1">
+              <li>
+                <strong>Dr. Cedric Oakenhart:</strong> Warning that if fresh mint leaves are not dried quickly, the outbreak could double in size.
+              </li>
+              <li>
+                <strong>Sir Goldwhistle:</strong> Authorizing a special treasury fund to purchase clean linen masks for all affected students.
+              </li>
+              <li>
+                <strong>Julie Frost:</strong> Spreading clinic guidelines on identifying bright green nose tips in children.
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-[11px] font-black uppercase tracking-wider text-cyan-900 border-b border-cyan-900/10 pb-0.5 mb-1.5">
+              🛠️ Emergency Logistics & Chores
+            </h4>
+            <ul className="list-disc pl-4 text-[11px] text-amber-950/85 space-y-1">
+              <li>
+                <strong>Blacksmith Crumblewise:</strong> Building temporary courtyard isolation structures at the Forest Academy.
+              </li>
+              <li>
+                <strong>Mrs. Petalworth:</strong> Leading resident foraging expeditions to harvest secret wild mint patches near riverbanks.
+              </li>
+              <li>
+                <strong>Rowan Thistle:</strong> Setting up clean wooden drying racks to speed up fresh mint extract processing.
+              </li>
+            </ul>
+          </div>
+        </div>
+      );
     } else {
-      return `${briefStory} Forester Sir Goldwhistle has officially welcomed traveling merchants to the central plaza, setting up extra trade rules for the season. Blacksmith Crumblewise is busy supervising wharf construction to make room for the new cargo vessels. Meanwhile, Mrs. Petalworth is working to ensure the increased visitor foot traffic doesn't disturb the forest borders, and Dr. Cedric Oakenhart is distributing warm teas to keep everyone healthy.`;
+      return (
+        <div className="space-y-4 mt-3 font-sans">
+          <div>
+            <h4 className="text-[11px] font-black uppercase tracking-wider text-amber-900 border-b border-amber-900/10 pb-0.5 mb-1.5">
+              📈 Wharf Commerce & Shipping
+            </h4>
+            <ul className="list-disc pl-4 text-[11px] text-amber-950/85 space-y-1">
+              <li>
+                <strong>Sir Goldwhistle:</strong> Welcoming traveling merchants and establishing custom trade rules for the season.
+              </li>
+              <li>
+                <strong>Blacksmith Crumblewise:</strong> Supervising dock expansion at Mossberry Wharf to fit larger cargo ships.
+              </li>
+              <li>
+                <strong>Mossberry Wharf:</strong> Tracking trade tariff rates on exported pine planks and sweet caramel milk.
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-[11px] font-black uppercase tracking-wider text-pink-900 border-b border-pink-900/10 pb-0.5 mb-1.5">
+              🧭 Exploration & Border Watch
+            </h4>
+            <ul className="list-disc pl-4 text-[11px] text-amber-950/85 space-y-1">
+              <li>
+                <strong>Mrs. Petalworth:</strong> Safeguarding forest paths to protect native flower borders from visitor foot traffic.
+              </li>
+              <li>
+                <strong>Dr. Cedric Oakenhart:</strong> Distributing warm herbal teas to keep cargo handlers and rangers healthy.
+              </li>
+              <li>
+                <strong>Ranger Patrol:</strong> Reporting mysterious white glows and trailing safe night coordinate paths.
+              </li>
+            </ul>
+          </div>
+        </div>
+      );
     }
   };
 
@@ -123,6 +261,13 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
 
     setVotedEvents(prev => ({ ...prev, [eventId]: optionName }));
     triggerFeedback(`🗳️ ${consequence}`);
+    
+    updateResidentJournal('vote', {
+      coins: coinsGained - cost,
+      legacy: legacyGained,
+      phaseName: 'Faction Vote',
+      description: `Cast ballot for "${optionName}" in the town square debate`
+    });
   };
 
   return (
@@ -188,10 +333,11 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                   </div>
 
                   {/* Right Column: Story Text (7 cols) */}
-                  <div className="md:col-span-7 space-y-3 text-left">
-                    <p className="text-[13px] leading-relaxed text-amber-900/90 font-serif text-justify">
-                      <strong>FOREST GROVE</strong> — {getPage1DetailedStory(dayContent.story, dayContent.day)}
+                  <div className="md:col-span-7 space-y-3 text-left font-serif">
+                    <p className="text-[13.5px] leading-relaxed text-amber-950 italic font-semibold border-b border-amber-900/10 pb-2 mb-2 text-justify">
+                      <strong>FOREST GROVE</strong> — {dayContent.story}
                     </p>
+                    {renderDetailedStoryBlocks(dayContent.day)}
 
                     {/* CIVIC DISPATCH STATISTICS & INQUIRIES */}
                     <div className="p-3 bg-amber-950/5 border border-amber-950/15 rounded-xl space-y-1.5 select-text text-left">
@@ -397,7 +543,7 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                 {/* Ballot options below */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-amber-950/15 pt-4 text-left">
                   {/* Affair 1: Politics */}
-                  <div className="p-4 bg-white/45 border border-amber-950/15 rounded-2xl flex flex-col justify-between text-xs min-h-[220px]">
+                  <div className="news-card-premium p-4 flex flex-col justify-between text-xs min-h-[220px]">
                     <div>
                       <div className="flex items-center justify-between font-sans mb-2 border-b border-amber-950/10 pb-1">
                         <span className="font-bold text-amber-950">{dayContent.page2AffairTitle}</span>
@@ -432,7 +578,7 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                   </div>
 
                   {/* CIVIC DISPATCH: BALLOT INQUIRIES & CENSUS */}
-                  <div className="md:col-span-2 p-4 bg-amber-950/5 border border-amber-950/15 rounded-2xl flex flex-col justify-between text-xs min-h-[220px]">
+                  <div className="md:col-span-2 news-card-premium p-4 flex flex-col justify-between text-xs min-h-[220px]">
                     <div>
                       <span className="text-[10px] font-black uppercase tracking-wider text-amber-950 font-sans block border-b border-amber-950/10 pb-1 mb-2">
                         📋 CURRENT BALLOT INQUIRIES & CENSUS
@@ -507,7 +653,7 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                   {/* Gossip & Whispers Column (Left 6 Columns) */}
                   <div className="lg:col-span-6 space-y-4 pr-0 lg:pr-4 lg:border-r border-amber-950/15">
                     <h3 className="text-sm font-black uppercase border-b border-amber-950/20 pb-1 tracking-wider font-sans flex items-center gap-1.5">
-                      <span>👂</span> Gossip & Whispers
+                      <span>👂</span> Gossip & Goosebump Findings
                     </h3>
                     
                     <div className="space-y-3 font-sans leading-relaxed text-[11px]">
@@ -519,11 +665,38 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                           </p>
                         </div>
                       ))}
+
+                      {/* Goosebump Findings & Scandals */}
+                      <div className="p-3 bg-amber-900/5 border border-amber-950/10 rounded-xl mt-3 space-y-2.5">
+                        <span className="font-black text-amber-950 text-[10px] block border-b border-amber-950/10 pb-1">👻 Town Scandals & Goosebump Findings (by Julie Frost)</span>
+                        
+                        <div className="space-y-1">
+                          <h5 className="font-bold text-red-955 text-[10px]">The Bakery Ghost Peaks:</h5>
+                          <p className="text-amber-900/85 font-serif text-[10px] leading-relaxed text-justify">
+                            "Reports say a flour-covered apparition has been rearranging Mortimer's rolling pins at 3 AM. Sir Goldwhistle suspects it is Pipkin in a sheet, but Dr. Cedric insists the ghostly footprints smell strongly of cinnamon!"
+                          </p>
+                        </div>
+
+                        <div className="space-y-1">
+                          <h5 className="font-bold text-red-955 text-[10px]">Sir Goldwhistle's Secret Tea Tithe:</h5>
+                          <p className="text-amber-900/85 font-serif text-[10px] leading-relaxed text-justify">
+                            "Leaked ledger logs suggest our chief auditor spends 12% of collected town taxes on premium imported Earl Grey tea. Sir Goldwhistle denies this, claiming it is 'essential office lubrication.'"
+                          </p>
+                        </div>
+
+                        <div className="space-y-1">
+                          <h5 className="font-bold text-red-955 text-[10px]">Glowcap Moth Messages:</h5>
+                          <p className="text-amber-900/85 font-serif text-[10px] leading-relaxed text-justify">
+                            "Recent reports of glowcap moths flying in binary formations. Julie Frost's findings suggest they are sending messages to Mrs. Petalworth's shop. A real goosebump finding!"
+                          </p>
+                        </div>
+                      </div>
+
                     </div>
                   </div>
 
                   {/* Health Watch: Clinic Update (Right 6 Columns) */}
-                  <div className="lg:col-span-6 space-y-4">
+                  <div className="lg:col-span-6 news-card-premium p-4 space-y-4">
                     <h3 className="text-sm font-black uppercase border-b border-amber-950/20 pb-1 tracking-wider font-sans flex items-center gap-1.5">
                       <span>🩺</span> Health Watch: Clinic Update
                     </h3>
@@ -555,14 +728,14 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                     <span>🔍</span> Archaeological & Historical Lore
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 text-[11.5px] text-amber-900 leading-relaxed font-serif">
-                    <div className="md:col-span-7 p-3 bg-amber-950/5 border border-amber-950/10 rounded-xl space-y-1.5">
+                    <div className="md:col-span-7 news-card-premium p-4 space-y-1.5">
                       <span className="text-[9px] font-bold text-amber-800 uppercase block font-sans">Found under the Ganache River Bed</span>
                       <h5 className="font-serif font-bold text-amber-950 text-xs">{dayContent.page3LoreTitle}</h5>
                       <p className="text-[10.5px] text-amber-900/80 leading-normal">
                         {dayContent.page3LoreText}
                       </p>
                     </div>
-                    <div className="md:col-span-5 border border-dashed border-amber-950/30 rounded-xl p-3 flex flex-col justify-center text-center bg-white/10">
+                    <div className="md:col-span-5 ad-clipping-dashed p-4 flex flex-col justify-center text-center">
                       <span className="text-[10px] font-sans font-bold text-amber-950 block">📚 LOCAL LORE FACT</span>
                       <p className="text-[11px] text-amber-900/70 leading-relaxed mt-1">
                         {dayContent.page3LoreFact}
@@ -572,7 +745,7 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                 </div>
 
                 {/* HEALTH CLINIC & DISCOVERY INQUIRIES */}
-                <div className="mt-4 p-3 bg-amber-950/5 border border-amber-950/15 rounded-xl space-y-1.5 text-left">
+                <div className="mt-4 news-card-premium p-4 space-y-1.5 text-left">
                   <span className="text-[9px] font-black uppercase tracking-wider text-amber-950 font-sans block border-b border-amber-950/10 pb-0.5">📋 HEALTH CLINIC & DISCOVERY DISPATCH</span>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-[10px] font-sans">
                     <div className="space-y-0.5">
@@ -640,7 +813,7 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 border-t border-amber-950/15 pt-4 text-left">
                   {/* Left Column: Commodity Index Table (6 columns) */}
-                  <div className="lg:col-span-6 space-y-4 pr-0 lg:pr-4 lg:border-r border-amber-950/15">
+                  <div className="lg:col-span-6 news-card-premium p-4 space-y-4 pr-0 lg:pr-4 lg:border-r border-amber-950/15">
                     <h3 className="text-sm font-black uppercase border-b border-amber-950/20 pb-1 tracking-wider font-sans flex items-center gap-1.5">
                       <span>📈</span> Commodity Exchange Index
                     </h3>
@@ -677,7 +850,7 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                       <span>📰</span> Classifieds & Ads
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 border-2 border-amber-950/30 rounded-xl flex flex-col justify-between bg-white/20 text-center relative group">
+                      <div className="ad-clipping-premium p-3 flex flex-col justify-between text-center relative group">
                         <span className="text-[8px] font-bold text-amber-900/60 uppercase tracking-widest block mb-1">PROVINCIAL AD</span>
                         <h4 className="text-[11px] font-extrabold uppercase font-serif text-amber-950">{dayContent.page4Classified1Title}</h4>
                         <p className="text-[10px] text-amber-900/80 leading-snug mt-1 font-serif">
@@ -688,7 +861,7 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                         </span>
                       </div>
 
-                      <div className="p-3 border-2 border-dashed border-amber-950/20 rounded-xl flex flex-col justify-between bg-[#FAF6EE] text-center">
+                      <div className="ad-clipping-dashed p-3 flex flex-col justify-between text-center">
                         <span className="text-[8px] font-bold text-amber-900/60 uppercase tracking-widest block mb-1 font-sans">SERVICES</span>
                         <h4 className="text-[11px] font-extrabold uppercase font-serif text-amber-950">{dayContent.page4Classified2Title}</h4>
                         <p className="text-[10px] text-amber-900/80 leading-snug mt-1 font-serif">
@@ -703,7 +876,7 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                 </div>
 
                 {/* COMMERCE & TRADING STATISTICS */}
-                <div className="mt-4 p-3 bg-amber-950/5 border border-amber-950/15 rounded-xl space-y-1.5 text-left">
+                <div className="mt-4 news-card-premium p-4 space-y-1.5 text-left">
                   <span className="text-[9px] font-black uppercase tracking-wider text-amber-950 font-sans block border-b border-amber-950/10 pb-0.5">📋 COMMERCE & WHARF TRADING DISPATCH</span>
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-[10px] font-sans">
                     <div className="space-y-0.5">
@@ -733,7 +906,7 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                       <h3 className="text-sm font-black uppercase border-b border-amber-950/20 pb-1 tracking-wider font-sans flex items-center gap-1.5">
                         <span>🧩</span> Interactive Broadside Puzzle
                       </h3>
-                      <div className="p-4 bg-white/45 border border-amber-950/20 rounded-2xl space-y-3">
+                      <div className="news-card-premium p-4 space-y-3">
                         <span className="text-[10px] font-sans font-bold text-amber-950 uppercase tracking-wider block">THE COCOA Riddle:</span>
                         <p className="text-xs font-serif text-amber-900 leading-relaxed">
                           "I am dark or milk, sweet or bittersweet. I begin in a pod on a tropical tree, get crushed and mixed to bring you glee. What am I?"
@@ -758,8 +931,15 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                                   const clean = riddleAnswer.trim().toLowerCase();
                                   if (clean === 'chocolate' || clean === 'cocoa') {
                                     setRiddleSolved(true);
-                                    addCoins(15, 'Solved Cocoa Gazette Riddle');
-                                    triggerFeedback('🎉 Correct! You solved the Cocoa Riddle! (+15🪙)');
+                                    addCoins(5, 'Solved Cocoa Gazette Riddle');
+                                    triggerFeedback('🎉 Correct! You solved the Cocoa Riddle! (+5🪙)');
+                                    
+                                    updateResidentJournal('riddle', {
+                                      coins: 5,
+                                      legacy: 0,
+                                      phaseName: 'Puzzle Solved',
+                                      description: 'Solved the interactive broadside puzzle in the morning newspaper'
+                                    });
                                   } else {
                                     triggerFeedback('❌ Incorrect answer. Keep thinking! Hint: Starts with C.');
                                   }
@@ -775,7 +955,7 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                     </div>
 
                     {/* Cosmic Horoscope (5 columns) */}
-                    <div className="lg:col-span-5 space-y-3">
+                    <div className="lg:col-span-5 news-card-premium p-4 space-y-3">
                       <h3 className="text-sm font-black uppercase border-b border-amber-950/20 pb-1 tracking-wider font-sans flex items-center gap-1.5">
                         <span>✨</span> Cosmic Horoscopes
                       </h3>
@@ -790,6 +970,240 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PAGE 5: TOWN CLASSIFIEDS & FESTIVALS (Raffle, Cook-off, Gossip) */}
+            {paperPage === 5 && (
+              <div className="space-y-6 pb-12 min-h-0 animate-fade-in text-amber-950">
+                {/* Header Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                  <div className="md:col-span-5 aspect-[3/2] w-full rounded-2xl overflow-hidden border-2 border-amber-950/25 bg-amber-950/5 shadow-md relative shrink-0">
+                    <img 
+                      src="/Assets/Ganache Grove/Scene_0.1.png" 
+                      alt="Festival Square" 
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+                  </div>
+                  <div className="md:col-span-7 space-y-2 text-left">
+                    <h3 className="text-2xl font-bold text-amber-950 uppercase flex items-center gap-1.5 font-serif">
+                      🎪 Town Classifieds & Festivals
+                    </h3>
+                    <p className="text-xs text-amber-900/80 font-serif leading-relaxed text-justify">
+                      Welcome to the County Engagement Board! Here, the Ganache Grove Town Hall sponsors crowd-pulling festivals, daily raffle drawings, and community gossip submissions. Participate to earn extra pocket coins, win premium gems, and spread sweet rumors across Toffee Towns!
+                    </p>
+                    <div className="bg-amber-950/5 border border-amber-900/20 rounded-xl p-3 mt-3 space-y-1">
+                      <span className="text-[8.5px] font-black uppercase tracking-wider text-amber-900 font-sans block">🎟️ FESTIVAL MEMO</span>
+                      <p className="text-[10px] text-amber-955/80 leading-relaxed font-serif text-justify">
+                        All tickets purchased at the Admissions Desk are final. Cook-off participation is limited to one entry per cycle. Gossip submissions are audited by the Town Clerk before printing.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 border-t border-amber-950/15 pt-4 text-left">
+                  
+                  {/* Left Column: Raffle Draw Console (6 columns) */}
+                  <div className="lg:col-span-6 space-y-4 pr-0 lg:pr-4 lg:border-r border-amber-950/15">
+                    <h3 className="text-sm font-black uppercase border-b border-amber-950/20 pb-1 tracking-wider font-sans flex items-center gap-1.5">
+                      <span>🎟️</span> Daily Dispatch Raffle Draw
+                    </h3>
+                    <p className="text-[11px] text-amber-900/70 font-serif leading-relaxed">
+                      Exchange 10 soft coins for a County Raffle Ticket. Draw to win Coins, Gems, or wood!
+                    </p>
+
+                    <div className="news-card-premium p-4 space-y-4">
+                      <div className="flex justify-between items-center text-xs">
+                        <div>
+                          <span className="font-bold text-amber-950 block">Your Raffle Tickets:</span>
+                          <span className="text-emerald-800 font-extrabold font-mono text-sm">{raffleTickets} Tickets</span>
+                        </div>
+                        <div>
+                          <span className="font-bold text-amber-950 block">Your Coffer Balance:</span>
+                          <span className="text-amber-900 font-extrabold font-mono text-sm">{coins} 🪙 / {gems} 💎</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          onClick={() => {
+                            if (coins < 10) {
+                              triggerFeedback('❌ Insufficient Coins to purchase a raffle ticket!');
+                              return;
+                            }
+                            if (buyRaffleTicket(10)) {
+                              triggerFeedback('🎉 Purchased 1 Raffle Ticket! (-10🪙)');
+                              cozyAudio.playCoins();
+                            }
+                          }}
+                          className="py-2.5 bg-amber-950 hover:bg-amber-900 text-[#f7f2e8] rounded-xl text-xs font-bold font-sans uppercase transition shadow-sm"
+                        >
+                          Buy Ticket (10 🪙)
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            if (raffleTickets <= 0) {
+                              triggerFeedback('❌ You need at least 1 Raffle Ticket to draw!');
+                              return;
+                            }
+                            const res = drawRaffle();
+                            if (res.success) {
+                              triggerFeedback(res.message);
+                              cozyAudio.playChime();
+                              updateResidentJournal('dispatch', {
+                                coins: res.reward === 'coins' ? 100 : 0,
+                                legacy: 0,
+                                phaseName: 'Raffle Draw',
+                                description: res.message
+                              });
+                            } else {
+                              triggerFeedback(`❌ ${res.message}`);
+                            }
+                          }}
+                          className={`py-2.5 rounded-xl text-xs font-bold font-sans uppercase transition shadow-sm ${
+                            raffleTickets > 0
+                              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white'
+                              : 'bg-neutral-300 text-neutral-500 cursor-not-allowed border border-neutral-400/20'
+                          }`}
+                          disabled={raffleTickets <= 0}
+                        >
+                          Draw Prize! 🎲
+                        </button>
+                      </div>
+
+                      <div className="text-[10px] bg-amber-950/5 p-2 rounded-lg border border-amber-950/10 text-amber-900/80 leading-normal font-sans">
+                        <span className="font-bold text-amber-950 block text-[9.5px] mb-0.5">🏆 Possible Prize Tiers:</span>
+                        <ul className="list-disc pl-4 space-y-0.5 text-[9.5px]">
+                          <li>💎 15 or 30 Gems (Premium Currency)</li>
+                          <li>🪙 100, 150, or 200 Cocoa Coins</li>
+                          <li>🌲 Structural Wood Planks (Participating Credit)</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Cook-off & Gossip Box (6 columns) */}
+                  <div className="lg:col-span-6 space-y-6">
+                    {/* The Great Molasses Cook-off */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-black uppercase border-b border-amber-950/20 pb-1 tracking-wider font-sans flex items-center gap-1.5">
+                        <span>👩‍🍳</span> The Great Molasses Cook-off
+                      </h3>
+                      <p className="text-[11px] text-amber-900/70 font-serif leading-relaxed">
+                        Mix base chocolates and infusions, name your recipe, and submit it to earn +10 Coins!
+                      </p>
+
+                      <div className="news-card-premium p-4 space-y-3">
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div>
+                            <label className="font-bold text-amber-950 block mb-1">Base Chocolate:</label>
+                            <select
+                              value={cookoffBase}
+                              onChange={(e) => setCookoffBase(e.target.value)}
+                              className="w-full px-3 py-1.5 bg-white border border-amber-950/20 rounded-xl text-amber-950 focus:outline-none"
+                            >
+                              <option value="Ganache">Ganache</option>
+                              <option value="Toffee">Toffee</option>
+                              <option value="Caramel">Caramel</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="font-bold text-amber-950 block mb-1">Infusion:</label>
+                            <select
+                              value={cookoffInfusion}
+                              onChange={(e) => setCookoffInfusion(e.target.value)}
+                              className="w-full px-3 py-1.5 bg-white border border-amber-950/20 rounded-xl text-amber-950 focus:outline-none"
+                            >
+                              <option value="Honeyberry">Honeyberry</option>
+                              <option value="Sea Salt">Sea Salt</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="font-bold text-amber-950 block mb-1 text-xs">Recipe Name:</label>
+                          <input
+                            type="text"
+                            value={cookoffName}
+                            onChange={(e) => setCookoffName(e.target.value)}
+                            placeholder="e.g. Grandma's Salted Glaze..."
+                            className="w-full px-3 py-1.5 bg-white border border-amber-950/20 rounded-xl text-xs text-amber-950 focus:outline-none"
+                          />
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            if (!cookoffName.trim()) {
+                              triggerFeedback('❌ Please give your recipe a name!');
+                              return;
+                            }
+                            addCoins(3, `Molasses Cook-off entry: ${cookoffName}`);
+                            triggerFeedback(`👩‍🍳 Recipe "${cookoffName}" submitted successfully! You earned +3🪙!`);
+                            cozyAudio.playCoins();
+                            
+                            updateResidentJournal('chore', {
+                                coins: 3,
+                                legacy: 0,
+                                phaseName: 'Molasses Cook-off',
+                                description: `Submitted recipe "${cookoffName}" (Base: ${cookoffBase}, Infusion: ${cookoffInfusion}) to the Great Molasses Cook-off`
+                            });
+
+                            setCookoffName('');
+                          }}
+                          className="w-full py-2 bg-emerald-800 hover:bg-emerald-700 text-[#f7f2e8] rounded-xl text-xs font-bold font-sans uppercase transition shadow-sm"
+                        >
+                          Submit Recipe (+3 🪙)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Gazette Gossip Box */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-black uppercase border-b border-amber-950/20 pb-1 tracking-wider font-sans flex items-center gap-1.5">
+                        <span>🤫</span> Gazette Gossip Box
+                      </h3>
+                      <p className="text-[11px] text-amber-900/70 font-serif leading-relaxed">
+                        Submit a custom rumor to the Town Clerk. Fun rumors will be printed in tomorrow's edition!
+                      </p>
+
+                      <div className="news-card-premium p-4 space-y-3">
+                        <textarea
+                          value={gossipRumor}
+                          onChange={(e) => setGossipRumor(e.target.value)}
+                          placeholder="Type your rumor or town gossip here..."
+                          rows={2}
+                          className="w-full px-3 py-2 bg-white border border-amber-950/20 rounded-xl text-xs text-amber-950 focus:outline-none resize-none font-sans"
+                        />
+
+                        <button
+                          onClick={() => {
+                            if (!gossipRumor.trim()) {
+                              triggerFeedback('❌ Gossip rumor cannot be empty!');
+                              return;
+                            }
+                            triggerFeedback('🤫 Gossip submitted! The Town Clerk will audit it for the next issue.');
+                            cozyAudio.playClick();
+                            
+                            updateResidentJournal('briefing', {
+                              coins: 0,
+                              legacy: 0,
+                              phaseName: 'Gossip Submission',
+                              description: `Submitted a custom rumor: "${gossipRumor}"`
+                            });
+
+                            setGossipRumor('');
+                          }}
+                          className="w-full py-2 bg-amber-950 hover:bg-amber-900 text-[#f7f2e8] rounded-xl text-xs font-bold font-sans uppercase transition shadow-sm"
+                        >
+                          Submit Gossip
+                        </button>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </div>
@@ -810,10 +1224,10 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
                 ← Prev Page
               </button>
               <button
-                onClick={() => setPaperPage(prev => (prev < 4 ? (prev + 1) as any : 4))}
-                disabled={paperPage === 4}
+                onClick={() => setPaperPage(prev => (prev < 5 ? (prev + 1) as any : 5))}
+                disabled={paperPage === 5}
                 className={`px-3 py-1 bg-amber-950 hover:bg-amber-900 text-[#f7f2e8] text-[9px] font-brand uppercase tracking-wider rounded-lg transition ${
-                  paperPage === 4 ? 'opacity-30 cursor-not-allowed' : ''
+                  paperPage === 5 ? 'opacity-30 cursor-not-allowed' : ''
                 }`}
                 style={{ fontFamily: '"Josefin Sans", sans-serif' }}
               >
@@ -822,7 +1236,7 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
             </div>
 
             <span className="text-[10px] font-sans font-bold text-amber-900/50 uppercase tracking-wider">
-              Page {paperPage} of 4
+              Page {paperPage} of 5
             </span>
 
             <span className="text-[9px] font-sans font-bold text-amber-900/40 uppercase tracking-widest hidden sm:inline">
@@ -831,6 +1245,76 @@ export const GG_TravellerDeck_NewsPaper: React.FC<GG_TravellerDeck_NewsPaperProp
           </div>
         </div>
       </div>
+      <style>{`
+        .newspaper-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .news-card-premium {
+          background-color: #FAF6EE;
+          border: 1px solid rgba(120, 53, 15, 0.25);
+          box-shadow: inset 0 0 30px rgba(120, 53, 15, 0.04), 0 2px 5px rgba(0, 0, 0, 0.05);
+          position: relative;
+          border-radius: 16px;
+          transition: all 0.3s ease;
+        }
+        .news-card-premium::before {
+          content: '';
+          position: absolute;
+          inset: 4px;
+          border: 1px dashed rgba(120, 53, 15, 0.15);
+          border-radius: 12px;
+          pointer-events: none;
+        }
+        .news-card-premium:hover {
+          transform: translateY(-2px);
+          box-shadow: inset 0 0 40px rgba(120, 53, 15, 0.08), 0 6px 15px rgba(120, 53, 15, 0.12);
+          border-color: rgba(120, 53, 15, 0.45);
+        }
+
+        .gossip-scrap {
+          background-color: #fdfcf7;
+          border: 1px solid rgba(120, 53, 15, 0.15);
+          border-left: 4px solid #b45309;
+          border-radius: 6px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+          transition: all 0.2s ease;
+        }
+        .gossip-scrap:hover {
+          background-color: #fffdfa;
+          border-left-color: #d97706;
+          transform: translateX(2px);
+        }
+
+        .scandal-card {
+          background-color: #fffbf4;
+          border: 1px solid rgba(120, 53, 15, 0.2);
+          border-radius: 12px;
+          box-shadow: inset 0 0 15px rgba(180, 83, 9, 0.03);
+        }
+
+        .ad-clipping-premium {
+          background-color: #FAF6EE;
+          border: 2px solid #78350f;
+          border-radius: 12px;
+          box-shadow: 1px 2px 4px rgba(0,0,0,0.06);
+          transition: all 0.3s ease;
+        }
+        .ad-clipping-premium:hover {
+          transform: scale(1.02);
+          box-shadow: 2px 4px 8px rgba(120, 53, 15, 0.15);
+        }
+
+        .ad-clipping-dashed {
+          background-color: #fcfbfa;
+          border: 2px dashed rgba(120, 53, 15, 0.3);
+          border-radius: 12px;
+          box-shadow: inset 0 0 8px rgba(0,0,0,0.02);
+          transition: all 0.3s ease;
+        }
+        .ad-clipping-dashed:hover {
+          transform: scale(1.02);
+          border-color: rgba(120, 53, 15, 0.5);
+        }
+      `}</style>
     </div>
   );
 };

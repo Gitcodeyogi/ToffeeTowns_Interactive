@@ -2,6 +2,7 @@ import type { StateCreator } from 'zustand';
 import type { TTStore } from '../useTTStore';
 import type { TaskItem, RewardItem, StampItem, TownId } from '../types';
 import { saveUserState } from '../storeUtils';
+import { updateResidentJournal } from '../../utils/journalHelper';
 
 export interface TaskQueueSlice {
   lastStampedDate: string | null;
@@ -11,12 +12,41 @@ export interface TaskQueueSlice {
   completedActions: string[];
   walkwayStatus: 'pending' | 'supported' | 'ignored';
 
+  // Residency Task Flow States
+  activeResidencyTask: {
+    workTask: Omit<TaskItem, 'id' | 'startedAt'>;
+    travelTask?: Omit<TaskItem, 'id' | 'startedAt'>;
+    startDeductions?: {
+      coins: number;
+      inventory: Record<string, number>;
+    };
+    hintPaid: boolean;
+    riddleSolved: boolean;
+  } | null;
+  residencyTaskStage: 'pre-start' | 'progress' | 'completed' | 'failed' | null;
+
   claimDailyStamp: (townId: string, icon: string, color: string) => void;
   addToQueue: (task: Omit<TaskItem, 'id' | 'startedAt'>) => void;
   cancelTask: (taskId: string) => void;
   resolveQueue: () => void;
   dismissReward: (id: string) => void;
   completeActionDirect: (actionId: string) => void;
+  speedUpTask: (taskId: string, amountMs: number) => void;
+
+  // Residency Task Actions
+  startResidencyTaskFlow: (taskFlow: {
+    workTask: Omit<TaskItem, 'id' | 'startedAt'>;
+    travelTask?: Omit<TaskItem, 'id' | 'startedAt'>;
+    startDeductions?: {
+      coins: number;
+      inventory: Record<string, number>;
+    };
+  }) => void;
+  payResidencyTaskHint: () => void;
+  beginResidencyTask: () => void;
+  solveResidencyTaskRiddle: () => void;
+  failResidencyTask: () => void;
+  dismissResidencyTaskModal: () => void;
 }
 
 export const createTaskQueueSlice: StateCreator<
@@ -31,6 +61,8 @@ export const createTaskQueueSlice: StateCreator<
   pendingRewards: [],
   completedActions: [],
   walkwayStatus: 'pending',
+  activeResidencyTask: null,
+  residencyTaskStage: null,
 
   claimDailyStamp: (townId, icon, color) => {
     const todayStr = new Date().toISOString().slice(0, 10);
@@ -44,6 +76,14 @@ export const createTaskQueueSlice: StateCreator<
     }));
     const s = get();
     s.addCoins(0, `Logged Daily Presence Stamp for ${townId}`); // to log transaction
+    
+    updateResidentJournal('stamp', {
+      coins: 20,
+      legacy: 0,
+      phaseName: 'Daily Stamp',
+      description: `Logged daily presence in ${townId.replace('-', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}`
+    });
+
     if (s.user) saveUserState(s.user.uid, s);
   },
 
@@ -74,14 +114,14 @@ export const createTaskQueueSlice: StateCreator<
     const { taskQueue } = get();
     if (taskQueue.length === 0) return;
 
-    let now = Date.now();
-    let updatedQueue = [...taskQueue];
-    let rewardsToClaim: any[] = [];
+    const now = Date.now();
+    const updatedQueue = [...taskQueue];
+    const rewardsToClaim: any[] = [];
     let queueChanged = false;
     let finalHomeTown: TownId | null = null;
 
     while (updatedQueue.length > 0) {
-      let current = { ...updatedQueue[0] };
+      const current = { ...updatedQueue[0] };
       if (current.startedAt === null) {
         current.startedAt = now;
         updatedQueue[0] = current;
@@ -90,7 +130,10 @@ export const createTaskQueueSlice: StateCreator<
 
       const elapsed = now - current.startedAt;
       if (elapsed >= current.duration) {
-        // Completed!
+        // Prevent auto-completion of work/study tasks unless solved
+        if ((current.type === 'work' || current.type === 'study') && !get().activeResidencyTask?.riddleSolved) {
+          break;
+        }
         rewardsToClaim.push({
           id: current.id,
           name: current.name,
@@ -100,6 +143,9 @@ export const createTaskQueueSlice: StateCreator<
           legacy: current.rewardLegacy,
           type: current.type,
           actionId: current.actionId,
+          destinationSubPage: current.destinationSubPage,
+          originSubPage: current.originSubPage,
+          transitFare: current.transitFare,
         });
 
         if (current.destinationTownId) {
@@ -123,15 +169,20 @@ export const createTaskQueueSlice: StateCreator<
       set((s) => {
         let nextCoins = s.coins;
         let nextLegacy = s.legacyPoints;
-        let nextSkills = { ...s.skills };
-        let nextCoinHistory = [...s.coinHistory];
-        let nextCompletedActions = [...s.completedActions];
+        const nextSkills = { ...s.skills };
+        const nextCoinHistory = [...s.coinHistory];
+        const nextCompletedActions = [...s.completedActions];
         let nextWalkwayStatus = s.walkwayStatus;
-        let nextEarnedBadges = [...s.earnedBadges];
+        const nextEarnedBadges = [...s.earnedBadges];
+        let nextLocation = s.currentLocation || 'home';
 
         rewardsToClaim.forEach((r) => {
           // Apply premium passport modifier (50% bonus legacy)
           const bonusLegacy = s.premiumPassport ? Math.ceil(r.legacy * 1.5) : r.legacy;
+          
+          if (r.destinationSubPage) {
+            nextLocation = r.destinationSubPage;
+          }
           
           if (r.coins > 0) {
             nextCoins += r.coins;
@@ -184,6 +235,7 @@ export const createTaskQueueSlice: StateCreator<
           completedActions: nextCompletedActions,
           walkwayStatus: nextWalkwayStatus,
           earnedBadges: nextEarnedBadges,
+          currentLocation: nextLocation,
         };
 
         if (finalHomeTown) {
@@ -191,6 +243,18 @@ export const createTaskQueueSlice: StateCreator<
         }
 
         return updates;
+      });
+
+      // Log completed dispatches
+      rewardsToClaim.forEach((r) => {
+        const s = get();
+        const bonusLegacy = s.premiumPassport ? Math.ceil(r.legacy * 1.5) : r.legacy;
+        updateResidentJournal('dispatch', {
+          coins: r.coins,
+          legacy: bonusLegacy,
+          phaseName: `Dispatch: ${r.name}`,
+          description: `Successfully completed the dispatch "${r.name}"`
+        });
       });
 
       const state = get();
@@ -214,5 +278,147 @@ export const createTaskQueueSlice: StateCreator<
     });
     const state = get();
     if (state.user) saveUserState(state.user.uid, state);
+  },
+
+  speedUpTask: (taskId, amountMs) => {
+    set((s) => {
+      const updatedQueue = s.taskQueue.map((t) => {
+        if (t.id === taskId) {
+          const nextStartedAt = t.startedAt !== null ? t.startedAt - amountMs : null;
+          return { ...t, startedAt: nextStartedAt };
+        }
+        return t;
+      });
+      return { taskQueue: updatedQueue };
+    });
+    get().resolveQueue();
+  },
+
+  startResidencyTaskFlow: (taskFlow) => {
+    set({
+      activeResidencyTask: {
+        ...taskFlow,
+        hintPaid: false,
+        riddleSolved: false,
+      },
+      residencyTaskStage: 'pre-start',
+    });
+  },
+
+  payResidencyTaskHint: () => {
+    const s = get();
+    if (!s.activeResidencyTask || s.activeResidencyTask.hintPaid) return;
+    if (s.coins < 5) return;
+    s.spendCoins(5, `Hint purchased for task: ${s.activeResidencyTask.workTask.name}`);
+    set((state) => ({
+      activeResidencyTask: state.activeResidencyTask ? {
+        ...state.activeResidencyTask,
+        hintPaid: true
+      } : null
+    }));
+    const nextState = get();
+    if (nextState.user) saveUserState(nextState.user.uid, nextState);
+  },
+
+  beginResidencyTask: () => {
+    const s = get();
+    const taskFlow = s.activeResidencyTask;
+    if (!taskFlow) return;
+
+    // Apply start deductions (coins only at store level)
+    if (taskFlow.startDeductions) {
+      const { coins: costCoins } = taskFlow.startDeductions;
+      if (costCoins > 0) {
+        s.spendCoins(costCoins, `Funded residency task: ${taskFlow.workTask.name}`);
+      }
+    }
+
+    // Queue travel task if present
+    if (taskFlow.travelTask) {
+      s.addToQueue(taskFlow.travelTask);
+    }
+    // Queue work/study task
+    s.addToQueue(taskFlow.workTask);
+
+    // If there is travel, modal closes while traveling
+    if (taskFlow.travelTask) {
+      set({ residencyTaskStage: null });
+    } else {
+      set({ residencyTaskStage: 'progress' });
+    }
+    const nextState = get();
+    if (nextState.user) saveUserState(nextState.user.uid, nextState);
+  },
+
+  solveResidencyTaskRiddle: () => {
+    const s = get();
+    const taskFlow = s.activeResidencyTask;
+    if (!taskFlow) return;
+
+    // Mark solved in state first
+    set((state) => ({
+      activeResidencyTask: state.activeResidencyTask ? {
+        ...state.activeResidencyTask,
+        riddleSolved: true
+      } : null
+    }));
+
+    // Find active task in queue (which should be the work/study task at index 0)
+    const active = s.taskQueue[0];
+    if (active && (active.type === 'work' || active.type === 'study')) {
+      // Speed up task duration to complete immediately
+      s.speedUpTask(active.id, active.duration);
+    }
+
+    set({ residencyTaskStage: 'completed' });
+    const nextState = get();
+    if (nextState.user) saveUserState(nextState.user.uid, nextState);
+  },
+
+  failResidencyTask: () => {
+    const s = get();
+    const taskFlow = s.activeResidencyTask;
+    if (!taskFlow) return;
+
+    const xpCat = taskFlow.workTask.rewardXPCat;
+    set((state) => {
+      const nextSkills = { ...state.skills };
+      if (xpCat) {
+        nextSkills[xpCat] = Math.max(0, (nextSkills[xpCat] || 0) - 10);
+      }
+      return {
+        coins: Math.max(0, state.coins - 10),
+        skills: nextSkills,
+      };
+    });
+
+    s.addCoins(0, `Penalty: -10 Coins and -10 XP for task failure: ${taskFlow.workTask.name}`); // log transaction
+
+    // Cancel the active task (removes from queue)
+    const active = s.taskQueue[0];
+    if (active && (active.type === 'work' || active.type === 'study')) {
+      s.cancelTask(active.id);
+    }
+
+    set({ residencyTaskStage: 'failed' });
+    const nextState = get();
+    if (nextState.user) saveUserState(nextState.user.uid, nextState);
+  },
+
+  dismissResidencyTaskModal: () => {
+    const s = get();
+    const taskFlow = s.activeResidencyTask;
+    if (taskFlow) {
+      const reward = s.pendingRewards.find(r => r.name === taskFlow.workTask.name);
+      if (reward) {
+        s.dismissReward(reward.id);
+      }
+    }
+    set({
+      activeResidencyTask: null,
+      residencyTaskStage: null,
+    });
+    const nextState = get();
+    if (nextState.user) saveUserState(nextState.user.uid, nextState);
   },
 });

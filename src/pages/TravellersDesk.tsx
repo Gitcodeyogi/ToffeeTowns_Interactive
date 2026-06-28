@@ -1,9 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTTStore } from '../store/useTTStore';
-import type { TownId } from '../store/useTTStore';
-import { GanacheGroveTownData } from '../data/towns/ganache-grove';
 import { CANAL_SERIES, getActiveCanalStep, getCanalProgressPct } from '../data/series/series1_canal';
+import { cozyAudio } from '../utils/audioHelper';
 
 
 
@@ -19,88 +18,34 @@ import { GG_TravellerDeck_NewsPaper } from '../components/desk/GG_TravellerDeck_
 import { GG_TravellerDeck_Stampbook } from '../components/desk/GG_TravellerDeck_Stampbook';
 import { GG_TravellerDeck_Shop } from '../components/desk/GG_TravellerDeck_Shop';
 import { GG_TravellerDeck_Series } from '../components/desk/GG_TravellerDeck_Series';
+import { GG_TravellerDeck_Theatre } from '../components/desk/GG_TravellerDeck_Theatre';
+import { GG_TravellerDeck_Gossip } from '../components/desk/GG_TravellerDeck_Gossip';
+import { GG_TravellerDeck_Politics } from '../components/desk/GG_TravellerDeck_Politics';
+import { GG_TravellerDeck_Economy } from '../components/desk/GG_TravellerDeck_Economy';
+import { GG_TravellerDeck_Transport } from '../components/desk/GG_TravellerDeck_Transport';
+import { GG_TravellerDeck_Health } from '../components/desk/GG_TravellerDeck_Health';
+import { GG_TravellerDeck_MiniGames } from '../components/desk/GG_TravellerDeck_MiniGames';
+import { TownTalkModal } from '../components/TownTalkModal';
+import { 
+  FONT, 
+  type SubPage, 
+  TRANSPORT_SPEEDS, 
+  TOWN_DETAILS, 
+  type TownDetails, 
+  getChocolateDate, 
+  getChocolateDateShort, 
+  getChocolateDateFull 
+} from '../lib/uiConstants';
 
-
-// ── Town Metadata & Addresses ──────────────────────────────
-export interface TownDetails {
-  houseNumber: string;
-  street: string;
-  district: string;
-  county: string;
-  imageLvl1: string;
-  imageLvl2: string;
-  imageLvl3: string;
-  imageLvl4: string;
-}
-
-export const TOWN_DETAILS: Record<TownId, TownDetails> = {
-  'ganache-grove': {
-    houseNumber: 'Traveller Residence',
-    street: 'Mossberry Lane 14',
-    district: 'Ganache Grove',
-    county: 'Cocoawood County',
-    imageLvl1: "/Assets/Ganache Grove/Traveller's Home_GanacheGrove.png",
-    imageLvl2: "/Assets/Ganache Grove/Traveller's Home_GanacheGrove.png",
-    imageLvl3: "/Assets/Ganache Grove/Traveller's Home_GanacheGrove.png",
-    imageLvl4: "/Assets/Ganache Grove/Traveller's Home_GanacheGrove.png",
-  },
-  'toffee-town': {
-    houseNumber: 'Terrace House #11',
-    street: 'Nutty Canopy Walk',
-    district: 'Hazelton Highland Slopes',
-    county: 'Nutwood County',
-    imageLvl1: '/towns/hometown_lvl1.png',
-    imageLvl2: '/towns/hometown_lvl2.png',
-    imageLvl3: '/towns/hometown_lvl3.png',
-    imageLvl4: '/towns/hometown_lvl4.png',
-  },
-  'eclair-square': {
-    houseNumber: 'Cove Cabin #13',
-    street: 'Sticky Surf Beachfront',
-    district: 'Golden Salt Tide Shore',
-    county: 'Honeywood County',
-    imageLvl1: '/towns/hometown_lvl1.png',
-    imageLvl2: '/towns/hometown_lvl2.png',
-    imageLvl3: '/towns/hometown_lvl3.png',
-    imageLvl4: '/towns/hometown_lvl4.png',
-  },
-  'peppermint-peak': {
-    houseNumber: 'Peak Lodge #88',
-    street: 'Frozen Avalanche Ridge',
-    district: 'Mint Glacial Sector',
-    county: 'Creamwood County',
-    imageLvl1: '/towns/hometown_lvl1.png',
-    imageLvl2: '/towns/hometown_lvl2.png',
-    imageLvl3: '/towns/hometown_lvl3.png',
-    imageLvl4: '/towns/hometown_lvl4.png',
-  },
-};
-
-export const FONT = '"Luckiest Guy", cursive';
-
-// ── Chocolate Era Calendar ──────────────────────────────────
-// 4-letter abbreviation of each confection-year month name
-export const CHOC_MONTHS = ['Janu', 'Febr', 'Marc', 'Apri', 'May ', 'June', 'July', 'Augu', 'Sept', 'Octo', 'Nove', 'Dece'];
-export const CHOC_MONTH_FULL = ['Praline','Velv','Moss','Cara','Truf','Gana','Coco','Butt','Cand','Mint','Cinn','Fond'];
-export const CONFECTION_YEAR = 400;
-export const getChocolateDate = (d?: Date): string => {
-  const dt = d || new Date();
-  const day = dt.getDate();
-  const suffix = day === 1 ? 'st' : day === 2 ? 'nd' : day === 3 ? 'rd' : 'th';
-  const month = CHOC_MONTH_FULL[dt.getMonth()];
-  return `${day}${suffix} ${month}, Year ${CONFECTION_YEAR}`;
-};
-export const getChocolateDateShort = (d?: Date): string => {
-  const dt = d || new Date();
-  const day = dt.getDate();
-  const month = CHOC_MONTHS[dt.getMonth()];
-  const hours = dt.getHours().toString().padStart(2, '0');
-  const mins = dt.getMinutes().toString().padStart(2, '0');
-  return `${day} ${month} · ${hours}:${mins}`;
-};
-export const getChocolateDateFull = (isoStr: string): string => {
-  const dt = new Date(isoStr);
-  return getChocolateDateShort(dt);
+export { 
+  FONT, 
+  type SubPage, 
+  TRANSPORT_SPEEDS, 
+  TOWN_DETAILS, 
+  type TownDetails, 
+  getChocolateDate, 
+  getChocolateDateShort, 
+  getChocolateDateFull 
 };
 
 export interface LevelInfo {
@@ -115,13 +60,11 @@ export interface LevelInfo {
 
 export const getPlayerLevelInfo = (totalXP: number): LevelInfo => {
   const thresholds = [
-    { level: 1, name: '🏡 Probationer', needed: 1000 },
-    { level: 2, name: '🌿 Resident', needed: 2000 },
-    { level: 3, name: '🍁 Contributor', needed: 3000 },
-    { level: 4, name: '🌳 Steward', needed: 4000 },
-    { level: 5, name: '🎁 Benefactor', needed: 5000 },
-    { level: 6, name: '⭐ Champion', needed: 6000 },
-    { level: 7, name: '👑 Citizen', needed: Infinity }
+    { level: 1, name: '🌱 Newcomer',    needed: 250 },
+    { level: 2, name: '🏠 Resident',    needed: 250 },
+    { level: 3, name: '🪵 Settler',     needed: 500 },
+    { level: 4, name: '🏘️ Townsman',    needed: 1500 },
+    { level: 5, name: '🏛️ Citizen',     needed: 2500 },
   ];
 
   let accumulated = 0;
@@ -129,121 +72,33 @@ export const getPlayerLevelInfo = (totalXP: number): LevelInfo => {
     const t = thresholds[i];
     const startXP = accumulated;
     const endXP = accumulated + t.needed;
-    if (totalXP < endXP || t.needed === Infinity) {
+    if (totalXP < endXP) {
       const withinLevelXP = totalXP - startXP;
-      const progress = t.needed === Infinity ? 100 : Math.min(100, (withinLevelXP / t.needed) * 100);
+      const progress = Math.min(100, (withinLevelXP / t.needed) * 100);
       return {
         level: t.level,
         title: t.name,
         currentLevelXP: withinLevelXP,
-        nextLevelXPNeeded: t.needed === Infinity ? 0 : t.needed,
+        nextLevelXPNeeded: t.needed,
         totalLevelStartXP: startXP,
-        totalLevelEndXP: endXP === Infinity ? totalXP : endXP,
+        totalLevelEndXP: endXP,
         progressPct: progress
       };
     }
     accumulated = endXP;
   }
   return {
-    level: 7,
-    title: '👑 Citizen',
-    currentLevelXP: 0,
-    nextLevelXPNeeded: 0,
-    totalLevelStartXP: 21000,
-    totalLevelEndXP: 21000,
+    level: 5,
+    title: '🏛️ Citizen',
+    currentLevelXP: 2500,
+    nextLevelXPNeeded: 2500,
+    totalLevelStartXP: 2500,
+    totalLevelEndXP: 5000,
     progressPct: 100
   };
 };
 
-export interface FlashNewsItem {
-  block: number;
-  timeRange: string;
-  news: string;
-  recommendedActions: string[];
-}
 
-export const FLASH_NEWS_DATA: FlashNewsItem[] = [
-  {
-    block: 0,
-    timeRange: "12:00 AM - 3:00 AM",
-    news: "Night Whispers: Eerie blue lights spotted near the old forest belfry. Night guards report a faint chiming sound echoing under the dark canopy.",
-    recommendedActions: [
-      "Investigate Midnight Bell at the Town Places (+25 Explorer XP)",
-      "Study mystical phenomena in the Academy Classroom (+15 XP)",
-      "Rest at your Mossberry Cottage to secure a Daily Stamp (+10 XP)"
-    ]
-  },
-  {
-    block: 1,
-    timeRange: "3:00 AM - 6:00 AM",
-    news: "Pre-Dawn Logistics: Cargo transport wagons spotted at Mossberry Wharf loading extra crates of velvet cocoa cream and raw molasses.",
-    recommendedActions: [
-      "Engage in Express Pod Delivery at the Town Places (+25 Builder XP)",
-      "Manage resources and check inventory at the Workshop",
-      "Sponsor harbor logistics to grow your town standing"
-    ]
-  },
-  {
-    block: 2,
-    timeRange: "6:00 AM - 9:00 AM",
-    news: "Morning Dam Release: The Ganache River water levels rose by 4 inches. Flow rates remain extremely fast, carrying twigs and silt.",
-    recommendedActions: [
-      "Dredge the River Route at the Town Places (+30 Explorer XP)",
-      "Claim your Daily Presence Stamp for a quick wallet boost (+20 Coins)",
-      "Collect wood to prepare for logistics construction"
-    ]
-  },
-  {
-    block: 3,
-    timeRange: "9:00 AM - 12:00 PM",
-    news: "Midday Market Speculation: Syrup brokers forecast a spike in molasses tariffs. Traders gather at Mossberry Wharf to secure supply.",
-    recommendedActions: [
-      "Check the Harbor Commodity rates in the Newspaper Page 4",
-      "Trade wheat and honey resources in the Town Market",
-      "Sponsor town hall council matters for reputation points"
-    ]
-  },
-  {
-    block: 4,
-    timeRange: "12:00 PM - 3:00 PM",
-    news: "Afternoon Heat Peak: Sun-dried cocoa beans on the town hall roof are curing exceptionally well. Bakers report high quality cream buns.",
-    recommendedActions: [
-      "Sponsor Harvest Festival at the Town Places (+30 Builder XP)",
-      "Purchase fresh decorations from the Resident Shop",
-      "Solve the Interactive Riddle on Page 4 of the Newspaper"
-    ]
-  },
-  {
-    block: 5,
-    timeRange: "3:00 PM - 6:00 PM",
-    news: "Pollen Warning: Dr. Cedric Oakenhart cautions residents about high concentrations of glowing forest spores drifting from the groves.",
-    recommendedActions: [
-      "Participate in the Moss Sneezles Campaign (+25 Healer XP)",
-      "Purchase a protective forest transport at the Shop",
-      "Read clinic updates on Page 3 of today's Newspaper"
-    ]
-  },
-  {
-    block: 6,
-    timeRange: "6:00 PM - 9:00 PM",
-    news: "Evening Festivity: Lanterns are lit along the forest pathways. Gnomes assemble in the town square for sugar dust dances.",
-    recommendedActions: [
-      "Support the Forest Walkway Project (+25 Builder XP)",
-      "Discuss environmental protection with Rebels and Bosses clans",
-      "Equip your favorite pet at your cottage registry"
-    ]
-  },
-  {
-    block: 7,
-    timeRange: "9:00 PM - 12:00 AM",
-    news: "Late Night Patrols: Forest wardens caught three hyperactive squirrels stealing heavy hemp ropes near the cargo transport belfry.",
-    recommendedActions: [
-      "Investigate Midnight Bell at the Town Places (+25 Explorer XP)",
-      "Check letters in your mailbox for urgent messages",
-      "Log your citizen record updates before the day ends"
-    ]
-  }
-];
 
 export const getProfileGreeting = (name: string): string => {
   const currentHour = new Date().getHours();
@@ -368,19 +223,17 @@ export const HOME_NAV_ITEMS: { id: SubPage; label: string; icon: string; color: 
   { id: 'classroom', label: 'Academy',     icon: '/Assets/Icons/Icon_2_q1.png', color: '#60a5fa', desc: 'Train your skills' },
   { id: 'shop',      label: 'Market',      icon: '/Assets/Icons/Icon_3_q1.png', color: '#fb923c', desc: 'Buy upgrades' },
   { id: 'newspaper', label: 'NewsPaper',   icon: '/Assets/Icons/Icons_Chocobrook_q1.png', color: '#facc15', desc: 'Read the news' },
-  { id: 'journal',   label: 'Journal',     icon: '/Assets/Icons/Icons_Chocobrook_q2.png', color: '#c084fc', desc: 'Your diary' },
   { id: 'stampbook', label: 'Passport',    icon: '/Assets/Icons/Icons_Chocobrook_q3.png', color: '#f472b6', desc: 'Stamp & travel log' },
   { id: 'workshop',  label: 'Workshop',    icon: '/Assets/Icons/Icon_1_q2.png', color: '#a3e635', desc: 'Craft items' },
   { id: 'dashboard', label: 'Desk Hub',    icon: '/Assets/Icons/Icons_Chocobrook_q4.png', color: '#94a3b8', desc: 'Manage everything' },
 ];
 
 export const getProvincialStanding = (points: number): string => {
-  if (points >= 1000) return 'Legend of Chocobrook';
-  if (points >= 500) return 'Provincial Figure';
-  if (points >= 250) return 'Community Leader';
-  if (points >= 100) return 'Trusted Citizen';
-  if (points >= 50) return 'Resident';
-  return 'New Arrival';
+  if (points >= 1500) return '🏛️ Citizen';
+  if (points >= 750)  return '🏘️ Townsman';
+  if (points >= 300)  return '🪵 Settler';
+  if (points >= 150)  return '🏠 Resident';
+  return '🌱 Newcomer';
 };
 
 export const getBuilderStanding = (xp: number): string => {
@@ -413,14 +266,7 @@ export const getHealerStanding = (xp: number): string => {
   return 'Probationer';
 };
 
-export type SubPage = 'home' | 'dashboard' | 'workshop' | 'classroom' | 'missions' | 'newspaper' | 'stampbook' | 'shop' | 'permits' | 'places' | 'journal' | 'series';
 
-export const TRANSPORT_SPEEDS: Record<string, number> = {
-  'walk': 40,
-  'horse-wagon': 80,
-  'forest-train': 160,
-  'hot-air-balloon': 320,
-};
 
 const COFFER_REWARD_FUNNY_TEXTS = [
   "Huzzah! Your metal coffers clang merrily. Added {coins} coins to your treasury stash!",
@@ -442,24 +288,19 @@ const TravellersDesk: React.FC = () => {
     addCoins,
     legacyPoints: _legacyPoints,
     addLegacy,
-    user,
     travellerName,
     skills,
-    lastFlashNewsShownBlock,
-    setFlashNewsShown,
     lastStampedDate: _lastStampedDate,
 
     // residency states
     equippedPet,
     premiumPassport,
-    activeTransport,
     taskQueue,
     pendingRewards,
     currentEncounter,
-    completedActions,
+    residencyTaskStage,
 
     // residency actions
-    addToQueue,
     cancelTask,
     resolveQueue,
     dismissReward,
@@ -478,12 +319,35 @@ const TravellersDesk: React.FC = () => {
   } = useTTStore();
 
   const [subPage, setSubPage] = useState<SubPage>('home');
+
+  useEffect(() => {
+    const handleNav = (e: Event) => {
+      const customEvent = e as CustomEvent<SubPage>;
+      if (customEvent.detail) {
+        setSubPage(customEvent.detail);
+      }
+    };
+    window.addEventListener('tt_change_subpage', handleNav);
+    return () => window.removeEventListener('tt_change_subpage', handleNav);
+  }, []);
+
+  // Always reset header to visible when navigating to any new main subPage.
+  // Each component's own useEffect controls hiding it when entering inner sub-views.
+  useEffect(() => {
+    localStorage.setItem('tt_active_subpage', subPage);
+    setHeaderHidden(false);
+    return () => {
+      localStorage.removeItem('tt_active_subpage');
+    };
+  }, [subPage, setHeaderHidden]);
+
   const [activePuzzleChore, setActivePuzzleChore] = useState<{ hotspot: HotspotConfig; chore: ChorePuzzle; expiresAt: number } | null>(null);
   const [puzzleAnswer, setPuzzleAnswer] = useState<string>('');
   const [showPuzzleHint, setShowPuzzleHint] = useState<boolean>(false);
   const [puzzleError, setPuzzleError] = useState<string | null>(null);
   const [puzzleSecondsLeft, setPuzzleSecondsLeft] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(() => Date.now());
+  const [answerRevealed, setAnswerRevealed] = useState<boolean>(false);
 
   useEffect(() => {
     if (!activePuzzleChore) return;
@@ -500,6 +364,7 @@ const TravellersDesk: React.FC = () => {
       setPuzzleAnswer('');
       setShowPuzzleHint(false);
       setPuzzleError(null);
+      setAnswerRevealed(false);
     }
   }, [activePuzzleChore]);
 
@@ -538,6 +403,7 @@ const TravellersDesk: React.FC = () => {
   const [consequenceModal, setConsequenceModal] = useState<any>(null);
   const [navHistory, setNavHistory] = useState<SubPage[]>([]);
   const [showDossierPlaycard, setShowDossierPlaycard] = useState(false);
+  const [skipTransitChecked, setSkipTransitChecked] = useState<boolean>(() => localStorage.getItem('toffeetown_skip_transit_receipt') === 'true');
 
   // ── Materials Shop & Mini-game States ──
   const [materialsPurchased, setMaterialsPurchased] = useState<boolean>(false);
@@ -823,10 +689,7 @@ Calculate: 900 / 45`,
 
   // Simultaneous events choices records (remembers what user voted)
   const [votedEvents, setVotedEvents] = useState<Record<string, string>>({});
-
-  const [showTownHallModal, setShowTownHallModal] = useState(false);
-
-  const [showFlashNewsModal, setShowFlashNewsModal] = useState(false);
+  const [townTalkChar, setTownTalkChar] = useState<string | null>(null);
   const [_greeting, setGreeting] = useState('');
 
   useEffect(() => {
@@ -845,15 +708,7 @@ Calculate: 900 / 45`,
     relocateTasks.forEach(t => state.cancelTask(t.id));
   }, []);
 
-  useEffect(() => {
-    const currentHour = new Date().getHours();
-    const currentBlock = Math.floor(currentHour / 3);
-    if (lastFlashNewsShownBlock !== currentBlock) {
-      const newsItem = FLASH_NEWS_DATA.find(x => x.block === currentBlock) || FLASH_NEWS_DATA[0];
-      setFlashNewsShown(currentBlock, newsItem.news);
-      setShowFlashNewsModal(true);
-    }
-  }, [lastFlashNewsShownBlock, setFlashNewsShown]);
+  // Townsfolk Calling is now triggered from WelcomeShow entrance, not auto on mount
 
   const totalXP = Object.values(skills || {}).reduce((a, b) => a + b, 0);
   getPlayerLevelInfo(totalXP); // keep side-effect-free reference to avoid tree-shake
@@ -882,27 +737,12 @@ Calculate: 900 / 45`,
 
 
 
-  const userUid = user?.uid || 'guest-traveller';
-  
-  // ── Deterministic Daily Seed Engine ────────────────────────
-  const seedRandom = (str: string) => {
-    let h = 1779033703 ^ str.length;
-    for (let i = 0; i < str.length; i++) {
-      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
-      h = (h << 13) | (h >>> 19);
-    }
-    return () => {
-      h = Math.imul(h ^ (h >>> 16), 2246822507);
-      h = Math.imul(h ^ (h >>> 13), 3266489909);
-      return ((h ^= h >>> 16) >>> 0) / 4294967296;
-    };
-  };
 
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const rand = seedRandom(`${userUid}-${todayStr}`);
 
-  const campaignPool = GanacheGroveTownData.problems.filter(p => ['health', 'market', 'trade'].includes(p.category));
-  const selectedCamp = campaignPool[Math.floor(rand() * campaignPool.length)] || GanacheGroveTownData.problems[2];
+
+
+
+
 
 
 
@@ -921,83 +761,40 @@ Calculate: 900 / 45`,
     }
   };
 
-  const triggerFeedback = (msg: string) => {
+  const triggerFeedback = useCallback((msg: string) => {
     setActionFeedback(msg);
     setTimeout(() => setActionFeedback(null), 3000);
-  };
+  }, []);
 
-  const handleExecuteMatter = (id: string) => {
-    if (completedActions.includes(id)) {
-      triggerFeedback('✅ Action already completed today!');
-      return;
-    }
-
-    const act = GanacheGroveTownData.problems.find(a => a.id === id);
-    if (!act) {
-      triggerFeedback('❌ Action not found!');
-      return;
-    }
-
-    if (!act.costCheck(inventory, coins)) {
-      triggerFeedback(`❌ Insufficient resources! ${act.requirementsSummary}`);
-      return;
-    }
-
-    const res = act.execute(inventory, coins);
-
-    if (res.deductions.coins > 0) {
-      spendCoins(res.deductions.coins, `Funded Action: ${act.title}`);
-    }
-
-    if (Object.keys(res.deductions.inventory).length > 0) {
-      setInventory(prev => {
-        const next = { ...prev };
-        for (const [item, qty] of Object.entries(res.deductions.inventory)) {
-          next[item] = Math.max(0, (next[item] || 0) - qty);
+  // Auto-dismiss and credit completed chores/travels immediately if skipped
+  useEffect(() => {
+    if (pendingRewards.length > 0) {
+      const activeReward = pendingRewards[0];
+      if (activeReward.type === 'travel' && skipTransitChecked) {
+        try {
+          cozyAudio.playTradeEconomySound();
+        } catch (e) {
+          console.warn(e);
         }
-        return next;
-      });
+        dismissReward(activeReward.id);
+        if (activeReward.destinationSubPage) {
+          setSubPage(activeReward.destinationSubPage as SubPage);
+        }
+        triggerFeedback(`✓ Completed travel to ${activeReward.destinationSubPage}`);
+      }
     }
+  }, [pendingRewards, dismissReward, triggerFeedback, setSubPage, skipTransitChecked]);
 
-    const speedMult = TRANSPORT_SPEEDS[activeTransport] || 40;
-    const travelDist = 1200;
-    const travelDuration = Math.max(2000, Math.round((travelDist / speedMult) * 1000));
-    const workDuration = 10000;
 
-    addToQueue({
-      name: `Travel to ${act.title} Site`,
-      type: 'travel',
-      duration: travelDuration,
-      rewardCoins: 0,
-      rewardXP: 0,
-      rewardXPCat: '',
-      rewardLegacy: 0,
-      icon: '🚶',
-      targetText: 'Maintenance Site (1200m)',
-    });
 
-    addToQueue({
-      name: act.title,
-      type: 'work',
-      duration: workDuration,
-      rewardCoins: 35,
-      rewardXP: res.xp.amount,
-      rewardXPCat: res.xp.skill,
-      rewardLegacy: res.legacy,
-      icon: '🛠️',
-      targetText: act.title,
-      actionId: id,
-    });
 
-    triggerFeedback(`📦 Task initiated! Funded resources and added 2 transit tasks to your Residency Queue.`);
-  };
 
   const handleReadDossier = () => {
     if (dossierRead) return;
     setDossierRead(true);
-    addLegacy(30);
-    addCoins(30, 'Daily Briefing Reading');
-    triggerFeedback('📋 Dossier Acknowledged! +30 Coins & +30 Legacy.');
+    addLegacy(5);
+    addCoins(3, 'Daily Briefing Reading');
+    triggerFeedback('📋 Dossier Acknowledged! +3 Coins & +5 Legacy.');
   };
 
   const handleSkipTransit = (taskId: string) => {
@@ -1020,124 +817,165 @@ Calculate: 900 / 45`,
     }
   };
 
+  const openRoadmap = (npcData?: { name: string; roleId: string; milestones: string[]; isNPC: boolean }) => {
+    const state = useTTStore.getState();
+    if (npcData) {
+      state.setRoadmapNPCData(npcData);
+    } else {
+      state.setRoadmapNPCData(null);
+    }
+    state.setShowRoadmapModal(true);
+  };
+
   return (
     <div className="h-full w-full flex items-center justify-center p-4 select-none">
       {activePuzzleChore ? (
         <div className="fixed inset-0 z-[300] bg-black/60 flex items-center justify-center p-4 select-none animate-fade-in">
-          <div className="w-[85vw] max-w-3xl rounded-[2.5rem] border-2 border-white/35 bg-black/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.25),_0_40px_120px_rgba(0,0,0,0.65)] p-8 flex flex-col gap-5 text-left font-body overflow-hidden text-pink-100 backdrop-blur-md relative">
+          <div className="w-[70vw] h-[70vh] rounded-[2.5rem] border-2 border-white/35 bg-black/80 shadow-[inset_0_1px_2px_rgba(255,255,255,0.25),_0_40px_120px_rgba(0,0,0,0.7)] p-8 flex flex-col justify-between text-left font-body overflow-hidden text-pink-100 relative">
             {/* Top glow line */}
             <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-pink-400 to-transparent" />
 
             {/* Header */}
             <div className="flex justify-between items-start border-b border-pink-950 pb-3 shrink-0">
               <div>
-                <span className="text-[8px] font-black uppercase tracking-[0.25em] text-pink-300">
+                <span className="text-[12px] font-black uppercase tracking-[0.25em] text-pink-300">
                   Cottage Chore Activity HUD
                 </span>
-                <h2 className="text-lg font-brand text-yellow-200 mt-0.5 flex items-center gap-2 uppercase">
+                <h2 className="text-xl font-brand text-yellow-200 mt-1 flex items-center gap-2 uppercase">
                   <span>{activePuzzleChore.hotspot.emoji}</span> {activePuzzleChore.chore.title}
                 </h2>
               </div>
               <button
                 onClick={() => setActivePuzzleChore(null)}
-                className="w-8 h-8 hover:scale-110 active:scale-95 transition-all flex items-center justify-center bg-pink-950/80 border border-pink-500/30 text-pink-300 font-bold rounded-full text-xs"
+                className="w-9 h-9 hover:scale-110 active:scale-95 transition-all flex items-center justify-center bg-pink-950/80 border border-pink-500/30 text-pink-300 font-bold rounded-full text-base cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            {/* Timer & XP Rewards row */}
-            <div className="flex justify-between items-center bg-[#4c0c1b]/60 border border-pink-900/40 px-3.5 py-2 rounded-2xl text-[11px] shrink-0 font-sans font-medium">
-              <span className="text-cyan-300 flex items-center gap-1">
-                <span>🏆</span> +{activePuzzleChore.chore.xpReward} {activePuzzleChore.chore.xpCategory.toUpperCase()} XP
-              </span>
-              <span className="text-yellow-400 flex items-center gap-1 font-mono">
-                <span>⏰</span> Expires in: {formatTimer(puzzleSecondsLeft)}
-              </span>
-            </div>
+            {/* Main scrollable body container to prevent overflow in 70vh */}
+            <div className="flex-grow overflow-y-auto custom-scrollbar my-4 pr-2 space-y-5">
+              {/* Timer & XP Rewards row */}
+              <div className="flex justify-between items-center bg-[#4c0c1b]/60 border border-pink-900/40 px-4 py-2.5 rounded-2xl text-[15px] font-sans font-black tracking-wider">
+                <span className="text-cyan-300 flex items-center gap-1.5">
+                  <span>🏆</span> +{activePuzzleChore.chore.xpReward} {activePuzzleChore.chore.xpCategory.toUpperCase()} XP
+                </span>
+                <span className="text-yellow-400 flex items-center gap-1.5 font-mono font-bold">
+                  <span>⏰</span> Expires in: {formatTimer(puzzleSecondsLeft)}
+                </span>
+              </div>
 
-            {/* Chore Description */}
-            <div className="space-y-1">
-              <span className="text-[8px] font-bold text-pink-400 uppercase tracking-widest block">Chore Objective</span>
-              <p className="text-xs text-pink-200 leading-relaxed font-sans">{activePuzzleChore.chore.chore}</p>
-            </div>
+              {/* Chore Description */}
+              <div className="space-y-1">
+                <span className="text-[11px] font-bold text-pink-400 uppercase tracking-widest block">Chore Objective</span>
+                <p className="text-[15px] text-pink-200 leading-relaxed font-sans">{activePuzzleChore.chore.chore}</p>
+              </div>
 
-            {/* Question */}
-            <div className="bg-black/40 border border-pink-950 p-4 rounded-2xl space-y-3 flex-grow overflow-y-auto custom-scrollbar">
-              <span className="text-[8px] font-bold text-yellow-400 uppercase tracking-widest block">Puzzle Question</span>
-              <p className="text-xs text-white font-medium leading-relaxed font-sans">{activePuzzleChore.chore.question}</p>
+              {/* Question */}
+              <div className="bg-black/45 border border-pink-950/60 p-5 rounded-2xl space-y-4">
+                <span className="text-[11px] font-bold text-yellow-400 uppercase tracking-widest block">Puzzle Question</span>
+                <p className="text-[15px] text-white font-medium leading-relaxed font-sans">{activePuzzleChore.chore.question}</p>
 
-              {/* Input Fields / Buttons based on Type */}
-              <div className="pt-2">
-                {activePuzzleChore.chore.type === 'calculation' ? (
-                  <div className="flex flex-col gap-1.5 font-sans">
-                    <label className="text-[9px] text-pink-400 uppercase font-black tracking-wider">Your Numerical Answer</label>
-                    <input
-                      type="text"
-                      placeholder="Enter numbers (e.g. 60 or 1.7)..."
-                      value={puzzleAnswer}
-                      onChange={(e) => {
-                        setPuzzleAnswer(e.target.value);
-                        setPuzzleError(null);
-                      }}
-                      className="px-3 py-2 bg-black/60 border border-pink-900/50 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500 w-full font-mono placeholder-pink-850"
-                    />
+                {/* Input Fields / Buttons based on Type */}
+                <div className="pt-2">
+                  {activePuzzleChore.chore.type === 'calculation' ? (
+                    <div className="flex flex-col gap-2 font-sans">
+                      <label className="text-[11px] text-pink-400 uppercase font-black tracking-wider">Your Numerical Answer</label>
+                      <input
+                        type="text"
+                        placeholder="Enter numbers (e.g. 60 or 1.7)..."
+                        value={puzzleAnswer}
+                        onChange={(e) => {
+                          setPuzzleAnswer(e.target.value);
+                          setPuzzleError(null);
+                        }}
+                        disabled={answerRevealed}
+                        className="px-4 py-3 bg-black/60 border border-pink-900/50 rounded-xl text-[15px] text-white focus:outline-none focus:border-pink-500 w-full font-mono placeholder-pink-850"
+                      />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-sans">
+                      {activePuzzleChore.chore.options?.map((opt) => {
+                        const isSelected = puzzleAnswer === opt;
+                        return (
+                          <button
+                            key={opt}
+                            disabled={answerRevealed}
+                            onClick={() => {
+                              setPuzzleAnswer(opt);
+                              setPuzzleError(null);
+                            }}
+                            className={`px-4 py-3 rounded-xl border text-[15px] text-left font-semibold transition-all duration-200 cursor-pointer ${
+                              isSelected
+                                ? 'bg-gradient-to-r from-pink-500 to-rose-600 border-white text-white shadow-[0_0_15px_rgba(236,72,153,0.5)] scale-[1.02]'
+                                : 'bg-[#1b050a] border-pink-950 text-pink-200/80 hover:bg-[#250810] hover:text-white hover:border-pink-900/55'
+                            }`}
+                          >
+                            {opt}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Hint / Reveal Answer Row */}
+              <div className="flex flex-wrap items-center gap-3 font-sans pt-1">
+                {showPuzzleHint ? (
+                  <div className="w-full p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-[15px] text-amber-250 leading-relaxed animate-fade-in">
+                    <span className="font-bold block text-[11px] uppercase tracking-wider text-amber-400 mb-1">💡 Hint Guide</span>
+                    {activePuzzleChore.chore.hint}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-sans">
-                    {activePuzzleChore.chore.options?.map((opt) => {
-                      const isSelected = puzzleAnswer === opt;
-                      return (
-                        <button
-                          key={opt}
-                          onClick={() => {
-                            setPuzzleAnswer(opt);
-                            setPuzzleError(null);
-                          }}
-                          className={`px-3 py-2.5 rounded-xl border text-xs text-left font-semibold transition-all duration-200 ${
-                            isSelected
-                              ? 'bg-gradient-to-r from-pink-500 to-rose-600 border-white text-white shadow-[0_0_15px_rgba(236,72,153,0.5)] scale-[1.02]'
-                              : 'bg-[#1b050a] border-pink-950 text-pink-200/80 hover:bg-[#250810] hover:text-white hover:border-pink-900/55'
-                          }`}
-                        >
-                          {opt}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <button
+                    onClick={() => {
+                      if (spendCoins(3, 'Chore Hint Unlocked')) {
+                        setShowPuzzleHint(true);
+                        triggerFeedback('💡 Hint unlocked! Spent 3 Coins.');
+                      } else {
+                        setPuzzleError('❌ Not enough coins! Need 3 coins for a hint.');
+                        triggerFeedback('❌ Not enough coins! Need 3 coins for a hint.');
+                      }
+                    }}
+                    className="text-[13px] text-amber-300 hover:text-amber-250 font-black flex items-center gap-1.5 transition px-3.5 py-2 bg-amber-950/40 border border-amber-900/30 rounded-xl cursor-pointer"
+                  >
+                    <span>💡</span> Unlock Hint (-3 🪙)
+                  </button>
+                )}
+
+                {!answerRevealed && (
+                  <button
+                    onClick={() => {
+                      if (spendCoins(5, 'Chore Answer Revealed')) {
+                        setPuzzleAnswer(activePuzzleChore.chore.answer);
+                        setAnswerRevealed(true);
+                        triggerFeedback('🔑 Answer revealed and filled! Spent 5 Coins.');
+                      } else {
+                        setPuzzleError('❌ Not enough coins! Need 5 coins to reveal answer.');
+                        triggerFeedback('❌ Not enough coins! Need 5 coins to reveal answer.');
+                      }
+                    }}
+                    className="text-[13px] text-cyan-300 hover:text-cyan-250 font-black flex items-center gap-1.5 transition px-3.5 py-2 bg-cyan-950/40 border border-cyan-900/30 rounded-xl cursor-pointer"
+                  >
+                    <span>🔑</span> Reveal Answer (-5 🪙)
+                  </button>
                 )}
               </div>
-            </div>
 
-            {/* Hint Section */}
-            <div className="shrink-0 font-sans">
-              {showPuzzleHint ? (
-                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-[11px] text-amber-200 leading-relaxed animate-fade-in">
-                  <span className="font-bold block text-[9px] uppercase tracking-wider text-amber-400 mb-0.5">💡 Hint Guide</span>
-                  {activePuzzleChore.chore.hint}
+              {/* Error Callout */}
+              {puzzleError && (
+                <div className="text-[15px] text-rose-300 font-bold bg-rose-950/40 border border-rose-900/30 px-4 py-2.5 rounded-xl shrink-0 font-sans animate-shake">
+                  {puzzleError}
                 </div>
-              ) : (
-                <button
-                  onClick={() => setShowPuzzleHint(true)}
-                  className="text-[10px] text-amber-300 hover:text-amber-200 font-bold flex items-center gap-1 transition px-2 py-1 bg-amber-950/40 border border-amber-900/30 rounded-lg"
-                >
-                  <span>💡</span> Need a Hint?
-                </button>
               )}
             </div>
 
-            {/* Error Callout */}
-            {puzzleError && (
-              <div className="text-[10px] text-rose-300 font-bold bg-rose-950/40 border border-rose-900/30 px-3.5 py-1.5 rounded-xl shrink-0 font-sans animate-shake">
-                {puzzleError}
-              </div>
-            )}
-
             {/* Footer */}
-            <div className="flex justify-between items-center gap-3 border-t border-pink-950 pt-3.5 shrink-0">
+            <div className="flex justify-between items-center gap-4 border-t border-pink-950 pt-4 shrink-0">
               <button
                 onClick={() => setActivePuzzleChore(null)}
-                className="px-4 py-2 bg-pink-950 hover:bg-pink-900 text-pink-200 border border-pink-900/50 text-[10px] font-brand uppercase tracking-wider rounded-xl transition"
+                className="px-5 py-3 bg-pink-950 hover:bg-pink-900 text-pink-200 border border-pink-900/50 text-[15px] font-brand uppercase tracking-wider rounded-xl transition cursor-pointer"
                 style={{ fontFamily: '"Josefin Sans", sans-serif' }}
               >
                 Close & Return
@@ -1145,7 +983,7 @@ Calculate: 900 / 45`,
               <button
                 disabled={!puzzleAnswer.trim()}
                 onClick={handleVerifyPuzzle}
-                className={`px-5 py-2 text-black text-[10px] font-brand uppercase tracking-widest font-black rounded-xl transition shadow-md ${
+                className={`px-6 py-3 text-black text-[15px] font-brand uppercase tracking-widest font-black rounded-xl transition shadow-md cursor-pointer ${
                   puzzleAnswer.trim()
                     ? 'bg-gradient-to-r from-yellow-300 to-amber-500 hover:scale-103 active:scale-97'
                     : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
@@ -1161,12 +999,12 @@ Calculate: 900 / 45`,
         <div 
           className={`rounded-[2.5rem] border-2 border-white/35 bg-black/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.25),_0_40px_120px_rgba(0,0,0,0.65)] pt-4 px-6 pb-4 flex flex-col justify-between overflow-hidden relative transition-all duration-700 ease-in-out ${
             headerHidden 
-              ? 'w-[92vw] max-w-[92vw] h-[94vh] max-h-[94vh] -translate-y-2' 
-              : 'w-[92vw] max-w-[92vw] h-[92vh] max-h-[92vh]'
+              ? 'w-[92vw] max-w-[92vw] h-[99.5vh] max-h-[99.5vh]' 
+              : 'w-[92vw] max-w-[92vw] h-[94vh] max-h-[94vh]'
           }`}
         >
         {coins < 0 && (
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-md z-[260] flex flex-col items-center justify-center p-8 text-center select-none">
+          <div className="absolute inset-0 bg-black/60 z-[260] flex flex-col items-center justify-center p-8 text-center select-none">
             <div className="max-w-md w-full bg-stone-900 border-2 border-red-500/40 rounded-[2rem] p-8 shadow-2xl flex flex-col items-center gap-6 animate-fade-in">
               <span className="text-6xl animate-bounce">🚫</span>
               <div>
@@ -1206,12 +1044,11 @@ Calculate: 900 / 45`,
             inventory={inventory}
             setInventory={setInventory}
             setShowDossierPlaycard={setShowDossierPlaycard}
-            setShowTownHallModal={setShowTownHallModal}
             dossierRead={dossierRead}
             triggerFeedback={triggerFeedback}
-            setShowFlashNewsModal={setShowFlashNewsModal}
             activePuzzleChore={activePuzzleChore}
             setActivePuzzleChore={setActivePuzzleChore}
+            openTownTalk={(charId) => setTownTalkChar(charId)}
           />
         )}
 
@@ -1221,6 +1058,7 @@ Calculate: 900 / 45`,
             setSubPage={setSubPage}
             pushPage={pushPage}
             popPage={popPage}
+            openRoadmap={openRoadmap}
           />
         )}
 
@@ -1341,7 +1179,7 @@ Calculate: 900 / 45`,
                     <div className="relative shrink-0 w-px bg-white/10 z-[270] flex items-center justify-center">
                       <button
                         onClick={() => setShowCanalAssignment(true)}
-                        className="absolute w-8 h-40 rounded-full border border-amber-500/40 bg-gradient-to-b from-[#1c1917]/95 to-[#0c0a09]/95 flex flex-col items-center justify-between py-4 shadow-[0_4px_25px_rgba(245,158,11,0.35)] cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 z-50 transform -translate-x-1/2 backdrop-blur-sm"
+                        className="absolute w-8 h-40 rounded-full border border-amber-500/40 bg-gradient-to-b from-[#1c1917]/95 to-[#0c0a09]/95 flex flex-col items-center justify-between py-4 shadow-[0_4px_25px_rgba(245,158,11,0.35)] cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 z-50 transform -translate-x-1/2"
                         title="Open Assignment Workspace"
                       >
                         <span className="text-[10px] text-amber-400 animate-pulse">⚡</span>
@@ -2744,68 +2582,69 @@ Calculate: 900 / 45`,
           />
         )}
 
+        {subPage === 'theatre' && (
+          <GG_TravellerDeck_Theatre
+            setSubPage={setSubPage}
+            popPage={popPage}
+            completedSeriesSteps={completedSeriesSteps}
+            triggerFeedback={triggerFeedback}
+          />
+        )}
+
+        {subPage === 'gossip' && (
+          <GG_TravellerDeck_Gossip
+            setSubPage={setSubPage}
+            popPage={popPage}
+            triggerFeedback={triggerFeedback}
+          />
+        )}
+
+        {subPage === 'politics' && (
+          <GG_TravellerDeck_Politics
+            setSubPage={setSubPage}
+            popPage={popPage}
+            triggerFeedback={triggerFeedback}
+          />
+        )}
+
+        {subPage === 'economy' && (
+          <GG_TravellerDeck_Economy
+            setSubPage={setSubPage}
+            popPage={popPage}
+            triggerFeedback={triggerFeedback}
+          />
+        )}
+
+        {subPage === 'transport' && (
+          <GG_TravellerDeck_Transport
+            setSubPage={setSubPage}
+            popPage={popPage}
+            triggerFeedback={triggerFeedback}
+          />
+        )}
+
+        {subPage === 'health' && (
+          <GG_TravellerDeck_Health
+            setSubPage={setSubPage}
+            popPage={popPage}
+            triggerFeedback={triggerFeedback}
+          />
+        )}
+
+        {subPage === 'mini-games' && (
+          <GG_TravellerDeck_MiniGames
+            setSubPage={setSubPage}
+            popPage={popPage}
+            triggerFeedback={triggerFeedback}
+          />
+        )}
+
 
 
         {/* Gazette Modal — placeholder for future Gazette popup */}
         {/* Gazette Modal */}
 
-        {/* Town Hall Modal */}
-        {showTownHallModal && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[210] p-4 select-none">
-            <div className="relative bg-neutral-900 border-2 border-white/25 rounded-[2rem] p-7 h-[92vh] w-[92vw] max-h-[92vh] max-w-[92vw] shadow-2xl flex flex-col gap-5 text-left font-body overflow-y-auto custom-scrollbar">
-              
-              <button
-                onClick={() => setShowTownHallModal(false)}
-                className="absolute top-4 right-4 w-10 h-10 hover:scale-110 active:scale-95 transition-all flex items-center justify-center filter drop-shadow-md"
-              >
-                <img src="/Assets/Icons/Icons_Chocobrook_q2.png" alt="Close" className="w-full h-full object-contain" />
-              </button>
 
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-400">Town Hall Council</span>
-                <h2 className="text-2xl font-brand text-white uppercase mt-0.5" style={{ fontFamily: FONT }}>
-                  County Campaigns
-                </h2>
-                <p className="text-xs text-white/50">Manage local health & merchant projects to earn citizen reputation.</p>
-              </div>
-
-              <div className="space-y-4">
-                {/* Dynamic Campaign */}
-                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-bold text-white text-sm">{selectedCamp.title}</h4>
-                      <p className="text-[10px] text-white/40 uppercase tracking-widest font-mono">{selectedCamp.category} Campaign</p>
-                    </div>
-                    {completedActions.includes(selectedCamp.id) ? (
-                      <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold rounded-lg uppercase font-sans">Completed</span>
-                    ) : (
-                      <span className="text-[9px] text-amber-400 uppercase tracking-wider font-semibold font-sans">Active Campaign</span>
-                    )}
-                  </div>
-                  <p className="text-xs text-white/70 leading-normal font-sans">
-                    {selectedCamp.description} ({selectedCamp.requirementsSummary})
-                  </p>
-                  {!completedActions.includes(selectedCamp.id) ? (
-                    <button
-                      onClick={() => handleExecuteMatter(selectedCamp.id)}
-                      className="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-brand text-[10px] uppercase tracking-wider rounded-xl transition"
-                      style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-                    >
-                      Support Campaign 🎟️
-                    </button>
-                  ) : (
-                    <div className="text-center text-[10px] text-white/40 italic font-sans">This campaign is completed for today. The town expresses its thanks!</div>
-                  )}
-                </div>
-              </div>
-
-              <div className="text-[10px] text-white/40 text-center font-sans border-t border-white/5 pt-3">
-                Sir Goldwhistle handles all logistics. Gained standing is recorded in your passport.
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Consequence Modal */}
         {consequenceModal && (
@@ -2850,58 +2689,96 @@ Calculate: 900 / 45`,
           </div>
         )}
         
-        {/* Floating Transit & Queue Widget */}
+        {/* Floating Transit & Queue Widget (Persistent Bottom-Right with details above progress bar) */}
         {taskQueue.length > 0 && (
-          <div className="absolute bottom-6 right-6 z-[150] w-80 bg-stone-900 border-2 border-amber-500/40 rounded-3xl p-4 shadow-2xl animate-slide-up select-none">
+          <div className="fixed bottom-6 right-6 z-[250] w-80 bg-stone-900 border-2 border-amber-500/40 rounded-3xl p-4 shadow-2xl animate-slide-up select-none text-white">
             {(() => {
               const active = taskQueue[0];
               const elapsed = active.startedAt !== null ? currentTime - active.startedAt : 0;
               const pct = Math.min(100, Math.max(0, Math.round((elapsed / active.duration) * 100)));
               const secondsLeft = Math.max(0, Math.ceil((active.duration - elapsed) / 1000));
-              const petEmoji = equippedPet ? (equippedPet === 'squirrel' ? '🐿️' : equippedPet === 'bunny' ? '🐇' : '🦉') : '🚶';
-              const targetIcon = active.icon || '📝';
+              const isTravel = active.type === 'travel';
+              const isBalloon = active.destinationSubPage === 'politics' || active.destinationSubPage === 'theatre' || active.originSubPage === 'politics' || active.originSubPage === 'theatre';
+              const trainNodes = ['home', 'health', 'newspaper', 'classroom', 'workshop', 'transport'];
+              const isTrain = isTravel && active.originSubPage && active.destinationSubPage && trainNodes.includes(active.originSubPage) && trainNodes.includes(active.destinationSubPage);
               
+              const petEmoji = isTrain ? '🚂🚃🚃' : isBalloon ? '🎈' : active.type === 'travel' ? '🐎' : (equippedPet ? (equippedPet === 'squirrel' ? '🐿️' : equippedPet === 'bunny' ? '🐇' : '🦉') : '🚶');
+              const targetIcon = isTrain ? '🚉' : isBalloon ? '☁️' : active.type === 'travel' ? '🛖' : (active.icon || '📝');
+              const match = active.targetText?.match(/\((\d+)m\)/) || active.targetText?.match(/Wagon: (\d+)m/);
+              const totalMeters = match ? parseInt(match[1], 10) : 1000;
+              const metersRemaining = Math.max(0, Math.round(totalMeters * (1 - pct / 100)));
+
               return (
-                <div className="space-y-3 font-sans text-left">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
+                <div className="space-y-3 font-sans text-left text-white">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-1.5 text-white">
                     <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 animate-pulse">
-                      {active.type === 'travel' ? 'In Transit' : active.type === 'study' ? 'Studying' : 'Working'}
+                      {isTrain ? 'Monorail Transit' : isBalloon ? 'Air Balloon Flight' : active.type === 'travel' ? 'Horse Wagon Transit' : 'Working'}
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-white/40 font-mono">{secondsLeft}s remaining</span>
-                      <button
-                        onClick={() => cancelTask(active.id)}
-                        className="w-5.5 h-5.5 hover:scale-110 active:scale-95 transition-all flex items-center justify-center filter drop-shadow-md"
+                      <button 
+                        onClick={() => cancelTask(active.id)} 
+                        className="w-5 h-5 bg-rose-500/20 hover:bg-rose-500/40 border border-rose-500/40 text-rose-400 rounded-full flex items-center justify-center text-[10px] font-black transition-all hover:scale-110 active:scale-95 cursor-pointer font-sans"
                         title="Force Cancel Current Task"
                       >
-                        <img src="/Assets/Icons/Icons_Chocobrook_q2.png" alt="Cancel" className="w-full h-full object-contain" />
+                        ✕
                       </button>
                     </div>
                   </div>
-                  
-                  <div className="text-xs text-white font-bold flex items-center justify-between">
-                    <span>{active.name}</span>
-                    <span className="text-white/40 text-[9px]">{active.targetText}</span>
-                  </div>
 
-                  {/* Progress bar track */}
+                  {isTravel ? (
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-3 space-y-2 text-xs">
+                      <div className="flex justify-between items-center">
+                        <span className="text-white/40">Transport:</span>
+                        <span className="text-white font-bold">{isTrain ? '🚂 Monorail Train' : isBalloon ? '🎈 Air Balloon' : '🐎 Horse Wagon'}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-white/40">Destination:</span>
+                        <span className="text-amber-400 font-bold">{active.name}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-white/40">Distance:</span>
+                        <span className="text-white font-mono font-bold">{metersRemaining}m / {totalMeters}m</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="text-xs text-white font-bold flex justify-between">
+                        <span>{active.name}</span>
+                        <span className="text-white/40 text-[9px]">{active.targetText}</span>
+                      </div>
+                      {!residencyTaskStage && (
+                        <button
+                          onClick={() => {
+                            useTTStore.getState().startResidencyTaskFlow({
+                              workTask: active,
+                            });
+                            useTTStore.setState({ residencyTaskStage: 'progress' });
+                          }}
+                          className="w-full py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 active:scale-98 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition shadow-md cursor-pointer text-center"
+                          style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+                        >
+                          📋 Open Task Register
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Progress bar track (no animate-bounce on vehicle container) */}
                   <div className="relative h-6 bg-white/5 border border-white/10 rounded-full overflow-hidden flex items-center px-1 shadow-[inset_0_1px_4px_rgba(0,0,0,0.5)]">
-                    <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-500/25 to-amber-500/50 transition-all duration-300" style={{ width: `${pct}%` }}></div>
-                    <div className="absolute transition-all duration-300 ease-out" style={{ left: `calc(${pct}% - 12px)`, transitionDuration: '1s' }}>
-                      <span className="text-base animate-bounce block">{petEmoji}</span>
+                    <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-500/25 to-amber-500/50" style={{ width: `${pct}%` }} />
+                    <div className="absolute transition-all ease-linear" style={{ left: `calc(${pct}% - 14px)`, transitionDuration: '1000ms' }}>
+                      <span className="text-base block">{petEmoji}</span>
                     </div>
-                    <div className="absolute right-2 text-sm">
-                      {targetIcon}
-                    </div>
+                    <div className="absolute right-2 text-sm">{targetIcon}</div>
                   </div>
 
                   {active.type === 'travel' && (
-                    <button
-                      onClick={() => handleSkipTransit(active.id)}
-                      className="w-full mt-2 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:scale-102 text-black text-[10px] font-black uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-1.5 shadow-md"
-                      style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+                    <button 
+                      onClick={() => handleSkipTransit(active.id)} 
+                      className="w-full py-2 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 text-black text-[11px] font-black uppercase rounded-xl shadow-md transition hover:scale-[1.02] active:scale-98"
                     >
-                      ☕ Instant Travel (-15 🪙)
+                      ⚡ Fasten Travel (-15 🪙)
                     </button>
                   )}
 
@@ -2912,7 +2789,16 @@ Calculate: 900 / 45`,
                       {taskQueue.slice(1).map((t, idx) => (
                         <div key={idx} className="flex justify-between items-center text-[10px] text-white/60">
                           <span className="truncate max-w-[150px]">{t.name}</span>
-                          <span className="font-mono">({Math.ceil(t.duration / 1000)}s)</span>
+                          <div className="flex items-center gap-1.5 font-mono">
+                            <span>({Math.ceil(t.duration / 1000)}s)</span>
+                            <button
+                              onClick={() => cancelTask(t.id)}
+                              className="text-rose-400 hover:text-rose-300 font-bold px-1 hover:scale-110 active:scale-95 transition-all cursor-pointer font-sans"
+                              title="Remove from queue"
+                            >
+                              ✕
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -2958,8 +2844,8 @@ Calculate: 900 / 45`,
           </div>
         )}
 
-        {/* Coffers Coin Reward Pop-up — suppressed when series popup is open */}
-        {pendingRewards.length > 0 && !seriesPopupOpen && (
+        {/* Coffers Coin Reward Pop-up — suppressed when series popup is open or for work/study tasks */}
+        {pendingRewards.length > 0 && !seriesPopupOpen && pendingRewards[0].type !== 'travel' && pendingRewards[0].type !== 'work' && pendingRewards[0].type !== 'study' && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[230] p-4 select-none animate-fade-in">
             <div className="relative bg-neutral-900 border-2 border-emerald-500/40 rounded-[2.5rem] p-6 h-[92vh] w-[92vw] max-h-[92vh] max-w-[92vw] shadow-2xl flex flex-col md:flex-row gap-6 text-left font-sans animate-fade-in overflow-y-auto custom-scrollbar">
               
@@ -3041,55 +2927,117 @@ Calculate: 900 / 45`,
           </div>
         )}
 
-        {/* Flash News Modal */}
-        {showFlashNewsModal && (() => {
-          const currentHour = new Date().getHours();
-          const currentBlock = Math.floor(currentHour / 3);
-          const newsItem = FLASH_NEWS_DATA.find(x => x.block === currentBlock) || FLASH_NEWS_DATA[0];
-          
-          return (
-            <div className="absolute inset-0 bg-black/85 flex items-center justify-center z-[240] p-4 select-none animate-fade-in">
-              <div className="relative bg-neutral-900 border-2 border-amber-500/40 rounded-[2.5rem] p-6 max-w-lg w-full shadow-2xl flex flex-col gap-4 text-left font-sans">
-                <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                  <div>
-                    <span className="text-[9px] font-black uppercase tracking-[0.25em] text-amber-400">Broadcast Alert</span>
-                    <h2 className="text-lg font-brand text-white uppercase mt-0.5" style={{ fontFamily: FONT }}>
-                      Ganache Grove Dispatch
-                    </h2>
+        {/* Completed Transit Card / Pass Receipt Overlay */}
+        {pendingRewards.length > 0 && !seriesPopupOpen && pendingRewards[0].type === 'travel' && (
+          <div className="fixed bottom-6 right-6 z-[260] w-96 max-w-[95vw] bg-neutral-950/95 border-2 border-amber-500/40 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 font-sans text-white animate-slide-up select-none">
+            {(() => {
+              const reward = pendingRewards[0];
+              const isTrain = reward.originSubPage && ['home', 'health', 'newspaper', 'classroom', 'workshop', 'transport'].includes(reward.originSubPage);
+              const isBalloon = reward.destinationSubPage === 'politics' || reward.destinationSubPage === 'theatre';
+              const mode = isTrain ? 'Monorail Train' : isBalloon ? 'Air Balloon' : 'Horse Wagon';
+              const emoji = isTrain ? '🚂' : isBalloon ? '🎈' : '🐎';
+              const farePaid = reward.transitFare !== undefined ? reward.transitFare : 2;
+
+              return (
+                <>
+                  <div className="shrink-0 border-b border-white/10 pb-2">
+                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-amber-400">Monorail & Wagon Log</span>
+                    <h2 className="text-xl font-brand uppercase text-white mt-0.5" style={{ fontFamily: FONT }}>Transit Pass Receipt</h2>
                   </div>
-                  <span className="text-[9px] text-neutral-400 font-mono">{newsItem.timeRange}</span>
-                </div>
 
-                <div className="p-4 bg-amber-950/20 border border-amber-800/30 rounded-2xl italic text-amber-200 text-xs leading-relaxed font-sans">
-                  "{newsItem.news}"
-                </div>
-
-                <div className="space-y-2.5">
-                  <span className="text-[10px] font-brand uppercase tracking-wider text-cyan-400 block" style={{ fontFamily: '"Josefin Sans", sans-serif' }}>
-                    Recommended Actions & Tasks 🛠️
-                  </span>
-                  <div className="space-y-1.5 text-xs text-neutral-300">
-                    {newsItem.recommendedActions.map((actText, idx) => (
-                      <div key={idx} className="flex gap-2 items-start p-2 bg-white/5 border border-white/5 rounded-xl">
-                        <span className="text-cyan-400">🔹</span>
-                        <span className="font-sans text-[11px] leading-snug">{actText}</span>
-                      </div>
-                    ))}
+                  {/* 4:3 Size Visual Image Slot */}
+                  <div className="w-full aspect-[4/3] bg-neutral-900/60 border border-white/10 rounded-2xl overflow-hidden relative shadow-inner">
+                    <img 
+                      src="/towns/hometown_lvl1.png" 
+                      alt="Transit Destination" 
+                      className="w-full h-full object-cover opacity-75"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                    <span className="absolute bottom-3 left-3 text-[9px] font-black uppercase tracking-[0.2em] text-amber-400 bg-black/60 px-2 py-0.5 rounded border border-amber-500/30">
+                      Official Transit Deed
+                    </span>
                   </div>
-                </div>
 
-                <button
-                  onClick={() => setShowFlashNewsModal(false)}
-                  className="w-full mt-2 py-3 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 hover:scale-[1.02] text-black font-black uppercase tracking-widest text-xs rounded-xl transition active:scale-95 shadow-glow"
-                  style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-                >
-                  Acknowledge Dispatch 🎟️
-                </button>
-              </div>
-            </div>
-          );
-        })()}
+                  <div className="space-y-1.5 text-xs text-white">
+                    <div className="flex justify-between items-center border-b border-white/5 pb-1">
+                      <span className="text-white/40">Destination:</span>
+                      <span className="text-emerald-400 font-bold uppercase">{reward.destinationSubPage || 'Mossberry Cottage'}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-white/5 pb-1">
+                      <span className="text-white/40">Vehicle Class:</span>
+                      <span className="text-white font-semibold flex items-center gap-1">{emoji} {mode}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-white/5 pb-1">
+                      <span className="text-amber-400 font-semibold">🪙 Transit Fare paid:</span>
+                      <span className="text-amber-400 font-black">{farePaid} Coins</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-white/60">Wallet Balance:</span>
+                      <span className="text-white font-bold">{coins} Coins</span>
+                    </div>
+                  </div>
 
+                  {/* Redesigned Action Buttons */}
+                  <div className="flex gap-2.5 mt-2">
+                    <button
+                      onClick={() => {
+                        dismissReward(reward.id);
+                        if (reward.destinationSubPage) {
+                          setSubPage(reward.destinationSubPage as SubPage);
+                        }
+                      }}
+                      className="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-brand font-black uppercase tracking-wider text-[10px] rounded-xl transition active:scale-95 cursor-pointer text-center"
+                      style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+                    >
+                      Travel to Destination 🚀
+                    </button>
+                    <button
+                      onClick={() => dismissReward(reward.id)}
+                      className="px-4 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-brand font-black uppercase text-[10px] rounded-xl transition active:scale-95 cursor-pointer text-center"
+                      style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+                    >
+                      Not Now
+                    </button>
+                  </div>
+
+                  {/* Don't show this tab option */}
+                  <div className="border-t border-white/5 pt-2 mt-1 flex items-center justify-center">
+                    <label className="flex items-center gap-2 cursor-pointer text-white/50 hover:text-white/80 transition select-none">
+                      <input
+                        type="checkbox"
+                        checked={skipTransitChecked}
+                        onChange={(e) => {
+                          localStorage.setItem('toffeetown_skip_transit_receipt', e.target.checked ? 'true' : 'false');
+                          setSkipTransitChecked(e.target.checked);
+                          triggerFeedback(e.target.checked ? '✓ Skip receipt enabled' : '✓ Skip receipt disabled');
+                        }}
+                        className="w-3.5 h-3.5 rounded border-white/10 bg-neutral-900 text-amber-500 cursor-pointer"
+                      />
+                      <span className="text-[9px] uppercase tracking-wider font-semibold font-sans">
+                        Don't show this tab every time
+                      </span>
+                    </label>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* Townsfolks Calling Modal — Fixed full-screen overlay */}
+        {townTalkChar && (
+          <div
+            className="fixed inset-0 z-[500] flex items-center justify-center bg-black/60"
+          >
+            <TownTalkModal
+              initialCharacterId={townTalkChar}
+              onClose={() => setTownTalkChar(null)}
+              inventory={inventory}
+              setInventory={setInventory}
+              triggerFeedback={triggerFeedback}
+            />
+          </div>
+        )}
         </div>
       )}
     </div>
