@@ -62,6 +62,9 @@ export interface TaskItem {
   actionId?: string;
   transitFare?: number;
   hasMiniGame?: boolean;
+  dutyType?: string;
+  frame?: string;
+  profession?: string;
 }
 
 export interface RewardItem {
@@ -76,6 +79,27 @@ export interface RewardItem {
   originSubPage?: string;
   actionId?: string;
   transitFare?: number;
+}
+
+export interface CompletedDuty {
+  name: string;
+  profession: string;
+  coins: number;
+  xp: number;
+  xpCat: string;
+  legacy: number;
+  location: string;
+  timestamp: number;
+}
+
+export interface WorkdayArchiveEntry {
+  dayNumber: number;
+  dateStr: string;
+  duties: CompletedDuty[];
+  totalCoins: number;
+  totalXP: Record<string, number>;
+  totalLegacy: number;
+  prosperityGain: number;
 }
 
 export interface StampItem {

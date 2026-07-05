@@ -1,5 +1,5 @@
 import React from 'react';
-import { FONT } from '../../../pages/TravellersDesk';
+import { FONT } from '../../../lib/uiConstants';
 
 interface Character {
   id: string;

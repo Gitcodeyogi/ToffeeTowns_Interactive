@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTTStore } from '../store/useTTStore';
-import { FONT } from '../pages/TravellersDesk';
+import { FONT } from '../lib/uiConstants';
 
 interface MapNode {
   id: string;
@@ -187,7 +187,12 @@ const STATION_PCTS: Record<string, number> = {
   workshop: 0.891,
 };
 
-export const TownGuideModal: React.FC = () => {
+interface TownGuideModalProps {
+  embedMode?: boolean;
+  onClose?: () => void;
+}
+
+export const TownGuideModal: React.FC<TownGuideModalProps> = ({ embedMode = false, onClose }) => {
   const {
     currentLocation,
     taskQueue,
@@ -397,6 +402,265 @@ export const TownGuideModal: React.FC = () => {
     { from: { x: 360, y: 240 }, to: { x: 480, y: 300 }, label: '350m' },
     { from: { x: 560, y: 240 }, to: { x: 480, y: 300 }, label: '250m' },
   ];
+
+  if (embedMode) {
+    return (
+      <div className="w-full h-full relative overflow-hidden flex flex-col justify-between text-left select-none font-body">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes mapDash {
+            to { stroke-dashoffset: -30; }
+          }
+          .animate-map-dash {
+            animation: mapDash 2s linear infinite;
+          }
+          @keyframes subtlePulse {
+            0%, 100% { opacity: 0.15; transform: scale(1); }
+            50% { opacity: 0.25; transform: scale(1.03); }
+          }
+          .animate-subtle-pulse {
+            animation: subtlePulse 5s ease-in-out infinite;
+          }
+        `}} />
+
+        <div className="w-full h-full bg-black/35 border border-white/5 rounded-3xl relative overflow-hidden flex items-center justify-center p-1 shadow-inner min-h-0">
+          <div className="relative w-[900px] h-[460px] shrink-0 transform scale-[0.62] md:scale-[0.70] lg:scale-[0.80] xl:scale-[0.85] transition-transform duration-300">
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+              <defs>
+                <linearGradient id="mapGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.2" />
+                </linearGradient>
+
+                <radialGradient id="forestGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
+                  <stop offset="70%" stopColor="#047857" stopOpacity="0.05" />
+                  <stop offset="100%" stopColor="#064e3b" stopOpacity="0" />
+                </radialGradient>
+              </defs>
+
+              <circle cx="220" cy="240" r="140" fill="url(#forestGrad)" stroke="#10b981" strokeWidth="1" strokeDasharray="5,5" opacity="0.5" className="animate-subtle-pulse" />
+              <circle cx="680" cy="200" r="150" fill="url(#forestGrad)" stroke="#10b981" strokeWidth="1" strokeDasharray="5,5" opacity="0.5" className="animate-subtle-pulse" />
+              <circle cx="420" cy="390" r="120" fill="url(#forestGrad)" stroke="#10b981" strokeWidth="1" strokeDasharray="5,5" opacity="0.5" className="animate-subtle-pulse" />
+
+              <text x="220" y="320" fill="#a7f3d0" fontSize="8px" fontWeight="black" letterSpacing="0.2em" opacity="0.25" textAnchor="middle">MOSSBERRY DEEPWOOD</text>
+              <text x="680" y="300" fill="#a7f3d0" fontSize="8px" fontWeight="black" letterSpacing="0.2em" opacity="0.25" textAnchor="middle">CANOPY WHISPERS RESERVE</text>
+              <text x="420" y="440" fill="#a7f3d0" fontSize="8px" fontWeight="black" letterSpacing="0.2em" opacity="0.25" textAnchor="middle">SOUTHERN SHADOW PINES</text>
+
+              <path d="M 0,150 Q 250,50 430,220 T 900,320" fill="none" stroke="#0891b2" strokeWidth="8" opacity="0.06" strokeLinecap="round" />
+              <path d="M 0,150 Q 250,50 430,220 T 900,320" fill="none" stroke="#22d3ee" strokeWidth="2.5" opacity="0.15" strokeLinecap="round" strokeDasharray="4,8" />
+              <text x="490" y="160" fill="#22d3ee" fontSize="7.5px" fontWeight="bold" letterSpacing="0.1em" opacity="0.25" transform="rotate(15 490 160)" textAnchor="middle">CHOCOBROOK STREAM CANAL</text>
+
+              <g opacity="0.15" fontSize="13px">
+                <text x="140" y="140">🌲</text>
+                <text x="110" y="310">🌲</text>
+                <text x="290" y="60">🌲</text>
+                <text x="620" y="130">🌲</text>
+                <text x="730" y="210">🌲</text>
+                <text x="700" y="380">🌲</text>
+                <text x="450" y="50">🏔️</text>
+                <text x="510" y="60">🏔️</text>
+                <text x="250" y="340">🏡</text>
+                <text x="690" y="80">🏡</text>
+                <text x="325" y="185">🏮</text>
+                <text x="475" y="315">🏮</text>
+                <text x="725" y="255">🏮</text>
+              </g>
+
+              <g opacity="0.8">
+                <text fontSize="11px" textAnchor="middle" y="4">🦊</text>
+                <animateMotion dur="24s" repeatCount="indefinite" path="M 180,390 C 250,320 300,450 380,390 C 450,320 500,450 560,390" />
+              </g>
+              <g opacity="0.8">
+                <text fontSize="9.5px" textAnchor="middle" y="4">🐿️</text>
+                <animateMotion dur="19s" repeatCount="indefinite" path="M 360,240 Q 460,240 560,240 Q 460,300 360,240" />
+              </g>
+              <g opacity="0.8">
+                <text fontSize="10.5px" textAnchor="middle" y="4">🦋</text>
+                <animateMotion dur="15s" repeatCount="indefinite" path="M 800,150 Q 500,80 200,90" />
+              </g>
+
+              <path
+                d="M 100,220 C 120,120 150,90 200,90 H 380 H 580 C 720,90 800,110 800,150 V 310 C 800,360 720,390 620,390 H 380 H 180 C 120,390 100,320 100,220 Z"
+                fill="none"
+                stroke="#06b6d4"
+                strokeWidth="5"
+                strokeLinecap="round"
+                opacity="0.08"
+              />
+              <path
+                d="M 100,220 C 120,120 150,90 200,90 H 380 H 580 C 720,90 800,110 800,150 V 310 C 800,360 720,390 620,390 H 380 H 180 C 120,390 100,320 100,220 Z"
+                fill="none"
+                stroke="#0891b2"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeDasharray="14,6"
+                style={{ filter: 'drop-shadow(0 0 3px rgba(6,182,212,0.35))' }}
+              />
+              <path
+                ref={pathRef}
+                d="M 100,220 C 120,120 150,90 200,90 H 380 H 580 C 720,90 800,110 800,150 V 310 C 800,360 720,390 620,390 H 380 H 180 C 120,390 100,320 100,220 Z"
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth="0.8"
+                strokeLinecap="round"
+                opacity="0.6"
+              />
+              
+              <text x="480" y="80" fill="#a5f3fc" fontSize="6px" fontWeight="bold" letterSpacing="0.1em" opacity="0.3" textAnchor="middle">GLASS MONORAIL ELEVATED HIGH-WAY SYSTEM</text>
+
+              {pathConnections.map((path, idx) => (
+                <g key={idx}>
+                  <line
+                    x1={path.from.x}
+                    y1={path.from.y}
+                    x2={path.to.x}
+                    y2={path.to.y}
+                    stroke="rgba(251,191,36,0.06)"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1={path.from.x}
+                    y1={path.from.y}
+                    x2={path.to.x}
+                    y2={path.to.y}
+                    stroke="url(#mapGlow)"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeDasharray="5,15"
+                    className="animate-map-dash"
+                  />
+                  <text
+                    x={(path.from.x + path.to.x) / 2}
+                    y={(path.from.y + path.to.y) / 2 - 5}
+                    fill="rgba(251,191,36,0.6)"
+                    fontSize="7.5px"
+                    fontWeight="bold"
+                    textAnchor="middle"
+                    className="font-mono"
+                  >
+                    {path.label}
+                  </text>
+                </g>
+              ))}
+            </svg>
+
+            {NODES.map((node) => {
+              const isCurrent = currentLocation === node.id;
+              const isTargeted = activeTravelTask?.destinationSubPage === node.id;
+
+              return (
+                <button
+                  key={node.id}
+                  onMouseEnter={() => setHoveredNode(node)}
+                  onMouseLeave={() => setHoveredNode(null)}
+                  onClick={() => handleStartTravel(node.id, node.fullName)}
+                  className={`absolute w-[114px] h-[50px] rounded-2xl flex flex-col items-center justify-center p-1 cursor-pointer transition-all duration-300 font-sans border text-white
+                    ${isCurrent ? 'ring-2 ring-cyan-400 ring-offset-1 ring-offset-black scale-105' : 'hover:scale-[1.06] hover:border-white/55'}
+                  `}
+                  style={{
+                    left: node.x - 57,
+                    top: node.y - 25,
+                    background: 'rgba(0, 0, 0, 0.70)',
+                    borderWidth: isCurrent ? '2px' : '1px',
+                    borderColor: isCurrent ? '#22d3ee' : 'rgba(255,255,255,0.15)',
+                    boxShadow: isCurrent
+                      ? '0 0 20px rgba(34, 211, 238, 0.5)'
+                      : isTargeted
+                      ? '0 0 18px rgba(251, 191, 36, 0.6)'
+                      : `0 0 10px ${node.glowColor}`,
+                  }}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[17px]">{node.emoji}</span>
+                    <span className="text-[9.5px] font-extrabold uppercase tracking-wide truncate max-w-[70px]">
+                      {node.displayName}
+                    </span>
+                  </div>
+                  
+                  <span className="text-[6.5px] text-neutral-400/90 font-medium truncate max-w-[95px] leading-tight font-sans block mt-0.5 uppercase tracking-wide">
+                    {node.id === 'home' ? 'Residence' : node.displayName === 'Landmarks' ? 'Sights' : node.displayName}
+                  </span>
+
+                  {isCurrent && (
+                    <span className="absolute inset-0 rounded-2xl bg-cyan-400/5 animate-ping pointer-events-none" />
+                  )}
+
+                  {isCurrent && (
+                    <span className="absolute -top-2.5 bg-cyan-400 text-black font-extrabold text-[6px] px-1 py-0.2 rounded uppercase tracking-wider scale-90 border border-cyan-300 shadow">
+                      YOU
+                    </span>
+                  )}
+                  
+                  {isTargeted && (
+                    <span className="absolute -top-2.5 bg-amber-400 text-black font-extrabold text-[6px] px-1 py-0.2 rounded uppercase tracking-wider scale-90 border border-amber-300 shadow animate-pulse">
+                      DEST
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+
+            {activeTravelTask && playerX !== null && playerY !== null && (
+              <div
+                className="absolute pointer-events-none z-30 transition-all duration-100 flex items-center justify-center"
+                style={{ left: playerX - 18, top: playerY - 18, width: 36, height: 36 }}
+              >
+                <span className="absolute inset-0 rounded-full bg-amber-400/50 animate-ping" />
+                <div className="w-8 h-8 rounded-full border-2 border-amber-300 bg-black flex items-center justify-center text-base shadow-[0_0_15px_rgba(245,158,11,0.6)]">
+                  {activeTravelTask && isTrainRoute(activeTravelTask.originSubPage, activeTravelTask.destinationSubPage) 
+                    ? '🚂' 
+                    : activeTravelTask && (activeTravelTask.destinationSubPage === 'politics' || activeTravelTask.destinationSubPage === 'theatre' || activeTravelTask.originSubPage === 'politics' || activeTravelTask.originSubPage === 'theatre')
+                    ? '🎈' 
+                    : '🐎'}
+                </div>
+              </div>
+            )}
+
+            {hoveredNode && (
+              <div
+                className="absolute z-[120] bg-[#0c0d12]/95 border border-white/20 rounded-2xl p-4 shadow-2xl w-[230px] text-left pointer-events-none animate-fade-in font-sans text-white transition-all duration-200"
+                style={{
+                  left: hoveredNode.x > 500 ? hoveredNode.x - 290 : hoveredNode.x + 65,
+                  top: hoveredNode.y - 75,
+                  boxShadow: `0 10px 35px rgba(0,0,0,0.6), 0 0 15px ${hoveredNode.glowColor}`,
+                }}
+              >
+                <div className="flex items-center gap-2 border-b border-white/10 pb-2 mb-2">
+                  <span className="text-xl">{hoveredNode.emoji}</span>
+                  <div>
+                    <h4 className="text-[11px] font-black tracking-wide uppercase text-amber-300 font-brand">
+                      {hoveredNode.fullName}
+                    </h4>
+                    <span className="text-[7.5px] uppercase tracking-widest text-neutral-400 font-bold block leading-none mt-0.5">
+                      {hoveredNode.type} Sector
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-[9px] text-white/70 leading-relaxed font-sans mb-2">
+                  {hoveredNode.details}
+                </p>
+
+                <div className="space-y-1 text-[8px] pt-1.5 border-t border-white/5">
+                  <div className="flex justify-between items-center">
+                    <span className="text-neutral-400 font-bold">Activity:</span>
+                    <span className="text-amber-250 font-medium font-mono">{hoveredNode.snippet}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-neutral-400 font-bold">People:</span>
+                    <span className="text-cyan-300 font-medium truncate max-w-[125px]">
+                      {hoveredNode.npcs.join(', ')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[490] bg-black/60 flex items-center justify-center p-4 select-none animate-fade-in">

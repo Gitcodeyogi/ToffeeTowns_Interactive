@@ -96,6 +96,14 @@ class CozyAudioEngine {
     }
   }
 
+  playSuccess() {
+    this.playChime();
+  }
+
+  playFailure() {
+    this.playClick();
+  }
+
   startMusic() {
     if (this.isMusicPlaying) return;
     this.isMusicPlaying = true;

@@ -1,6 +1,40 @@
 /* eslint-disable react-hooks/purity */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+
+const WorkshopFrame: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => {
+  return (
+    <div className={`relative ${className}`}>
+      {/* Outer borders and measurement ticks */}
+      <div className="absolute inset-0 border border-amber-800/30 rounded-3xl pointer-events-none z-20">
+        {/* Top edge ticks */}
+        <div className="absolute top-0 left-8 right-8 h-1.5 flex justify-between opacity-30 select-none">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={i} className={`w-[1px] bg-amber-600/60 ${i % 5 === 0 ? 'h-2' : 'h-1'}`} />
+          ))}
+        </div>
+        {/* Left edge ticks */}
+        <div className="absolute left-0 top-8 bottom-8 w-1.5 flex flex-col justify-between opacity-30 select-none">
+          {Array.from({ length: 15 }).map((_, i) => (
+            <div key={i} className={`h-[1px] bg-amber-600/60 ${i % 5 === 0 ? 'w-2' : 'w-1'}`} />
+          ))}
+        </div>
+        
+        {/* Brass corner rivets/pins */}
+        <div className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-gradient-to-br from-yellow-100 via-amber-400 to-amber-700 border border-amber-950/70 shadow-[0_1px_2px_rgba(0,0,0,0.4),_inset_0_0.5px_0_rgba(255,255,255,0.4)]" />
+        <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-gradient-to-br from-yellow-100 via-amber-400 to-amber-700 border border-amber-950/70 shadow-[0_1px_2px_rgba(0,0,0,0.4),_inset_0_0.5px_0_rgba(255,255,255,0.4)]" />
+        <div className="absolute bottom-2 left-2 w-1.5 h-1.5 rounded-full bg-gradient-to-br from-yellow-100 via-amber-400 to-amber-700 border border-amber-950/70 shadow-[0_1px_2px_rgba(0,0,0,0.4),_inset_0_0.5px_0_rgba(255,255,255,0.4)]" />
+        <div className="absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full bg-gradient-to-br from-yellow-100 via-amber-400 to-amber-700 border border-amber-950/70 shadow-[0_1px_2px_rgba(0,0,0,0.4),_inset_0_0.5px_0_rgba(255,255,255,0.4)]" />
+        
+        {/* Tiny engraved numbers near corners */}
+        <span className="absolute top-1 left-6 font-mono text-[6px] text-amber-500/40 select-none">TT-01</span>
+        <span className="absolute bottom-1 right-6 font-mono text-[6px] text-amber-500/40 select-none">ENG-45</span>
+      </div>
+      {children}
+    </div>
+  );
+};
 import { useTTStore } from '../../store/useTTStore';
+import { cozyAudio } from '../../utils/audioHelper';
 import { GanacheGroveTownData } from '../../data/towns/ganache-grove';
 import { ECONOMY_CONFIG } from '../../constants/economyConfig';
 import type { SubPage } from '../../pages/TravellersDesk';
@@ -609,6 +643,18 @@ const GANACHE_CHARACTERS: CharacterSlide[] = [
 ];
 
 const _SHADOW_SLIDER_CSS = `
+  .toffee-elastic {
+    transition: all 0.3s cubic-bezier(0.34, 1.6, 0.64, 1);
+  }
+  .toffee-elastic:hover {
+    transform: translateY(-4px) scale(1.035);
+    border-color: rgba(251, 191, 36, 0.45) !important;
+    box-shadow: 0 12px 28px rgba(245, 158, 11, 0.25);
+  }
+  .toffee-elastic:active {
+    transform: scale(0.975);
+  }
+
   @keyframes key-fade-scale {
     0% { opacity: 0; transform: scale(1.05); }
     100% { opacity: 1; transform: scale(1); }
@@ -658,9 +704,13 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
     setShowTownGuide,
     setShowRoadmapModal,
     setShowDailyChores,
+    setShowTownTour,
     setShowHelpModal,
     goldenCitizenPass,
     earnedBadges,
+    completedDutiesToday,
+    workdayArchive,
+    sleepAndCompleteWorkday,
   } = useTTStore();
 
   // Removed currentHomeSlide state to fix unused warning
@@ -669,6 +719,13 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
   const [showHomeNav, setShowHomeNav] = useState(false);
   const [activeCharIndex, setActiveCharIndex] = useState(0);
   const [charContentTab, setCharContentTab] = useState<'registry' | 'lore'>('registry');
+
+  // Workday Bedtime Sleep states
+  const [showSleepConfirmModal, setShowSleepConfirmModal] = useState(false);
+  const [isSleeping, setIsSleeping] = useState(false);
+  const [showWorkdayCompleteModal, setShowWorkdayCompleteModal] = useState(false);
+  const [showWorkdayJournalsModal, setShowWorkdayJournalsModal] = useState(false);
+  const [lastWorkdaySummary, setLastWorkdaySummary] = useState<any | null>(null);
 
   const [activeHotspot, setActiveHotspot] = useState<HotspotConfig | null>(null);
   const [hudChoresState, setHudChoresState] = useState<HudChoresState>(() => {
@@ -782,11 +839,12 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
 
 
 
-  const handleOpenPuzzle = (spot: HotspotConfig, chore: ChorePuzzle) => {
+  const handleOpenPuzzle = (spot: HotspotConfig, chore: ChorePuzzle, choreIndex: number) => {
     setActiveHotspot(null);
     setActivePuzzleChore({
       hotspot: spot,
       chore,
+      choreIndex,
       expiresAt: hudChoresState[spot.id]?.expiresAt ?? (Date.now() + 7200 * 1000)
     });
     setLastInteractionTime(Date.now());
@@ -945,45 +1003,18 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
         </div>
       </div>
 
-      {/* Sub-Header Actions Row (Flash News, Daily Dispatch, Relocate, Logout) */}
+      {/* Sub-Header Actions Row (Resident Journal only) */}
       <div className="flex flex-wrap items-center justify-end gap-3 mb-2 shrink-0">
-        {setShowFlashNewsModal && (
-          <button
-            onClick={() => setShowFlashNewsModal(true)}
-            className="px-3.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/35 border border-amber-500/40 text-[10px] font-brand uppercase tracking-wider text-amber-300 rounded-xl transition flex items-center gap-1 shadow-md cursor-pointer"
-            style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-          >
-            <span>📯</span> Flash News
-          </button>
-        )}
-
-        <button
-          onClick={() => setShowDailyDispatch(true)}
-          className="px-3.5 py-1.5 bg-gradient-to-r from-pink-500/20 to-purple-500/20 hover:bg-gradient-to-r hover:from-pink-500/35 hover:to-purple-500/35 border border-pink-500/40 text-[10px] font-brand uppercase tracking-wider text-pink-300 rounded-xl transition flex items-center gap-1 shadow-md animate-pulse cursor-pointer"
-          style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-        >
-          <span>📯</span> Daily Dispatch
-        </button>
-
         <button
           onClick={() => {
-            if (coins < 15) {
-              triggerFeedback("❌ Cannot Relocate! Relocation fee is 15 Cocoa Coins.");
-            } else {
-              setPage('choose-town');
-            }
+            cozyAudio.playClick();
+            setShowTownTour(true);
           }}
-          className="px-3.5 py-1.5 bg-neutral-850 hover:bg-neutral-800 border border-white/10 text-[10px] font-brand uppercase tracking-wider text-white rounded-xl transition shadow-md cursor-pointer"
+          className="px-4 py-1.5 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:brightness-110 border border-amber-400/50 text-[10px] font-brand uppercase tracking-wider text-black font-black rounded-xl transition flex items-center gap-1.5 shadow-[0_0_12px_rgba(245,158,11,0.25)] hover:scale-105 active:scale-95 cursor-pointer"
           style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+          title="Open Today's Resident Journal & Agenda"
         >
-          Relocate (-15 🪙)
-        </button>
-        <button
-          onClick={() => logout()}
-          className="px-3.5 py-1.5 bg-red-900/30 hover:bg-red-800/40 border border-red-500/30 text-[10px] font-brand uppercase tracking-wider text-red-300 rounded-xl transition shadow-md cursor-pointer"
-          style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-        >
-          Logout
+          <span>📖</span> Resident Journal
         </button>
       </div>
 
@@ -995,10 +1026,11 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
           {/* Solid backing layer */}
           <div className="absolute top-2 left-2 right-0 bottom-0 bg-amber-500/35 border-[3px] border-amber-500/40 rounded-3xl -z-10" />
 
-          {/* Main container */}
-          <div
-            className="mr-2 mb-2 w-[calc(100%-8px)] h-[500px] rounded-3xl overflow-hidden border-[3px] border-amber-500/40 bg-black/60 relative group z-10 flex flex-row animate-fade-in"
-          >
+          {/* Main container wrapped with WorkshopFrame */}
+          <WorkshopFrame className="mr-2 mb-2 w-[calc(100%-8px)] rounded-3xl overflow-hidden">
+            <div
+              className="w-full h-[500px] border-[3px] border-amber-500/40 bg-black/60 relative group z-10 flex flex-row animate-fade-in"
+            >
             {/* Left Side: Room Image Explorer (60%) */}
             {!isGridExpanded && (
               <div className="w-[60%] h-full overflow-hidden relative bg-black flex items-center justify-center border-r-[3px] border-amber-500/40">
@@ -1069,6 +1101,34 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
                     );
                   })}
 
+                {activeRoom === 'bedroom' && (
+                  <button
+                    onClick={() => {
+                      if (completedDutiesToday.length === 0) {
+                        triggerFeedback("💤 You haven't completed any duties today! Do some work in town before retiring.");
+                        return;
+                      }
+                      setShowSleepConfirmModal(true);
+                      setLastInteractionTime(Date.now());
+                    }}
+                    className="group absolute z-30 w-12 h-12 rounded-full border-2 border-amber-300 bg-gradient-to-tr from-amber-700 via-yellow-600 to-amber-500 flex items-center justify-center cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.9),_0_0_40px_rgba(245,158,11,0.4)] hover:scale-125 hover:rotate-6 hover:border-white transition-all duration-300 text-lg"
+                    style={{ top: '40%', left: '48%' }}
+                  >
+                    {/* Custom Tooltip */}
+                    <div className="absolute bottom-full mb-2.5 hidden group-hover:flex flex-col items-start bg-black/95 border border-amber-500 text-white text-[10px] px-3 py-2 rounded-2xl shadow-2xl whitespace-nowrap z-50 pointer-events-none transition-all duration-200">
+                      <div className="font-bold text-yellow-300 flex items-center gap-1.5">
+                        <span>🛏️</span>
+                        <span>Retire for the Day (Sleep)</span>
+                      </div>
+                      <div className="text-amber-300 font-mono mt-0.5 whitespace-normal max-w-xs text-left leading-normal">
+                        Click to sleep, record today's work journal, and gain standing legacy.
+                      </div>
+                    </div>
+                    <span className="absolute -inset-1.5 rounded-full bg-amber-400/40 animate-ping z-0 pointer-events-none" />
+                    <span className="relative z-10">🛏️</span>
+                  </button>
+                )}
+
                 {/* Pink/Maroon Hotspot Detail Overlay Card */}
                 {activeHotspot && (() => {
                   const spotState = hudChoresState[activeHotspot.id];
@@ -1098,7 +1158,7 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
                         <span className="text-[10px] text-cyan-300 font-bold">XP Reward: +{activeChore.xpReward} {activeChore.xpCategory.toUpperCase()} XP</span>
                         <button
                           onClick={() => {
-                            handleOpenPuzzle(activeHotspot, activeChore);
+                            handleOpenPuzzle(activeHotspot, activeChore, spotState?.choreIndex ?? 0);
                           }}
                           className="px-3.5 py-1.5 bg-gradient-to-r from-pink-500 to-rose-600 hover:scale-105 active:scale-95 text-white text-[10px] font-black uppercase tracking-wider rounded-xl transition shadow-md"
                           style={{ fontFamily: '"Josefin Sans", sans-serif' }}
@@ -1255,7 +1315,8 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
               </div>
             </div>
 
-          </div>
+            </div>
+          </WorkshopFrame>
         </div>
 
         {/* ═══ BOX 2: World Engine Group (Moved beneath Cottage) ═══ */}
@@ -1280,8 +1341,9 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
           {/* Solid backing shadow */}
           <div className="absolute top-2 left-2 right-0 bottom-0 bg-amber-500/25 border-[3px] border-amber-500/40 rounded-3xl -z-10" />
 
-          {/* Main container */}
-          <div className="mr-2 mb-2 w-[calc(100%-8px)] rounded-3xl overflow-hidden border-[3px] border-amber-500/40 bg-black/60 relative z-10 flex flex-col p-6 gap-5">
+          {/* Main container wrapped with WorkshopFrame */}
+          <WorkshopFrame className="mr-2 mb-2 w-[calc(100%-8px)] rounded-3xl overflow-hidden">
+            <div className="w-full border-[3px] border-amber-500/40 bg-black/60 relative z-10 flex flex-col p-6 gap-5">
             {/* Header */}
             <div className="text-left border-b border-white/10 pb-4">
               <span className="text-[8px] font-black uppercase tracking-[0.25em] text-amber-400 font-sans">Town Gateway</span>
@@ -1290,49 +1352,50 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
               </h3>
             </div>
 
-            {/* Stand out, bigger, brilliant image hyperlinks with NO extra text or buttons */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 justify-center py-2">
-              {[
-                {
-                  id: 'guide_map',
-                  icon: '/Assets/Icons/cropped/widget_guide_map.png',
-                  action: () => setShowTownGuide(true),
-                },
-                {
-                  id: 'journey',
-                  icon: '/Assets/Icons/cropped/widget_journey.png',
-                  action: () => setShowRoadmapModal(true),
-                },
-                {
-                  id: 'dispatch',
-                  icon: '/Assets/Icons/cropped/widget_dispatch.png',
-                  action: () => setShowDailyChores(true),
-                },
-                {
-                  id: 'calling',
-                  icon: '/Assets/Icons/cropped/widget_calling.png',
-                  action: () => openTownTalk('pipkin'),
-                },
-                {
-                  id: 'help',
-                  icon: '/Assets/Icons/cropped/widget_help.png',
-                  action: () => setShowHelpModal(true),
-                },
-              ].map(widget => (
-                <button
-                  key={widget.id}
-                  onClick={widget.action}
-                  className="relative flex items-center justify-center p-0 rounded-2xl border border-white/5 hover:border-amber-400/40 bg-transparent hover:bg-white/5 transition-all duration-300 hover:scale-105 group shadow-xl active:scale-[0.97] overflow-hidden cursor-pointer"
-                >
-                  <img
-                    src={widget.icon}
-                    alt={widget.id}
-                    className="w-full h-auto max-h-[140px] md:max-h-[170px] object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)] group-hover:drop-shadow-[0_12px_24px_rgba(245,158,11,0.35)] transition-all duration-300"
-                  />
-                </button>
-              ))}
+             {/* Stand out, bigger, brilliant image hyperlinks with NO extra text or buttons */}
+             <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 justify-center py-2">
+               {[
+                 {
+                   id: 'guide_map',
+                   icon: '/Assets/Icons/cropped/widget_guide_map.png',
+                   action: () => setShowTownGuide(true),
+                 },
+                 {
+                   id: 'journey',
+                   icon: '/Assets/Icons/cropped/widget_journey.png',
+                   action: () => setShowTownTour(true),
+                 },
+                 {
+                   id: 'dispatch',
+                   icon: '/Assets/Icons/cropped/widget_dispatch.png',
+                   action: () => setShowDailyChores(true),
+                 },
+                 {
+                   id: 'calling',
+                   icon: '/Assets/Icons/cropped/widget_calling.png',
+                   action: () => openTownTalk('pipkin'),
+                 },
+                 {
+                   id: 'help',
+                   icon: '/Assets/Icons/cropped/widget_help.png',
+                   action: () => setShowHelpModal(true),
+                 },
+               ].map(widget => (
+                 <button
+                   key={widget.id}
+                   onClick={widget.action}
+                   className="relative flex items-center justify-center p-0 rounded-2xl border border-white/5 hover:border-amber-400/40 bg-transparent hover:bg-white/5 toffee-elastic group shadow-xl overflow-hidden cursor-pointer"
+                 >
+                   <img
+                     src={widget.icon}
+                     alt={widget.id}
+                     className="w-full h-auto max-h-[140px] md:max-h-[170px] object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)] group-hover:drop-shadow-[0_12px_24px_rgba(245,158,11,0.35)] transition-all duration-300"
+                   />
+                 </button>
+               ))}
+             </div>
             </div>
-          </div>
+          </WorkshopFrame>
         </div>
 
 
@@ -1389,6 +1452,7 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
             pushPage={pushPage}
             setPage={setPage}
             setSubPage={setSubPage}
+            setShowWorkdayJournalsModal={setShowWorkdayJournalsModal}
           />
         </div>
 
@@ -1734,6 +1798,280 @@ export const GG_TravellerDeck_Home: React.FC<GG_TravellerDeck_HomeProps> = ({
       {showFlashNewsModal && (
         <div className="fixed inset-0 z-[280] bg-black/60 backdrop-blur-md flex items-center justify-center p-6 select-none animate-fade-in">
           <FlashNewsModal onClose={() => setShowFlashNewsModal(false)} />
+        </div>
+      )}
+
+      {isSleeping && (
+        <div className="fixed inset-0 bg-black z-[999] flex flex-col items-center justify-center transition-opacity duration-1000 animate-fade-in text-center select-none">
+          <span className="text-4xl animate-bounce">💤</span>
+          <p className="text-amber-200/80 font-brand uppercase tracking-[0.3em] text-xs mt-4 animate-pulse" style={{ fontFamily: FONT }}>
+            Retiring for the night...
+          </p>
+        </div>
+      )}
+
+      {showSleepConfirmModal && (
+        <div className="fixed inset-0 z-[280] bg-black/75 backdrop-blur-md flex items-center justify-center p-6 select-none animate-fade-in font-sans">
+          <div className="bg-[#18120e] border-[3px] border-amber-500/40 rounded-[2rem] p-6 max-w-md w-full shadow-2xl text-center text-white space-y-4">
+            <span className="text-4xl">🛏️</span>
+            <h3 className="text-xl font-brand uppercase text-amber-400" style={{ fontFamily: FONT }}>
+              Retire for the Day?
+            </h3>
+            <p className="text-sm text-neutral-300 leading-relaxed">
+              Are you ready to blow out the candles, wrap yourself in the cozy quilt, and complete this workday?
+            </p>
+            {completedDutiesToday.length === 0 ? (
+              <div className="p-3 bg-rose-950/20 border border-rose-500/20 rounded-xl text-rose-300 text-xs">
+                ⚠️ You haven't completed any duties today! Do some work in town before sleeping.
+              </div>
+            ) : (
+              <div className="p-3 bg-emerald-950/20 border border-emerald-500/20 rounded-xl text-emerald-300 text-xs font-semibold">
+                ✓ {completedDutiesToday.length} duties will be logged and archived into your chronicles.
+              </div>
+            )}
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setShowSleepConfirmModal(false)}
+                className="flex-1 py-2.5 bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-white font-brand text-[10px] uppercase tracking-wider rounded-xl transition font-black cursor-pointer"
+              >
+                Keep Working
+              </button>
+              <button
+                disabled={completedDutiesToday.length === 0}
+                onClick={() => {
+                  setShowSleepConfirmModal(false);
+                  setIsSleeping(true);
+                  
+                  // Calculate values for Summary Modal
+                  const coins = completedDutiesToday.reduce((acc, t) => acc + t.coins, 0);
+                  const legacy = completedDutiesToday.reduce((acc, t) => acc + t.legacy, 0);
+                  const xp: Record<string, number> = {};
+                  completedDutiesToday.forEach((d: any) => {
+                    if (d.xp > 0 && d.xpCat) {
+                      xp[d.xpCat] = (xp[d.xpCat] || 0) + d.xp;
+                    }
+                  });
+                  const dayNumber = workdayArchive.length + 1;
+                  const dateStr = new Date().toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  });
+                  const prosperityGain = Math.min(10, Number((completedDutiesToday.length * 1.5).toFixed(1)));
+                  
+                  setLastWorkdaySummary({
+                    dayNumber,
+                    dateStr,
+                    duties: [...completedDutiesToday],
+                    totalCoins: coins,
+                    totalXP: xp,
+                    totalLegacy: legacy,
+                    prosperityGain
+                  });
+                  
+                  setTimeout(() => {
+                    sleepAndCompleteWorkday();
+                    setIsSleeping(false);
+                    setShowWorkdayCompleteModal(true);
+                  }, 2000);
+                }}
+                className={`flex-1 py-2.5 font-brand text-[10px] uppercase tracking-wider rounded-xl transition font-black cursor-pointer ${
+                  completedDutiesToday.length === 0
+                    ? 'bg-neutral-700 text-neutral-400 cursor-not-allowed'
+                    : 'bg-amber-500 hover:bg-amber-400 text-black shadow-md'
+                }`}
+              >
+                Go to Sleep 💤
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showWorkdayCompleteModal && lastWorkdaySummary && (
+        <div className="fixed inset-0 z-[280] bg-black/85 backdrop-blur-md flex items-center justify-center p-6 select-none animate-fade-in font-sans">
+          <div className="bg-[#FAF7F0] border-l-[36px] border-l-[#50371e] border-r-8 border-y-8 border-[#3b2713] rounded-[2rem] p-6 max-w-2xl w-full shadow-2xl text-[#2d1e10] flex flex-col max-h-[90vh] relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-red-400/40 ml-8 pointer-events-none z-20" />
+            <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-blue-300/30 ml-[45px] pointer-events-none z-20" />
+            <div className="text-center pb-4 border-b border-[#2d1e10]/15 shrink-0">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#8c6239]">Cottage Chronicles</span>
+              <h2 className="text-2xl font-brand uppercase text-[#3b2713] mt-1" style={{ fontFamily: FONT }}>
+                Workday Complete: Day {lastWorkdaySummary.dayNumber}
+              </h2>
+              <span className="text-xs text-neutral-500 italic block mt-0.5">{lastWorkdaySummary.dateStr}</span>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar my-4 space-y-4 pr-1 py-1 text-sm leading-relaxed text-left">
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold text-[#8c6239] uppercase tracking-widest block">Completed Work Orders</span>
+                <div className="space-y-2">
+                  {lastWorkdaySummary.duties.map((d: any, idx: number) => (
+                    <div key={idx} className="bg-white/70 border border-[#e6d0b3] p-3 rounded-2xl flex justify-between items-center shadow-sm">
+                      <div>
+                        <span className="font-bold text-[#3b2713] block">{d.name}</span>
+                        <span className="text-[10px] text-neutral-500">{d.location}</span>
+                      </div>
+                      <div className="text-right text-[11px] font-semibold text-emerald-700">
+                        <span>+{d.coins}🪙</span> • <span className="text-cyan-700">+{d.xp}xp</span> • <span className="text-yellow-700 font-bold">+{d.legacy}★</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-3 bg-[#efe6d5]/50 border border-[#e6d0b3] p-3 rounded-2xl text-center">
+                <div>
+                  <span className="text-[10px] text-neutral-500 uppercase font-black block">Coins Earned</span>
+                  <span className="text-base font-bold text-emerald-800 mt-0.5 block">+{lastWorkdaySummary.totalCoins} 🪙</span>
+                </div>
+                <div className="border-x border-[#e6d0b3]/50">
+                  <span className="text-[10px] text-neutral-500 uppercase font-black block">Legacy Standing</span>
+                  <span className="text-base font-bold text-yellow-800 mt-0.5 block">+{lastWorkdaySummary.totalLegacy} Pts</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-neutral-500 uppercase font-black block">Sleep Bonus</span>
+                  <span className="text-base font-bold text-purple-800 mt-0.5 block">+10 Legacy</span>
+                </div>
+              </div>
+              
+              <div className="bg-[#FAF7F0] border border-[#e6d0b3] p-4 rounded-2xl space-y-2">
+                <span className="text-[10px] font-bold text-[#8c6239] uppercase tracking-widest block">Today's Town Contribution</span>
+                <div className="space-y-1 text-xs text-[#3b2713] font-medium italic">
+                  <div className="flex items-center gap-1.5 text-emerald-850">
+                    <span>📈</span>
+                    <span>Ganache Grove Prosperity: +{lastWorkdaySummary.prosperityGain}%</span>
+                  </div>
+                  {lastWorkdaySummary.duties.map((d: any, idx: number) => {
+                    const prof = d.profession.toLowerCase();
+                    let remark = "";
+                    if (prof === 'builder') {
+                      remark = `The structures at ${d.location} have been reinforced and polished.`;
+                    } else if (prof === 'healer') {
+                      remark = `Wellness checkups were completed at ${d.location}, helping cure local sneezles.`;
+                    } else if (prof === 'baker') {
+                      remark = `120 fresh loaves of bread were baked and shipped out from ${d.location}.`;
+                    } else {
+                      remark = `Exploration and navigation paths at ${d.location} were mapped and logs updated.`;
+                    }
+                    return (
+                      <div key={idx} className="flex items-start gap-1.5 text-[#5c3a21]">
+                        <span>•</span>
+                        <span>{remark}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              
+              {(() => {
+                const counts: Record<string, number> = {};
+                lastWorkdaySummary.duties.forEach((d: any) => {
+                  counts[d.profession] = (counts[d.profession] || 0) + 1;
+                });
+                let leadProf = 'general';
+                let maxCount = 0;
+                Object.entries(counts).forEach(([prof, c]) => {
+                  if (c > maxCount) {
+                    leadProf = prof;
+                    maxCount = c;
+                  }
+                });
+                let npcName = 'Rowan Thistle';
+                let quote = "Working alongside you today made the heavy logs feel light. You've got a builder's eye. Rest well!";
+                const activeProf = leadProf.toLowerCase();
+                if (activeProf === 'healer') {
+                  npcName = 'Dr. Cedric Oakenhart';
+                  quote = "The clinic is quiet tonight, thanks to your steady hand. The teas are brewed, the cots are clean. Rest well.";
+                } else if (activeProf === 'baker') {
+                  npcName = 'Chef Caramel';
+                  quote = "The ovens have cooled down, but the aroma of those honey-buns lingers. You're becoming a fine baker.";
+                } else if (activeProf === 'explorer') {
+                  npcName = 'Julie Frost';
+                  quote = "Your path coordinate logs are already indexed in the Gazette archives. We map the world, one step at a time.";
+                }
+                return (
+                  <div className="bg-[#fffdfa] border border-[#e6d0b3] p-4 rounded-2xl space-y-1 shadow-inner relative">
+                    <span className="text-[10px] font-bold text-[#8c6239] uppercase tracking-widest block font-sans">
+                      NPC Chronicle Entry: {npcName}
+                    </span>
+                    <p className="text-[#5c3a21] text-xs leading-relaxed italic border-l-2 border-amber-600 pl-3">
+                      "${quote}"
+                    </p>
+                  </div>
+                );
+              })()}
+            </div>
+            <div className="pt-4 border-t border-[#2d1e10]/15 shrink-0">
+              <button
+                onClick={() => {
+                  setShowWorkdayCompleteModal(false);
+                  setLastWorkdaySummary(null);
+                }}
+                className="w-full py-3 bg-[#50371e] hover:bg-[#3b2713] text-[#fcf8f2] font-brand font-black uppercase text-[11px] tracking-wider rounded-xl transition cursor-pointer shadow-md"
+              >
+                Acknowledge &amp; Welcome Tomorrow 🌞
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showWorkdayJournalsModal && (
+        <div className="fixed inset-0 z-[280] bg-black/85 backdrop-blur-md flex items-center justify-center p-6 select-none animate-fade-in font-sans">
+          <div className="bg-[#FAF7F0] border-l-[36px] border-l-[#50371e] border-r-8 border-y-8 border-[#3b2713] rounded-[2rem] p-6 max-w-2xl w-full shadow-2xl text-[#2d1e10] flex flex-col max-h-[85vh] relative overflow-hidden">
+            {/* Binder rings */}
+            <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-red-400/40 ml-8 pointer-events-none z-20" />
+            <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-blue-300/30 ml-[45px] pointer-events-none z-20" />
+
+            <div className="flex justify-between items-center pb-4 border-b border-[#2d1e10]/15 shrink-0">
+              <div className="text-left">
+                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#8c6239]">Chronicles Archive</span>
+                <h2 className="text-2xl font-brand uppercase text-[#3b2713] mt-1" style={{ fontFamily: FONT }}>
+                  Cottage Chronicles &amp; Worklogs
+                </h2>
+              </div>
+              <button
+                onClick={() => setShowWorkdayJournalsModal(false)}
+                className="px-3 py-1.5 bg-[#5d4023] hover:bg-[#473019] text-[#FAF7F0] text-[10px] font-brand uppercase tracking-wider rounded-lg transition"
+              >
+                Close ✕
+              </button>
+            </div>
+
+            {/* Scrollable journals list */}
+            <div className="flex-grow overflow-y-auto custom-scrollbar my-4 space-y-4 pr-1 py-1 text-left">
+              {workdayArchive.length === 0 ? (
+                <div className="text-center py-12 text-[#5c3a21]/50 italic text-sm">
+                  📚 No chronicles have been recorded yet. Complete a workday by sleeping in your cottage bed to write your first entry!
+                </div>
+              ) : (
+                [...workdayArchive].reverse().map((entry: any, index: number) => (
+                  <div key={index} className="bg-white/80 border border-[#e6d0b3] p-4 rounded-2xl space-y-3 shadow-sm hover:bg-[#fffdfa] transition duration-200 mb-4">
+                    <div className="flex justify-between items-center border-b border-[#e6d0b3]/50 pb-2">
+                      <div>
+                        <span className="text-sm font-black text-[#3b2713] block">Day {entry.dayNumber} Journal</span>
+                        <span className="text-[10.5px] text-neutral-500 font-mono">{entry.dateStr}</span>
+                      </div>
+                      <div className="text-right text-[11px] font-semibold text-emerald-800">
+                        <span>+{entry.totalCoins}🪙</span> • <span>+{entry.totalLegacy}★</span> • <span className="text-purple-700">+{entry.prosperityGain}% Prosperity</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 text-xs text-[#5c3a21]">
+                      {entry.duties.map((d: any, dIdx: number) => (
+                        <div key={dIdx} className="flex justify-between items-center bg-[#FAF7F0]/40 p-2 rounded-xl">
+                          <div>
+                            <span className="font-semibold text-[#3b2713]">{d.name}</span>
+                            <span className="text-[10px] text-neutral-400 block">{d.location} ({d.profession.toUpperCase()})</span>
+                          </div>
+                          <span className="font-mono font-bold text-neutral-500">+{d.coins}🪙</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

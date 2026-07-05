@@ -53,6 +53,14 @@ export interface TTStore
   setShowTownGuide: (show: boolean) => void;
   showDailyChores: boolean;
   setShowDailyChores: (show: boolean) => void;
+  showTownTour: boolean;
+  setShowTownTour: (show: boolean) => void;
+  tourReadNewspaper: boolean;
+  setTourReadNewspaper: (read: boolean) => void;
+  tourChattedTownsfolk: boolean;
+  setTourChattedTownsfolk: (chatted: boolean) => void;
+  tourVisitedTheatre: boolean;
+  setTourVisitedTheatre: (visited: boolean) => void;
 }
 
 export const useTTStore = create<TTStore>()(
@@ -96,6 +104,14 @@ export const useTTStore = create<TTStore>()(
         setShowTownGuide: (show) => devSet({ showTownGuide: show, isModalOpen: show }),
         showDailyChores: false,
         setShowDailyChores: (show) => devSet({ showDailyChores: show, isModalOpen: show }),
+        showTownTour: false,
+        setShowTownTour: (show) => devSet({ showTownTour: show, isModalOpen: show }),
+        tourReadNewspaper: false,
+        setTourReadNewspaper: (read) => devSet({ tourReadNewspaper: read }),
+        tourChattedTownsfolk: false,
+        setTourChattedTownsfolk: (chatted) => devSet({ tourChattedTownsfolk: chatted }),
+        tourVisitedTheatre: false,
+        setTourVisitedTheatre: (visited) => devSet({ tourVisitedTheatre: visited }),
 
         // Slices
         ...createAuthSlice(devSet, get, store),

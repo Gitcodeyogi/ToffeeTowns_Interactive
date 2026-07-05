@@ -19,6 +19,7 @@ export const ResidencyTaskModal: React.FC<ResidencyTaskModalProps> = ({ setInven
     solveResidencyTaskRiddle,
     failResidencyTask,
     dismissResidencyTaskModal,
+    skills,
   } = useTTStore();
 
   const [nowTime, setNowTime] = useState(() => Date.now());
@@ -61,6 +62,54 @@ export const ResidencyTaskModal: React.FC<ResidencyTaskModalProps> = ({ setInven
     ? Math.max(0, Math.ceil((active.duration - elapsed) / 1000))
     : Math.ceil(workTask.duration / 1000);
 
+  const getProfessionTitle = (prof: string, xpVal: number) => {
+    const p = prof.toLowerCase();
+    if (p === 'builder') {
+      if (xpVal < 100) return 'Apprentice Builder';
+      if (xpVal < 250) return 'Journeyman Builder';
+      return 'Master Builder';
+    }
+    if (p === 'healer') {
+      if (xpVal < 100) return 'Clinic Helper';
+      if (xpVal < 250) return 'Apothecary';
+      return 'Master Healer';
+    }
+    if (p === 'baker') {
+      if (xpVal < 100) return 'Pastry Hand';
+      if (xpVal < 250) return 'Master Baker';
+      return 'Patissier';
+    }
+    if (p === 'explorer') {
+      if (xpVal < 100) return 'Novice Cartographer';
+      if (xpVal < 250) return 'Wayfinder';
+      return 'Master Explorer';
+    }
+    return 'Town Contributor';
+  };
+
+  const getNaturalNpcReaction = (prof: string, npc: string) => {
+    const p = prof.toLowerCase();
+    if (p === 'builder') {
+      return `${npc}: "Perfect fit. That blueprint aligns perfectly with the foundation."`;
+    }
+    if (p === 'healer') {
+      return `${npc}: "The herbs arrived just in time. These dried leaves will cure the sneezles."`;
+    }
+    if (p === 'baker') {
+      return `${npc}: "Mmm, smell that yeast rise! The crust has the perfect golden glaze."`;
+    }
+    if (p === 'explorer') {
+      return `${npc}: "Excellent path notations. The bogs are mapped correctly now."`;
+    }
+    return `${npc}: "The work is done properly. Let me index this entry into the registry."`;
+  };
+
+  const profKey = workTask.profession || 'general';
+  const skillCategoryForXP = workTask.rewardXPCat || 'general';
+  const currentXPForProf = skills[skillCategoryForXP] || 0;
+  const activeTitle = getProfessionTitle(profKey, currentXPForProf);
+  const naturalNpcQuote = getNaturalNpcReaction(profKey, details.reviewer || 'Rowan');
+
   const handleSelectAnswer = (option: string) => {
     if (residencyTaskStage !== 'progress') return;
     if (option === details.riddle.answer) {
@@ -100,23 +149,33 @@ export const ResidencyTaskModal: React.FC<ResidencyTaskModalProps> = ({ setInven
   const isMiniGameTask = !!(activeResidencyTask?.workTask as any)?.hasMiniGame;
   const showMiniGame   = residencyTaskStage === 'progress' && isMiniGameTask;
 
+  if (showMiniGame) {
+    return (
+      <div
+        className="fixed inset-0 z-[320] flex items-center justify-center p-4 overflow-hidden select-none bg-no-repeat bg-cover bg-center animate-fade-in"
+        style={{ backgroundImage: 'url("/Assets/Ganache Grove/Scene_0.1.png")' }}
+      >
+        <MiniGameRouter
+          taskName={activeResidencyTask!.workTask.name}
+          skillCat={activeResidencyTask!.workTask.rewardXPCat || 'healer'}
+          dutyType={activeResidencyTask!.workTask.dutyType}
+          frame={activeResidencyTask!.workTask.frame}
+          profession={activeResidencyTask!.workTask.profession}
+          rewards={{
+            coins:  activeResidencyTask!.workTask.rewardCoins  ?? 35,
+            xp:     activeResidencyTask!.workTask.rewardXP     ?? 45,
+            legacy: activeResidencyTask!.workTask.rewardLegacy ?? 12,
+            skill:  activeResidencyTask!.workTask.rewardXPCat  ?? 'healer',
+          }}
+          onSuccess={() => { solveResidencyTaskRiddle(); }}
+          onFail={() => { failResidencyTask(); }}
+        />
+      </div>
+    );
+  }
+
   return (
     <>
-    {/* Mini-game overlay — renders on top of everything when active */}
-    {showMiniGame && (
-      <MiniGameRouter
-        taskName={activeResidencyTask!.workTask.name}
-        skillCat={activeResidencyTask!.workTask.rewardXPCat || 'healer'}
-        rewards={{
-          coins:  activeResidencyTask!.workTask.rewardCoins  ?? 35,
-          xp:     activeResidencyTask!.workTask.rewardXP     ?? 45,
-          legacy: activeResidencyTask!.workTask.rewardLegacy ?? 12,
-          skill:  activeResidencyTask!.workTask.rewardXPCat  ?? 'healer',
-        }}
-        onSuccess={() => { solveResidencyTaskRiddle(); }}
-        onFail={() => { failResidencyTask(); }}
-      />
-    )}
 
     <div
       className="fixed inset-0 z-[320] flex items-center justify-center p-4 overflow-hidden select-none bg-no-repeat bg-cover bg-center animate-fade-in"
@@ -391,11 +450,16 @@ export const ResidencyTaskModal: React.FC<ResidencyTaskModalProps> = ({ setInven
                 <div className="flex-grow overflow-y-auto custom-scrollbar my-4 space-y-4 pr-1 py-1 text-[16px]">
                   {/* 1. Reviewer dialogue response */}
                   <div className="p-5 bg-white/5 border border-white/10 rounded-2xl space-y-2">
-                    <span className="text-[11px] font-bold text-cyan-400 uppercase tracking-widest block font-sans">
-                      Reviewer Response: {details.reviewer}
-                    </span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-bold text-cyan-400 uppercase tracking-widest block font-sans">
+                        Reviewer: {details.reviewer}
+                      </span>
+                      <span className="text-[10px] font-mono text-amber-300 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                        Rank: {activeTitle}
+                      </span>
+                    </div>
                     <p className="text-white/95 text-[16px] leading-relaxed italic border-l-2 border-cyan-500 pl-3">
-                      "{details.reviewResponse}"
+                      {naturalNpcQuote}
                     </p>
                   </div>
 

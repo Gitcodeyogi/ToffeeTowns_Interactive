@@ -365,15 +365,15 @@ I'm still exploring the deep woods, but you can ask me about:
 };
 
 const PipkinChatPage: React.FC = () => {
-  const { coins, setPage, headerHidden, spendCoins } = useTTStore();
+  const { coins, setPage, headerHidden, spendCoins, travellerName } = useTTStore();
   const [lastTopic, setLastTopic] = useState<string | null>(null);
   const [showPenaltyCard, setShowPenaltyCard] = useState(false);
   const [penaltyMessage, setPenaltyMessage] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
       id: 'welcome-msg',
       sender: 'pipkin',
-      text: `Hey there, Yogesh! I'm Pipkin Nutterby! 🐿️ Welcome to my chat corner!
+      text: `Hey there, ${travellerName || 'Resident'}! I'm Pipkin Nutterby! 🐿️ Welcome to my chat corner!
 *   **Role**: Resident adventurer & guide 🎒
 *   **Topics**: Residents 👥, Coins 🪙, Secrets 🤫, Relocating 🏘️, Honeyberry Incident 🫐.
 
@@ -426,7 +426,7 @@ How can I help you today? ✨`,
         spendCoins(50, 'Rude Conduct Fine', true);
 
         // Show penalty card
-        setPenaltyMessage("Pipkin Nutterby has issued a ticket to Yogesh for rude/inappropriate language. Obey the local bylaws!");
+        setPenaltyMessage(`Pipkin Nutterby has issued a ticket to ${travellerName || 'Resident'} for rude/inappropriate language. Obey the local bylaws!`);
         setShowPenaltyCard(true);
 
         // Redirect back to desk after 3 seconds
@@ -441,10 +441,12 @@ How can I help you today? ✨`,
     setTimeout(() => {
       const botResult = getBotResponse(textToSend, lastTopic);
       setLastTopic(botResult.nextTopic);
+      // Clean up Yogesh in bot response
+      const cleanBotText = botResult.text.replace(/Yogesh/g, travellerName || 'Resident');
       const botMsg: ChatMessage = {
         id: 'msg-' + Math.random().toString(36).slice(2),
         sender: 'pipkin',
-        text: botResult.text,
+        text: cleanBotText,
         date: new Date().toLocaleTimeString()
       };
       setMessages(prev => [...prev, botMsg]);

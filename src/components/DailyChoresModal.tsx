@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTTStore } from '../store/useTTStore';
-import { FONT } from '../pages/TravellersDesk';
+import { FONT } from '../lib/uiConstants';
 
 export const DailyChoresModal: React.FC = () => {
   const {

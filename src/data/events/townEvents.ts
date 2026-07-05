@@ -74,6 +74,7 @@ const IMG_BALCONY   = '/Assets/Ganache Grove/Ganache_BeginnerHome_Balcony.png';
 // const IMG_BACKYARD  = '/Assets/Ganache Grove/Ganache_BeginnerHome_backyard.png';
 const IMG_MIST_GLASSTRAIN = '/Assets/Ganache Grove/Pop-ups/Mist_Glasstrain_Pop-up.png';
 const IMG_PLANK_PRICE_HIKE = '/Assets/Ganache Grove/Pop-ups/Plank_Price_Hike.png';
+const IMG_HERB_DELIVERY = '/Assets/Ganache Grove/Pop-ups/Herb_Delivery.png';
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -276,7 +277,7 @@ export const TRANSPORT_EVENTS: TownEvent[] = [
     category: 'Transport Bulletin',
     icon: '🌿',
     accentHex: '#38bdf8',
-    image: IMG_SCENE,
+    image: IMG_HERB_DELIVERY,
     leftLabel: 'Transit Authority',
     badgeText: '🚨 Urgent Cargo!',
     mainText: "Four horse wagons loaded with fresh wild mint, dried lavender, and herbal tonic are currently en route from the Northern Forest Edge to Dr. Cedric Oakenhart's clinic. The cargo is urgently needed for the Moss Sneezles recovery programme.\n\nAll horse wagon traffic on Mossberry Lane is requested to give way to the herb convoy. The Glass Monorail has opened Platform 4 as an emergency unloading station for lighter cargo batches.",

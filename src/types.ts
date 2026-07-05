@@ -1,20 +1,4 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 import 'react';
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      [elemName: string]: any;
-    }
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        [elemName: string]: any;
-      }
-    }
-  }
-}
 
 export type Theme = 'nature' | 'city' | 'ocean' | 'space' | 'burger' | 'serene-forest' | 'mountain-mist' | 'golden-canyon' | 'wooden-flowers' | 'leaf-at-night' | 'kittle-chickens' | 'colorful-donuts' | 'elephants-mist' | 'morning-brightness' | 'default' | 'start' | 'modern' | 'neon' | 'dark-matter' | 'nebula' | 'supernova' | 'black-hole' | 'holographic';
 

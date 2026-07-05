@@ -54,9 +54,13 @@ export const GG_TravellerDeck_Classroom: React.FC<GG_TravellerDeck_ClassroomProp
         rewardCoins: 15,
         rewardXP: xp,
         rewardXPCat: skillKey,
-        rewardLegacy: 15,
+        rewardLegacy: 2,
         icon: '🎓',
         targetText: name,
+        hasMiniGame: skillKey !== 'healer',
+        dutyType: skillKey === 'builder' ? 'scaffolding' : 'wagon',
+        frame: skillKey === 'builder' ? 'wooden' : skillKey === 'healer' ? 'scholar' : 'ledger',
+        profession: skillKey === 'builder' ? 'builder' : skillKey === 'healer' ? 'healer' : 'explorer',
       },
       startDeductions: {
         coins: cost,
@@ -127,24 +131,43 @@ export const GG_TravellerDeck_Classroom: React.FC<GG_TravellerDeck_ClassroomProp
           <div className="border-t border-white/10 pt-4">
             <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-yellow-400 mb-2.5">Available Seminars</h3>
             <div className="space-y-3">
-              <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between text-xs gap-3">
-                <div>
+              {/* Structural Carpentry — MINI-GAME: Scaffolding */}
+              <div className="relative p-3 rounded-xl flex items-center justify-between text-xs gap-3"
+                style={{ background: 'rgba(34,211,238,0.08)', border: '2px solid rgba(34,211,238,0.25)', boxShadow: '0 4px 0 rgba(0,0,0,0.4)' }}>
+                <div className="absolute -top-2.5 left-3 flex items-center gap-1 px-2 py-0.5 rounded-full"
+                  style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', boxShadow: '0 0 8px rgba(124,58,237,0.6)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                  <span className="text-[7px]" style={{ fontFamily: "'Luckiest Guy',cursive" }}>🎮 MINI-GAME • Scaffolding</span>
+                </div>
+                <div className="pt-1">
                   <h4 className="font-bold text-white">Structural Carpentry</h4>
-                  <p className="text-[10px] text-white/50 mt-0.5">+10 Builder XP • +15 Legacy</p>
+                  <p className="text-[10px] text-white/50 mt-0.5">+10 Builder XP • +2 Legacy</p>
                 </div>
-                <button onClick={() => handleTrain('builder', 'Structural Carpentry', 20, 10)} className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-black uppercase text-[10px] tracking-wider shrink-0">20 🪙</button>
+                <button onClick={() => handleTrain('builder', 'Structural Carpentry', 20, 10)}
+                  className="px-3 py-1.5 rounded-lg text-white font-black uppercase text-[10px] tracking-wider shrink-0 active:scale-95 transition"
+                  style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', boxShadow: '0 4px 0 rgba(0,0,0,0.5)' }}>20 🪙</button>
               </div>
-              <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between text-xs gap-3">
-                <div>
+
+              {/* Valley Navigation — MINI-GAME: Wagon */}
+              <div className="relative p-3 rounded-xl flex items-center justify-between text-xs gap-3"
+                style={{ background: 'rgba(34,211,238,0.08)', border: '2px solid rgba(34,211,238,0.25)', boxShadow: '0 4px 0 rgba(0,0,0,0.4)' }}>
+                <div className="absolute -top-2.5 left-3 flex items-center gap-1 px-2 py-0.5 rounded-full"
+                  style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', boxShadow: '0 0 8px rgba(124,58,237,0.6)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                  <span className="text-[7px]" style={{ fontFamily: "'Luckiest Guy',cursive" }}>🎮 MINI-GAME • Wagon</span>
+                </div>
+                <div className="pt-1">
                   <h4 className="font-bold text-white">Valley Navigation</h4>
-                  <p className="text-[10px] text-white/50 mt-0.5">+10 Explorer XP • +15 Legacy</p>
+                  <p className="text-[10px] text-white/50 mt-0.5">+10 Explorer XP • +2 Legacy</p>
                 </div>
-                <button onClick={() => handleTrain('explorer', 'Valley Navigation', 25, 10)} className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-black uppercase text-[10px] tracking-wider shrink-0">25 🪙</button>
+                <button onClick={() => handleTrain('explorer', 'Valley Navigation', 25, 10)}
+                  className="px-3 py-1.5 rounded-lg text-white font-black uppercase text-[10px] tracking-wider shrink-0 active:scale-95 transition"
+                  style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', boxShadow: '0 4px 0 rgba(0,0,0,0.5)' }}>25 🪙</button>
               </div>
+
+              {/* Geothermal Sanitizer — Study (no mini-game) */}
               <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between text-xs gap-3">
                 <div>
                   <h4 className="font-bold text-white">Geothermal Sanitizer</h4>
-                  <p className="text-[10px] text-white/50 mt-0.5">+10 Healer XP • +15 Legacy</p>
+                  <p className="text-[10px] text-white/50 mt-0.5">+10 Healer XP • +2 Legacy • 📖 Study</p>
                 </div>
                 <button onClick={() => handleTrain('healer', 'Geothermal Sanitizer', 20, 10)} className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white font-black uppercase text-[10px] tracking-wider shrink-0">20 🪙</button>
               </div>

@@ -25,6 +25,7 @@ import { GG_TravellerDeck_Economy } from '../components/desk/GG_TravellerDeck_Ec
 import { GG_TravellerDeck_Transport } from '../components/desk/GG_TravellerDeck_Transport';
 import { GG_TravellerDeck_Health } from '../components/desk/GG_TravellerDeck_Health';
 import { GG_TravellerDeck_MiniGames } from '../components/desk/GG_TravellerDeck_MiniGames';
+import { GG_TravellerDeck_ChoreModal } from '../components/desk/GG_TravellerDeck_ChoreModal';
 import { TownTalkModal } from '../components/TownTalkModal';
 import { 
   FONT, 
@@ -831,169 +832,25 @@ Calculate: 900 / 45`,
     <div className="h-full w-full flex items-center justify-center p-4 select-none">
       {activePuzzleChore ? (
         <div className="fixed inset-0 z-[300] bg-black/60 flex items-center justify-center p-4 select-none animate-fade-in">
-          <div className="w-[70vw] h-[70vh] rounded-[2.5rem] border-2 border-white/35 bg-black/80 shadow-[inset_0_1px_2px_rgba(255,255,255,0.25),_0_40px_120px_rgba(0,0,0,0.7)] p-8 flex flex-col justify-between text-left font-body overflow-hidden text-pink-100 relative">
-            {/* Top glow line */}
-            <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-pink-400 to-transparent" />
-
-            {/* Header */}
-            <div className="flex justify-between items-start border-b border-pink-950 pb-3 shrink-0">
-              <div>
-                <span className="text-[12px] font-black uppercase tracking-[0.25em] text-pink-300">
-                  Cottage Chore Activity HUD
-                </span>
-                <h2 className="text-xl font-brand text-yellow-200 mt-1 flex items-center gap-2 uppercase">
-                  <span>{activePuzzleChore.hotspot.emoji}</span> {activePuzzleChore.chore.title}
-                </h2>
-              </div>
-              <button
-                onClick={() => setActivePuzzleChore(null)}
-                className="w-9 h-9 hover:scale-110 active:scale-95 transition-all flex items-center justify-center bg-pink-950/80 border border-pink-500/30 text-pink-300 font-bold rounded-full text-base cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Main scrollable body container to prevent overflow in 70vh */}
-            <div className="flex-grow overflow-y-auto custom-scrollbar my-4 pr-2 space-y-5">
-              {/* Timer & XP Rewards row */}
-              <div className="flex justify-between items-center bg-[#4c0c1b]/60 border border-pink-900/40 px-4 py-2.5 rounded-2xl text-[15px] font-sans font-black tracking-wider">
-                <span className="text-cyan-300 flex items-center gap-1.5">
-                  <span>🏆</span> +{activePuzzleChore.chore.xpReward} {activePuzzleChore.chore.xpCategory.toUpperCase()} XP
-                </span>
-                <span className="text-yellow-400 flex items-center gap-1.5 font-mono font-bold">
-                  <span>⏰</span> Expires in: {formatTimer(puzzleSecondsLeft)}
-                </span>
-              </div>
-
-              {/* Chore Description */}
-              <div className="space-y-1">
-                <span className="text-[11px] font-bold text-pink-400 uppercase tracking-widest block">Chore Objective</span>
-                <p className="text-[15px] text-pink-200 leading-relaxed font-sans">{activePuzzleChore.chore.chore}</p>
-              </div>
-
-              {/* Question */}
-              <div className="bg-black/45 border border-pink-950/60 p-5 rounded-2xl space-y-4">
-                <span className="text-[11px] font-bold text-yellow-400 uppercase tracking-widest block">Puzzle Question</span>
-                <p className="text-[15px] text-white font-medium leading-relaxed font-sans">{activePuzzleChore.chore.question}</p>
-
-                {/* Input Fields / Buttons based on Type */}
-                <div className="pt-2">
-                  {activePuzzleChore.chore.type === 'calculation' ? (
-                    <div className="flex flex-col gap-2 font-sans">
-                      <label className="text-[11px] text-pink-400 uppercase font-black tracking-wider">Your Numerical Answer</label>
-                      <input
-                        type="text"
-                        placeholder="Enter numbers (e.g. 60 or 1.7)..."
-                        value={puzzleAnswer}
-                        onChange={(e) => {
-                          setPuzzleAnswer(e.target.value);
-                          setPuzzleError(null);
-                        }}
-                        disabled={answerRevealed}
-                        className="px-4 py-3 bg-black/60 border border-pink-900/50 rounded-xl text-[15px] text-white focus:outline-none focus:border-pink-500 w-full font-mono placeholder-pink-850"
-                      />
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-sans">
-                      {activePuzzleChore.chore.options?.map((opt) => {
-                        const isSelected = puzzleAnswer === opt;
-                        return (
-                          <button
-                            key={opt}
-                            disabled={answerRevealed}
-                            onClick={() => {
-                              setPuzzleAnswer(opt);
-                              setPuzzleError(null);
-                            }}
-                            className={`px-4 py-3 rounded-xl border text-[15px] text-left font-semibold transition-all duration-200 cursor-pointer ${
-                              isSelected
-                                ? 'bg-gradient-to-r from-pink-500 to-rose-600 border-white text-white shadow-[0_0_15px_rgba(236,72,153,0.5)] scale-[1.02]'
-                                : 'bg-[#1b050a] border-pink-950 text-pink-200/80 hover:bg-[#250810] hover:text-white hover:border-pink-900/55'
-                            }`}
-                          >
-                            {opt}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Hint / Reveal Answer Row */}
-              <div className="flex flex-wrap items-center gap-3 font-sans pt-1">
-                {showPuzzleHint ? (
-                  <div className="w-full p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-[15px] text-amber-250 leading-relaxed animate-fade-in">
-                    <span className="font-bold block text-[11px] uppercase tracking-wider text-amber-400 mb-1">💡 Hint Guide</span>
-                    {activePuzzleChore.chore.hint}
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      if (spendCoins(3, 'Chore Hint Unlocked')) {
-                        setShowPuzzleHint(true);
-                        triggerFeedback('💡 Hint unlocked! Spent 3 Coins.');
-                      } else {
-                        setPuzzleError('❌ Not enough coins! Need 3 coins for a hint.');
-                        triggerFeedback('❌ Not enough coins! Need 3 coins for a hint.');
-                      }
-                    }}
-                    className="text-[13px] text-amber-300 hover:text-amber-250 font-black flex items-center gap-1.5 transition px-3.5 py-2 bg-amber-950/40 border border-amber-900/30 rounded-xl cursor-pointer"
-                  >
-                    <span>💡</span> Unlock Hint (-3 🪙)
-                  </button>
-                )}
-
-                {!answerRevealed && (
-                  <button
-                    onClick={() => {
-                      if (spendCoins(5, 'Chore Answer Revealed')) {
-                        setPuzzleAnswer(activePuzzleChore.chore.answer);
-                        setAnswerRevealed(true);
-                        triggerFeedback('🔑 Answer revealed and filled! Spent 5 Coins.');
-                      } else {
-                        setPuzzleError('❌ Not enough coins! Need 5 coins to reveal answer.');
-                        triggerFeedback('❌ Not enough coins! Need 5 coins to reveal answer.');
-                      }
-                    }}
-                    className="text-[13px] text-cyan-300 hover:text-cyan-250 font-black flex items-center gap-1.5 transition px-3.5 py-2 bg-cyan-950/40 border border-cyan-900/30 rounded-xl cursor-pointer"
-                  >
-                    <span>🔑</span> Reveal Answer (-5 🪙)
-                  </button>
-                )}
-              </div>
-
-              {/* Error Callout */}
-              {puzzleError && (
-                <div className="text-[15px] text-rose-300 font-bold bg-rose-950/40 border border-rose-900/30 px-4 py-2.5 rounded-xl shrink-0 font-sans animate-shake">
-                  {puzzleError}
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="flex justify-between items-center gap-4 border-t border-pink-950 pt-4 shrink-0">
-              <button
-                onClick={() => setActivePuzzleChore(null)}
-                className="px-5 py-3 bg-pink-950 hover:bg-pink-900 text-pink-200 border border-pink-900/50 text-[15px] font-brand uppercase tracking-wider rounded-xl transition cursor-pointer"
-                style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-              >
-                Close & Return
-              </button>
-              <button
-                disabled={!puzzleAnswer.trim()}
-                onClick={handleVerifyPuzzle}
-                className={`px-6 py-3 text-black text-[15px] font-brand uppercase tracking-widest font-black rounded-xl transition shadow-md cursor-pointer ${
-                  puzzleAnswer.trim()
-                    ? 'bg-gradient-to-r from-yellow-300 to-amber-500 hover:scale-103 active:scale-97'
-                    : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
-                }`}
-                style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-              >
-                Verify & Complete Action
-              </button>
-            </div>
-          </div>
+          <GG_TravellerDeck_ChoreModal
+            activePuzzleChore={activePuzzleChore as any}
+            setActivePuzzleChore={setActivePuzzleChore}
+            triggerFeedback={triggerFeedback}
+            onChoreComplete={(hotspotId) => {
+              completeActionDirect(hotspotId);
+              addSkillXP(activePuzzleChore.chore.xpCategory, activePuzzleChore.chore.xpReward);
+              try {
+                const raw = localStorage.getItem('tt_hud_chores_state');
+                const state = raw ? JSON.parse(raw) : {};
+                if (state[hotspotId]) {
+                  state[hotspotId].completed = true;
+                  localStorage.setItem('tt_hud_chores_state', JSON.stringify(state));
+                }
+              } catch (e) {
+                console.error(e);
+              }
+            }}
+          />
         </div>
       ) : (
         <div 

@@ -24,7 +24,45 @@ export const GG_TravellerDeck_Politics: React.FC<Props> = ({
   popPage,
   triggerFeedback,
 }) => {
-  const { coins, spendCoins, addLegacy, legacyPoints } = useTTStore();
+  const { coins, spendCoins, addLegacy, legacyPoints, startResidencyTaskFlow } = useTTStore();
+
+  const startStandaloneDuty = (
+    name: string,
+    dutyType: string,
+    frame: string,
+    profession: string,
+    costCoins: number,
+    rewards: { coins: number; xp: number; legacy: number },
+    onSuccessCallback: () => void
+  ) => {
+    if (coins < costCoins) {
+      triggerFeedback(`❌ Need ${costCoins} Coins!`);
+      return;
+    }
+
+    startResidencyTaskFlow({
+      travelTask: undefined,
+      workTask: {
+        name,
+        type: 'work',
+        duration: 8000,
+        rewardCoins: rewards.coins,
+        rewardXP: rewards.xp,
+        rewardXPCat: profession,
+        rewardLegacy: rewards.legacy,
+        icon: '🏛️',
+        targetText: name,
+        hasMiniGame: true,
+        dutyType,
+      },
+      startDeductions: {
+        coins: costCoins,
+        inventory: {}
+      }
+    });
+    useTTStore.setState({ residencyTaskStage: 'progress' });
+    onSuccessCallback();
+  };
 
   const [decrees, setDecrees] = useState<Decree[]>([
     {
@@ -79,39 +117,53 @@ export const GG_TravellerDeck_Politics: React.FC<Props> = ({
       return;
     }
 
-    if (spendCoins(decree.cost, `Cast Vote: ${decree.title}`)) {
-      setDecrees(prev => prev.map(d => {
-        if (d.id === decreeId) {
-          return {
-            ...d,
-            votesFor: support ? d.votesFor + 1 : d.votesFor,
-            votesAgainst: !support ? d.votesAgainst + 1 : d.votesAgainst
-          };
-        }
-        return d;
-      }));
+    startStandaloneDuty(
+      `Cast Vote: ${decree.title}`,
+      "scaffolding",
+      "ledger",
+      "builder",
+      decree.cost,
+      { coins: 0, xp: 20, legacy: 2 },
+      () => {
+        setDecrees(prev => prev.map(d => {
+          if (d.id === decreeId) {
+            return {
+              ...d,
+              votesFor: support ? d.votesFor + 1 : d.votesFor,
+              votesAgainst: !support ? d.votesAgainst + 1 : d.votesAgainst
+            };
+          }
+          return d;
+        }));
 
-      const nextVotes = [...votedDecrees, decreeId];
-      setVotedDecrees(nextVotes);
-      localStorage.setItem('tt_voted_decrees', JSON.stringify(nextVotes));
-      addLegacy(25);
-      triggerFeedback(`🏛️ Vote cast successfully! Added +25 Legacy Standing.`);
-    }
+        const nextVotes = [...votedDecrees, decreeId];
+        setVotedDecrees(nextVotes);
+        localStorage.setItem('tt_voted_decrees', JSON.stringify(nextVotes));
+        triggerFeedback(`🏛️ Vote registered! Play the duty to log standing legacy.`);
+      }
+    );
   };
 
   const handleSignPetition = () => {
     if (petitionSigned) return;
-    if (coins < 50) {
-      triggerFeedback('❌ Filing a civic proposal requires 50 Coins for municipal review stamps!');
+    if (coins < 55) {
+      triggerFeedback('❌ Filing a civic proposal requires 55 Coins for municipal review stamps!');
       return;
     }
 
-    if (spendCoins(50, 'Filed Civic Proposal: Pave Canopy Sidewalks')) {
-      setPetitionSigned(true);
-      localStorage.setItem('tt_petition_signed', 'true');
-      addLegacy(120);
-      triggerFeedback('📜 Civic proposal submitted to Council Assembly! Earned +120 Legacy Standing.');
-    }
+    startStandaloneDuty(
+      "Submit Walkway Proposal",
+      "gear",
+      "ledger",
+      "builder",
+      55,
+      { coins: 0, xp: 45, legacy: 5 },
+      () => {
+        setPetitionSigned(true);
+        localStorage.setItem('tt_petition_signed', 'true');
+        triggerFeedback('📜 Proposal filed! Play the duty to log standing legacy.');
+      }
+    );
   };
 
   return (
@@ -164,19 +216,28 @@ export const GG_TravellerDeck_Politics: React.FC<Props> = ({
                           Vote Logged ✓
                         </span>
                       ) : (
-                        <div className="flex gap-1.5">
-                          <button
-                            onClick={() => handleVote(dec.id, true)}
-                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[9px] font-bold uppercase transition"
-                          >
-                            For 👍
-                          </button>
-                          <button
-                            onClick={() => handleVote(dec.id, false)}
-                            className="px-2.5 py-1 bg-red-800 hover:bg-red-700 text-white rounded-lg text-[9px] font-bold uppercase transition"
-                          >
-                            Against 👎
-                          </button>
+                        <div className="flex flex-col gap-1.5">
+                          {/* Game badge for vote action */}
+                          <div className="flex items-center gap-1">
+                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[7.5px] font-bold"
+                              style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', boxShadow: '0 0 8px rgba(124,58,237,0.5)' }}>
+                              🎮 MINI-GAME • Scaffolding
+                            </span>
+                          </div>
+                          <div className="flex gap-1.5">
+                            <button
+                              onClick={() => handleVote(dec.id, true)}
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[9px] font-bold uppercase transition"
+                            >
+                              For 👍
+                            </button>
+                            <button
+                              onClick={() => handleVote(dec.id, false)}
+                              className="px-2.5 py-1 bg-red-800 hover:bg-red-700 text-white rounded-lg text-[9px] font-bold uppercase transition"
+                            >
+                              Against 👎
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -220,20 +281,27 @@ export const GG_TravellerDeck_Politics: React.FC<Props> = ({
               </div>
             </div>
 
-            <button
-              onClick={handleSignPetition}
-              disabled={petitionSigned || coins < 50}
-              className={`w-full py-3 rounded-2xl font-brand font-black uppercase text-[10px] tracking-wider transition mt-4 ${
-                petitionSigned
-                  ? 'bg-emerald-650/25 border border-emerald-500/20 text-emerald-400/60 cursor-not-allowed'
-                  : coins >= 50
-                    ? 'bg-pink-600 hover:bg-pink-500 text-white shadow-glow cursor-pointer'
-                    : 'bg-neutral-800 text-white/40 cursor-not-allowed border border-white/5'
-              }`}
-              style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-            >
-              {petitionSigned ? '📜 Proposal Submitted!' : '🚀 Submit Civic Proposal (50🪙)'}
-            </button>
+            <div className="relative mt-4">
+              <div className="absolute -top-2.5 left-4 z-10 flex items-center gap-1 px-2.5 py-0.5 rounded-full"
+                style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', boxShadow: '0 0 12px rgba(124,58,237,0.6)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                <span className="text-[8px]" style={{ fontFamily: "'Luckiest Guy',cursive" }}>🎮 MINI-GAME</span>
+                <span className="text-[8px] text-purple-200 font-bold">• Gear</span>
+              </div>
+              <button
+                onClick={handleSignPetition}
+                disabled={petitionSigned || coins < 50}
+                className={`w-full pt-5 pb-3 px-4 rounded-2xl font-brand font-black uppercase text-[10px] tracking-wider transition ${
+                  petitionSigned
+                    ? 'bg-emerald-650/25 border border-emerald-500/20 text-emerald-400/60 cursor-not-allowed'
+                    : coins >= 50
+                      ? 'cursor-pointer active:scale-95'
+                      : 'bg-neutral-800 text-white/40 cursor-not-allowed border border-white/5'
+                }`}
+                style={coins >= 50 && !petitionSigned ? { background: 'linear-gradient(135deg,rgba(236,72,153,0.25),rgba(219,39,119,0.15))', border: '2px solid rgba(236,72,153,0.4)', boxShadow: '0 6px 0 rgba(0,0,0,0.4)', fontFamily: '"Josefin Sans", sans-serif' } : { fontFamily: '"Josefin Sans", sans-serif' }}
+              >
+                {petitionSigned ? '📜 Proposal Submitted!' : '🚀 Submit Civic Proposal (50🪙)'}
+              </button>
+            </div>
           </div>
 
           <div className="text-[10px] text-white/45 text-center border-t border-white/5 pt-3">

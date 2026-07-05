@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand';
 import type { TTStore } from '../useTTStore';
-import type { TaskItem, RewardItem, StampItem, TownId } from '../types';
+import type { TaskItem, RewardItem, StampItem, TownId, CompletedDuty, WorkdayArchiveEntry } from '../types';
 import { saveUserState } from '../storeUtils';
 import { updateResidentJournal } from '../../utils/journalHelper';
 
@@ -11,6 +11,9 @@ export interface TaskQueueSlice {
   pendingRewards: RewardItem[];
   completedActions: string[];
   walkwayStatus: 'pending' | 'supported' | 'ignored';
+  completedDutiesToday: CompletedDuty[];
+  workdayArchive: WorkdayArchiveEntry[];
+  sleepAndCompleteWorkday: () => void;
 
   // Residency Task Flow States
   activeResidencyTask: {
@@ -61,8 +64,61 @@ export const createTaskQueueSlice: StateCreator<
   pendingRewards: [],
   completedActions: [],
   walkwayStatus: 'pending',
+  completedDutiesToday: [],
+  workdayArchive: [],
   activeResidencyTask: null,
   residencyTaskStage: null,
+
+  sleepAndCompleteWorkday: () => {
+    const s = get();
+    const duties = s.completedDutiesToday;
+    if (duties.length === 0) return;
+
+    const totalCoins = duties.reduce((acc, d) => acc + d.coins, 0);
+    const totalLegacy = duties.reduce((acc, d) => acc + d.legacy, 0);
+    
+    // Group XP by category
+    const totalXP: Record<string, number> = {};
+    duties.forEach(d => {
+      if (d.xp > 0 && d.xpCat) {
+        totalXP[d.xpCat] = (totalXP[d.xpCat] || 0) + d.xp;
+      }
+    });
+
+    const dayNumber = s.workdayArchive.length + 1;
+    
+    // Use local time for the calendar entry date string
+    const dateStr = new Date().toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+
+    // Prosperity is +1.5% per duty, max +10%
+    const prosperityGain = Math.min(10, Number((duties.length * 1.5).toFixed(1)));
+
+    const newArchiveEntry: WorkdayArchiveEntry = {
+      dayNumber,
+      dateStr,
+      duties,
+      totalCoins,
+      totalXP,
+      totalLegacy,
+      prosperityGain
+    };
+
+    // Award bonus legacy points (+10 standing points for completing the day!)
+    const nextLegacy = s.legacyPoints + 10;
+
+    set(state => ({
+      completedDutiesToday: [],
+      workdayArchive: [...state.workdayArchive, newArchiveEntry],
+      legacyPoints: nextLegacy
+    }));
+
+    const nextState = get();
+    if (nextState.user) saveUserState(nextState.user.uid, nextState);
+  },
 
   claimDailyStamp: (townId, icon, color) => {
     const todayStr = new Date().toISOString().slice(0, 10);
@@ -146,6 +202,10 @@ export const createTaskQueueSlice: StateCreator<
           destinationSubPage: current.destinationSubPage,
           originSubPage: current.originSubPage,
           transitFare: current.transitFare,
+          targetText: current.targetText,
+          profession: current.profession,
+          dutyType: current.dutyType,
+          frame: current.frame,
         });
 
         if (current.destinationTownId) {
@@ -175,10 +235,25 @@ export const createTaskQueueSlice: StateCreator<
         let nextWalkwayStatus = s.walkwayStatus;
         const nextEarnedBadges = [...s.earnedBadges];
         let nextLocation = s.currentLocation || 'home';
+        const nextCompletedDutiesToday = [...s.completedDutiesToday];
 
         rewardsToClaim.forEach((r) => {
           // Apply premium passport modifier (50% bonus legacy)
           const bonusLegacy = s.premiumPassport ? Math.ceil(r.legacy * 1.5) : r.legacy;
+
+          if (r.type === 'work' || r.type === 'study') {
+            const duty: CompletedDuty = {
+              name: r.name,
+              profession: (r as any).profession || 'general',
+              coins: r.coins,
+              xp: r.xp,
+              xpCat: r.xpCat || 'general',
+              legacy: bonusLegacy,
+              location: (r as any).targetText || 'Ganache Grove',
+              timestamp: Date.now()
+            };
+            nextCompletedDutiesToday.push(duty);
+          }
           
           if (r.destinationSubPage) {
             nextLocation = r.destinationSubPage;
@@ -236,6 +311,7 @@ export const createTaskQueueSlice: StateCreator<
           walkwayStatus: nextWalkwayStatus,
           earnedBadges: nextEarnedBadges,
           currentLocation: nextLocation,
+          completedDutiesToday: nextCompletedDutiesToday,
         };
 
         if (finalHomeTown) {

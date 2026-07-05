@@ -25,7 +25,65 @@ export const GG_TravellerDeck_Health: React.FC<Props> = ({
   popPage,
   triggerFeedback,
 }) => {
-  const { addSkillXP, addCoins, coins } = useTTStore();
+  const { addSkillXP, addCoins, coins, startResidencyTaskFlow } = useTTStore();
+
+  const startStandaloneDuty = (
+    name: string,
+    dutyType: string,
+    frame: string,
+    profession: string,
+    costCoins: number,
+    costInv: Record<string, number>,
+    rewards: { coins: number; xp: number; legacy: number }
+  ) => {
+    if (coins < costCoins) {
+      triggerFeedback(`❌ Need ${costCoins} Coins!`);
+      return;
+    }
+    
+    if (name.includes("Brew")) {
+      if (herbs.spores < 1 || herbs.mint < 1 || herbs.bark < 1) {
+        triggerFeedback('❌ Need 1 Spore, 1 Mint, and 1 Bark to brew a Spore Remedy!');
+        return;
+      }
+      setHerbs(prev => ({
+        spores: prev.spores - 1,
+        mint: prev.mint - 1,
+        bark: prev.bark - 1
+      }));
+      setRemedies(prev => prev + 1);
+    } else if (name.includes("Forage")) {
+      const herbPool = ['spores', 'mint', 'bark'];
+      const picked = herbPool[Math.floor(Math.random() * herbPool.length)];
+      setHerbs(prev => ({ ...prev, [picked]: prev[picked] + 1 }));
+      const herbName = picked === 'spores' ? 'Glowing Spores 🧪' : picked === 'mint' ? 'Velvet Mint Leaf 🌿' : 'Sugar Willow Bark 🪵';
+      setTimeout(() => {
+        triggerFeedback(`✓ Foraged: ${herbName}!`);
+      }, 500);
+    }
+
+    startResidencyTaskFlow({
+      travelTask: undefined,
+      workTask: {
+        name,
+        type: 'work',
+        duration: 8000,
+        rewardCoins: rewards.coins,
+        rewardXP: rewards.xp,
+        rewardXPCat: profession,
+        rewardLegacy: rewards.legacy,
+        icon: '🩺',
+        targetText: name,
+        hasMiniGame: true,
+        dutyType,
+      },
+      startDeductions: {
+        coins: costCoins,
+        inventory: {}
+      }
+    });
+    useTTStore.setState({ residencyTaskStage: 'progress' });
+  };
 
   // Local Clinic Inventory
   const [herbs, setHerbs] = useState<Record<string, number>>({ spores: 2, mint: 1, bark: 0 });
@@ -174,23 +232,27 @@ export const GG_TravellerDeck_Health: React.FC<Props> = ({
               </div>
             </div>
 
-            {/* Forage Action */}
-            {foraging ? (
-              <div className="mt-4 p-4 bg-neutral-900 border border-white/5 rounded-2xl text-center space-y-2">
-                <div className="text-[9px] text-emerald-300 font-bold uppercase animate-pulse">Foraging Canopy walkways...</div>
-                <div className="w-full h-1.5 bg-neutral-950 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-400 animate-key-slide-in" style={{ width: '100%' }} />
-                </div>
+            {/* Forage Action — MINI-GAME TASK */}
+            <div className="mt-4 relative">
+              <div className="absolute -top-2.5 left-4 z-10 flex items-center gap-1 px-2.5 py-0.5 rounded-full"
+                style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', boxShadow: '0 0 12px rgba(124,58,237,0.6)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                <span className="text-[8px]" style={{ fontFamily: "'Luckiest Guy',cursive" }}>🎮 MINI-GAME</span>
+                <span className="text-[8px] text-purple-200 font-bold">• Adventure</span>
               </div>
-            ) : (
               <button
-                onClick={handleForageHerbs}
-                className="w-full mt-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-brand font-black uppercase text-[10px] tracking-wider transition"
-                style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-              >
-                🌲 Search Forest Canopy (5🪙 Fee)
+                onClick={() => startStandaloneDuty("Forage Canopy Herbs","adventure","clipboard","healer",5,{},{ coins: 20, xp: 30, legacy: 2 })}
+                className="w-full pt-5 pb-3 px-4 rounded-2xl flex items-center justify-between cursor-pointer transition-all active:scale-95"
+                style={{ background: 'linear-gradient(135deg,rgba(5,150,105,0.25),rgba(4,120,87,0.15))', border: '2px solid rgba(52,211,153,0.35)', boxShadow: '0 6px 0 rgba(0,0,0,0.4)' }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🌲</span>
+                  <div className="text-left">
+                    <p className="text-emerald-300 font-black text-[10px] uppercase tracking-wide" style={{ fontFamily: "'Josefin Sans',sans-serif" }}>Search Forest Canopy</p>
+                    <p className="text-white/40 text-[8.5px]">5🪙 Fee • Gain Herbs</p>
+                  </div>
+                </div>
+                <span className="text-emerald-400 font-bold text-[9px] px-2 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30">+30 XP</span>
               </button>
-            )}
+            </div>
           </div>
 
           <div className="text-[10px] text-white/40 text-center border-t border-white/5 pt-3">
@@ -212,23 +274,27 @@ export const GG_TravellerDeck_Health: React.FC<Props> = ({
                 </p>
               </div>
 
-              {/* Cauldron Brewing status */}
-              {brewing ? (
-                <div className="py-2 space-y-2">
-                  <div className="text-[9px] text-purple-300 font-bold uppercase animate-pulse">Heating cauldron...</div>
-                  <div className="w-full h-2 bg-neutral-900 rounded-full overflow-hidden relative">
-                    <div className="h-full bg-purple-500 animate-key-slide-in" style={{ width: '100%' }} />
-                  </div>
+              {/* Cauldron Brewing status — MINI-GAME TASK */}
+              <div className="relative">
+                <div className="absolute -top-2.5 left-4 z-10 flex items-center gap-1 px-2.5 py-0.5 rounded-full"
+                  style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', boxShadow: '0 0 12px rgba(124,58,237,0.6)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <span className="text-[8px]" style={{ fontFamily: "'Luckiest Guy',cursive" }}>🎮 MINI-GAME</span>
+                  <span className="text-[8px] text-purple-200 font-bold">• Boiler</span>
                 </div>
-              ) : (
                 <button
-                  onClick={handleBrewRemedy}
-                  className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-brand font-black uppercase text-[9px] tracking-wider transition"
-                  style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-                >
-                  🧪 Brew Remedy (Consumes 1-1-1)
+                  onClick={() => startStandaloneDuty("Brew Cauldron Remedy","boiler","clipboard","healer",0,{ spores: 1, mint: 1, bark: 1 },{ coins: 35, xp: 45, legacy: 3 })}
+                  className="w-full pt-5 pb-3 px-4 rounded-2xl flex items-center justify-between cursor-pointer transition-all active:scale-95"
+                  style={{ background: 'linear-gradient(135deg,rgba(124,58,237,0.2),rgba(109,40,217,0.15))', border: '2px solid rgba(139,92,246,0.35)', boxShadow: '0 6px 0 rgba(0,0,0,0.4)' }}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🧪</span>
+                    <div className="text-left">
+                      <p className="text-purple-300 font-black text-[10px] uppercase tracking-wide" style={{ fontFamily: "'Josefin Sans',sans-serif" }}>Brew Remedy</p>
+                      <p className="text-white/40 text-[8.5px]">Consumes 1-1-1 herbs</p>
+                    </div>
+                  </div>
+                  <span className="text-purple-400 font-bold text-[9px] px-2 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30">+45 XP</span>
                 </button>
-              )}
+              </div>
             </div>
           </div>
 

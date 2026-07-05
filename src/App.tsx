@@ -1,20 +1,19 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, Suspense, lazy } from 'react';
 import { useTTStore } from './store/useTTStore';
 import type { AppPage } from './store/useTTStore';
 import { type SubPage } from './lib/uiConstants';
 
 
-// Pages
-import WelcomeShow    from './pages/WelcomeShow';
-import ChooseTown     from './pages/ChooseTown';
-import TownTalkEntrancePage from './pages/TownTalkEntrancePage';
-import TravellersDesk from './pages/TravellersDesk';
-import LeaderboardPage from './pages/LeaderboardPage';
-import CoinsPage       from './pages/CoinsPage';
-import CharactersPage  from './pages/CharactersPage';
-import BadgesPage      from './pages/BadgesPage';
-import PipkinChatPage  from './pages/CocoaChatPage';
-import NavBar          from './components/NavBar';
+// Pages - Lazy loaded for optimization
+const WelcomeShow = lazy(() => import('./pages/WelcomeShow'));
+const ChooseTown = lazy(() => import('./pages/ChooseTown'));
+const TownTalkEntrancePage = lazy(() => import('./pages/TownTalkEntrancePage'));
+const TravellersDesk = lazy(() => import('./pages/TravellersDesk'));
+const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
+const CoinsPage = lazy(() => import('./pages/CoinsPage'));
+const CharactersPage = lazy(() => import('./pages/CharactersPage'));
+const BadgesPage = lazy(() => import('./pages/BadgesPage'));
+const PipkinChatPage = lazy(() => import('./pages/CocoaChatPage'));import NavBar          from './components/NavBar';
 import BgCanvas        from './components/BgCanvas';
 import LoginPage       from './components/LoginPage';
 import LoadingSpinner   from './components/LoadingSpinner';
@@ -24,6 +23,7 @@ import { JourneyPopup } from './components/desk/home/JourneyPopup';
 import { TownGuideModal } from './components/TownGuideModal';
 import { DailyChoresModal } from './components/DailyChoresModal';
 import { ResidencyTaskModal } from './components/ResidencyTaskModal';
+import { TownTourTracker } from './components/TownTourTracker';
 import { ALL_TIMED_EVENTS } from './data/events/townEvents';
 import { getDailyWorldEvents } from './store/slices/worldTimeSlice';
 
@@ -70,6 +70,7 @@ const App: React.FC = () => {
     setRoadmapNPCData,
     showTownGuide,
     showDailyChores,
+    showTownTour,
     residencyTaskStage
   } = useTTStore();
 
@@ -113,7 +114,7 @@ const App: React.FC = () => {
         const nextBg = pool[Math.floor(Math.random() * pool.length)] || LOVELY_WALLPAPERS[0];
         const img = new Image();
         img.onload = () => {
-          console.log("Wallpaper rotated to:", nextBg);
+          // Wallpaper loaded
         };
         img.src = nextBg;
         return nextBg;
@@ -130,19 +131,17 @@ const App: React.FC = () => {
   // ── Monitor popup states and record closed time when going from open to closed ──
   const prevPopupsOpenRef = useRef(false);
   useEffect(() => {
-    const isAnyPopupOpen = !!(showHelpModal || activeTimedEvent || activeResolution || showRoadmapModal || showTownGuide || showDailyChores);
+    const isAnyPopupOpen = !!(showHelpModal || activeTimedEvent || activeResolution || showRoadmapModal || showTownGuide || showDailyChores || showTownTour);
     if (prevPopupsOpenRef.current && !isAnyPopupOpen) {
-      console.log("All popups closed. Recording closed time.");
       recordPopupClosed();
     }
     prevPopupsOpenRef.current = isAnyPopupOpen;
-  }, [showHelpModal, activeTimedEvent, activeResolution, showRoadmapModal, showTownGuide, showDailyChores]);
+  }, [showHelpModal, activeTimedEvent, activeResolution, showRoadmapModal, showTownGuide, showDailyChores, showTownTour]);
 
   // ── Auto-close effect for system-triggered popups (max 90 seconds display time) ──
   useEffect(() => {
     if (activeTimedEvent || activeResolution) {
       const timer = setTimeout(() => {
-        console.log("Auto-closing active system popup due to 90s timeout...");
         if (activeTimedEvent) {
           setActiveTimedEvent(null);
         }
@@ -202,7 +201,7 @@ const App: React.FC = () => {
     checkTimedEvents();
     const checkInterval = setInterval(checkTimedEvents, 10000);
     return () => clearInterval(checkInterval);
-  }, [user, welcomeDone, currentPage, setActiveTimedEvent, showHelpModal, activeTimedEvent, activeResolution, showRoadmapModal, showTownGuide, showDailyChores]);
+  }, [user, welcomeDone, currentPage, setActiveTimedEvent, showHelpModal, activeTimedEvent, activeResolution, showRoadmapModal, showTownGuide, showDailyChores, showTownTour]);
 
   // ── Simulation Event Timeline pop-ups (on-time and 10 mins before) ──
   useEffect(() => {
@@ -364,7 +363,7 @@ const App: React.FC = () => {
   }
 
   const showNav = welcomeDone && currentPage !== 'welcome' && currentPage !== 'choose-town' && currentPage !== 'town-talk-entrance' && !residencyTaskStage;
-  const isPopupActive = !!(showHelpModal || activeTimedEvent || activeResolution || showRoadmapModal || showTownGuide || showDailyChores);
+  const isPopupActive = !!(showHelpModal || activeTimedEvent || activeResolution || showRoadmapModal || showTownGuide || showDailyChores || showTownTour);
 
   return (
     <div className="relative w-full h-screen overflow-hidden flex flex-col">
@@ -372,35 +371,47 @@ const App: React.FC = () => {
       {/* ── Global animated background ── */}
       <BgCanvas bgUrl={bgUrl} />
 
-      {/* ── Top Nav (shown after onboarding) ── */}
-      {showNav && !isPopupActive && (
-        <div>
-          <NavBar
-            currentPage={currentPage}
-            onNav={(page) => setPage(page as AppPage)}
-            homeTown={useTTStore.getState().homeTown}
-            hidden={headerHidden}
-          />
-        </div>
-      )}
-
-      {/* ── Page Content ── */}
-      <div className={`relative z-10 flex-1 overflow-y-auto custom-scrollbar ${showNav ? '' : 'h-full'} ${isPopupActive ? 'hidden pointer-events-none' : ''}`}>
-        {residencyTaskStage ? (
-          <ResidencyTaskModal />
-        ) : (
-          <>
-            {currentPage === 'welcome'      && <WelcomeShow />}
-            {currentPage === 'choose-town' && <ChooseTown />}
-            {currentPage === 'town-talk-entrance' && <TownTalkEntrancePage />}
-            {currentPage === 'desk'         && <TravellersDesk />}
-            {currentPage === 'leaderboard'  && <LeaderboardPage />}
-            {currentPage === 'coins'        && <CoinsPage />}
-            {currentPage === 'characters'   && <CharactersPage />}
-            {currentPage === 'badges'       && <BadgesPage />}
-            {currentPage === 'pipkin-chat'   && <PipkinChatPage />}
-          </>
+      {/* ── Page Layout Wrapper (Blurs & zoom-out scale when modal is active) ── */}
+      <div className={`relative z-10 flex-1 flex flex-col min-h-0 transition-all duration-500 origin-center ${
+        isPopupActive ? 'blur-[8px] brightness-[0.4] scale-[0.985] pointer-events-none select-none' : ''
+      }`}>
+        {/* ── Top Nav (shown after onboarding) ── */}
+        {showNav && (
+          <div>
+            <NavBar
+              currentPage={currentPage}
+              onNav={(page) => setPage(page as AppPage)}
+              homeTown={useTTStore.getState().homeTown}
+              hidden={headerHidden}
+            />
+          </div>
         )}
+
+        {/* ── Page Content ── */}
+        <div className={`flex-1 overflow-y-auto custom-scrollbar ${showNav ? '' : 'h-full'}`}>
+          {residencyTaskStage ? (
+            <ResidencyTaskModal />
+          ) : (
+            <>
+              <Suspense fallback={
+                <div className="w-full h-full flex flex-col items-center justify-center p-8 text-neutral-400 font-brand">
+                  <div className="w-12 h-12 rounded-full border-2 border-amber-500/20 border-t-amber-500 animate-spin mb-4" />
+                  <span className="text-xs uppercase tracking-widest">Entering Ganache Grove...</span>
+                </div>
+              }>
+                {currentPage === 'welcome'      && <WelcomeShow />}
+              {currentPage === 'choose-town' && <ChooseTown />}
+              {currentPage === 'town-talk-entrance' && <TownTalkEntrancePage />}
+              {currentPage === 'desk'         && <TravellersDesk />}
+              {currentPage === 'leaderboard'  && <LeaderboardPage />}
+              {currentPage === 'coins'        && <CoinsPage />}
+              {currentPage === 'characters'   && <CharactersPage />}
+              {currentPage === 'badges'       && <BadgesPage />}
+              {currentPage === 'pipkin-chat'   && <PipkinChatPage />}
+              </Suspense>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Global resting unhide star when website header is hidden */}
@@ -625,9 +636,9 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* Standalone Town Guide Modal Overlay */}
-      {showTownGuide && (
-        <TownGuideModal />
+      {/* Unified Resident Journal Modal Overlay */}
+      {(showTownTour || showTownGuide) && (
+        <TownTourTracker defaultTab={showTownGuide ? 'guide' : 'today'} />
       )}
 
       {/* Standalone Daily Chores Modal Overlay */}

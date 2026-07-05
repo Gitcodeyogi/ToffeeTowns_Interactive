@@ -236,7 +236,46 @@ export const GG_TravellerDeck_Shop: React.FC<GG_TravellerDeck_ShopProps> = ({
     buyPass,
     worldTime,
     setHeaderHidden,
+    startResidencyTaskFlow,
   } = useTTStore();
+
+  const startStandaloneDuty = (
+    name: string,
+    dutyType: string,
+    frame: string,
+    profession: string,
+    costCoins: number,
+    rewards: { coins: number; xp: number; legacy: number },
+    onSuccessCallback: () => void
+  ) => {
+    if (coins < costCoins) {
+      triggerFeedback(`❌ Need ${costCoins} Coins!`);
+      return;
+    }
+
+    startResidencyTaskFlow({
+      travelTask: undefined,
+      workTask: {
+        name,
+        type: 'work',
+        duration: 8000,
+        rewardCoins: rewards.coins,
+        rewardXP: rewards.xp,
+        rewardXPCat: profession,
+        rewardLegacy: rewards.legacy,
+        icon: '🛒',
+        targetText: name,
+        hasMiniGame: true,
+        dutyType,
+      },
+      startDeductions: {
+        coins: costCoins,
+        inventory: {}
+      }
+    });
+    useTTStore.setState({ residencyTaskStage: 'progress' });
+    onSuccessCallback();
+  };
 
   const [shopTab, setShopTab] = useState<'produce' | 'improvements' | 'estates' | 'permits'>('produce');
 
@@ -575,30 +614,22 @@ export const GG_TravellerDeck_Shop: React.FC<GG_TravellerDeck_ShopProps> = ({
       title: 'Trade Delivery',
       desc: 'Deliver cocoa crates to Riverside Docks.',
       coins: 60,
-      legacy: 5,
+      legacy: 3,
       requires: { 'cocoa-pods': 2 },
       emoji: '🦫',
-      color: 'border-emerald-500/20 text-emerald-400'
+      color: 'border-emerald-500/20 text-emerald-400',
+      gameType: 'wagon',
     },
     {
       id: 1,
       title: 'Caravan Supply Run',
       desc: 'Supply goods to the Forest Caravan.',
       coins: 90,
-      legacy: 8,
+      legacy: 4,
       requires: { 'cocoa-pods': 1, 'honey-syrup': 1 },
       emoji: '🐎',
-      color: 'border-amber-500/20 text-amber-400'
-    },
-    {
-      id: 2,
-      title: 'Festival Goods Delivery',
-      desc: 'Deliver festival supplies to Town Square.',
-      coins: 120,
-      legacy: 10,
-      requires: { 'sweetbread': 1, 'lavender-bunch': 1 },
-      emoji: '🎁',
-      color: 'border-rose-500/20 text-rose-400'
+      color: 'border-amber-500/20 text-amber-400',
+      gameType: 'gear',
     }
   ];
 
@@ -617,24 +648,31 @@ export const GG_TravellerDeck_Shop: React.FC<GG_TravellerDeck_ShopProps> = ({
       }
     }
 
-    setInventory((prev) => {
-      const updated = { ...prev };
-      for (const [itemId, qty] of Object.entries(reqItems)) {
-        updated[itemId] = Math.max(0, updated[itemId] - qty);
+    const opt = opportunities.find(o => o.id === index);
+    if (!opt) return;
+
+    startStandaloneDuty(
+      name,
+      opt.gameType,
+      "wooden",
+      "explorer",
+      0,
+      { coins: coinsReward, xp: 30, legacy: legacyReward },
+      () => {
+        setInventory((prev) => {
+          const updated = { ...prev };
+          for (const [itemId, qty] of Object.entries(reqItems)) {
+            updated[itemId] = Math.max(0, updated[itemId] - qty);
+          }
+          return updated;
+        });
+        setCompletedContracts(prev => ({ ...prev, [index]: true }));
+        setEarningsToday(prev => prev + coinsReward);
+        setTotalTradesToday(prev => prev + 1);
+        addMerchantXP(30);
+        triggerFeedback(`✅ Delivery registered! Play the duty to log standing legacy.`);
       }
-      return updated;
-    });
-
-    addCoins(coinsReward, `Completed market contract: ${name}`);
-    addLegacy(legacyReward);
-    setEarningsToday(prev => prev + coinsReward);
-    setTotalTradesToday(prev => prev + 1);
-    addMerchantXP(30);
-    setCompletedContracts(prev => ({ ...prev, [index]: true }));
-
-    cozyAudio.playCoins();
-    cozyAudio.playChime();
-    triggerFeedback(`✅ Delivered contract! Earned 🪙 ${coinsReward} and ⭐ ${legacyReward} Legacy.`);
+    );
   };
 
   const getWallpaper = () => {
@@ -785,13 +823,19 @@ export const GG_TravellerDeck_Shop: React.FC<GG_TravellerDeck_ShopProps> = ({
                                 ✓ Completed
                               </button>
                             ) : (
-                              <button
-                                onClick={() => handleCompleteContract(opt.id, opt.requires as unknown as Record<string, number>, opt.coins, opt.legacy, opt.title)}
-                                className="w-full py-1 bg-amber-500 hover:bg-amber-400 text-black text-[8px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 font-bold"
-                                style={{ fontFamily: '"Josefin Sans", sans-serif' }}
-                              >
-                                Deliver
-                              </button>
+                              <div className="relative">
+                                <div className="absolute -top-2 left-2 z-10 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
+                                  style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', boxShadow: '0 0 6px rgba(124,58,237,0.7)' }}>
+                                  <span className="text-[6.5px]" style={{ fontFamily: "'Luckiest Guy',cursive" }}>🎮 MINI-GAME</span>
+                                </div>
+                                <button
+                                  onClick={() => handleCompleteContract(opt.id, opt.requires as unknown as Record<string, number>, opt.coins, opt.legacy, opt.title)}
+                                  className="w-full pt-3.5 pb-1 rounded-lg text-white text-[8px] font-black uppercase tracking-wider transition-all active:scale-95"
+                                  style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.9),rgba(217,119,6,0.9))', boxShadow: '0 3px 0 rgba(0,0,0,0.5)', fontFamily: '"Josefin Sans", sans-serif' }}
+                                >
+                                  🚚 Deliver
+                                </button>
+                              </div>
                             )}
                           </div>
                         </div>

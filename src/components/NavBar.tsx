@@ -108,6 +108,16 @@ const NavBar: React.FC<Props> = ({ currentPage, onNav, homeTown: _homeTown, hidd
           👤 <span>My Profile</span>
         </button>
         <button
+          onClick={() => {
+            cozyAudio.playClick();
+            useTTStore.getState().logout();
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/15 border border-red-500/35 hover:bg-red-500/25 text-red-300 text-xs font-black transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-md"
+          title="Sign Out"
+        >
+          🚪 <span>Logout</span>
+        </button>
+        <button
           onClick={() => { cozyAudio.playClick(); useTTStore.getState().setShowHelpModal(true); }}
           className="w-8 h-8 rounded-full border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/25 flex items-center justify-center cursor-pointer shadow-[0_2px_10px_rgba(245,158,11,0.15)] hover:scale-110 active:scale-95 transition-all duration-300 text-xs"
           title="Guide & System Architecture"

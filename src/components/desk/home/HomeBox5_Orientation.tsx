@@ -1,6 +1,6 @@
 import React from 'react';
-import { FONT } from '../../../pages/TravellersDesk';
-import type { SubPage } from '../../../pages/TravellersDesk';
+import { FONT } from '../../../lib/uiConstants';
+import type { SubPage } from '../../../lib/uiConstants';
 import { useTTStore } from '../../../store/useTTStore';
 
 interface MatterItem {

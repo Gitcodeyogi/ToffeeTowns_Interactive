@@ -23,6 +23,9 @@ interface Activity {
   xp: number;
   legacy: number;
   icon: string;
+  dutyType?: string;
+  frame?: string;
+  profession?: string;
 }
 
 const ACTIVITIES: Activity[] = [
@@ -39,7 +42,10 @@ const ACTIVITIES: Activity[] = [
     coins: 30,
     xp: 15,
     legacy: 15,
-    icon: '📋'
+    icon: '📋',
+    dutyType: 'scaffolding',
+    frame: 'theater',
+    profession: 'builder'
   },
   {
     id: 'builder-basics',
@@ -53,7 +59,10 @@ const ACTIVITIES: Activity[] = [
     coins: 20,
     xp: 20,
     legacy: 15,
-    icon: '📐'
+    icon: '📐',
+    dutyType: 'scaffolding',
+    frame: 'wooden',
+    profession: 'builder'
   },
   {
     id: 'builder-cargo',
@@ -67,7 +76,10 @@ const ACTIVITIES: Activity[] = [
     coins: 35,
     xp: 15,
     legacy: 10,
-    icon: '📦'
+    icon: '📦',
+    dutyType: 'wagon',
+    frame: 'wooden',
+    profession: 'builder'
   },
   {
     id: 'builder-merchant',
@@ -81,7 +93,10 @@ const ACTIVITIES: Activity[] = [
     coins: 35,
     xp: 15,
     legacy: 10,
-    icon: '🛍️'
+    icon: '🛍️',
+    dutyType: 'wagon',
+    frame: 'wooden',
+    profession: 'builder'
   },
   {
     id: 'builder-bell',
@@ -95,7 +110,10 @@ const ACTIVITIES: Activity[] = [
     coins: 15,
     xp: 10,
     legacy: 10,
-    icon: '⚙️'
+    icon: '⚙️',
+    dutyType: 'gear',
+    frame: 'wooden',
+    profession: 'builder'
   },
   {
     id: 'builder-press',
@@ -109,7 +127,10 @@ const ACTIVITIES: Activity[] = [
     coins: 25,
     xp: 15,
     legacy: 10,
-    icon: '⚙️'
+    icon: '⚙️',
+    dutyType: 'gear',
+    frame: 'ledger',
+    profession: 'builder'
   },
   {
     id: 'builder-dredge',
@@ -123,7 +144,10 @@ const ACTIVITIES: Activity[] = [
     coins: 35,
     xp: 20,
     legacy: 10,
-    icon: '🧹'
+    icon: '🧹',
+    dutyType: 'steam',
+    frame: 'wooden',
+    profession: 'builder'
   },
 
   // ── EXPLORER JOURNEYS ──
@@ -139,7 +163,10 @@ const ACTIVITIES: Activity[] = [
     coins: 20,
     xp: 10,
     legacy: 10,
-    icon: '🏛️'
+    icon: '🏛️',
+    dutyType: 'adventure',
+    frame: 'theater',
+    profession: 'explorer'
   },
   {
     id: 'explorer-rail',
@@ -153,7 +180,10 @@ const ACTIVITIES: Activity[] = [
     coins: 20,
     xp: 10,
     legacy: 15,
-    icon: '🗺️'
+    icon: '🗺️',
+    dutyType: 'monorail',
+    frame: 'wooden',
+    profession: 'explorer'
   },
   {
     id: 'explorer-trade',
@@ -167,7 +197,10 @@ const ACTIVITIES: Activity[] = [
     coins: 25,
     xp: 10,
     legacy: 10,
-    icon: '📄'
+    icon: '📄',
+    dutyType: 'wagon',
+    frame: 'ledger',
+    profession: 'explorer'
   },
   {
     id: 'explorer-mayor',
@@ -181,7 +214,10 @@ const ACTIVITIES: Activity[] = [
     coins: 3,
     xp: 10,
     legacy: 15,
-    icon: '📢'
+    icon: '📢',
+    dutyType: 'adventure',
+    frame: 'theater',
+    profession: 'explorer'
   },
   {
     id: 'explorer-notice',
@@ -195,7 +231,10 @@ const ACTIVITIES: Activity[] = [
     coins: 15,
     xp: 10,
     legacy: 10,
-    icon: '📯'
+    icon: '📯',
+    dutyType: 'adventure',
+    frame: 'ledger',
+    profession: 'explorer'
   },
   {
     id: 'explorer-gossip',
@@ -209,7 +248,10 @@ const ACTIVITIES: Activity[] = [
     coins: 25,
     xp: 15,
     legacy: 15,
-    icon: '💬'
+    icon: '💬',
+    dutyType: 'adventure',
+    frame: 'theater',
+    profession: 'explorer'
   },
   {
     id: 'explorer-park',
@@ -223,7 +265,10 @@ const ACTIVITIES: Activity[] = [
     coins: 25,
     xp: 15,
     legacy: 10,
-    icon: '🧹'
+    icon: '🧹',
+    dutyType: 'adventure',
+    frame: 'wooden',
+    profession: 'explorer'
   },
   {
     id: 'explorer-cargo-secure',
@@ -237,7 +282,10 @@ const ACTIVITIES: Activity[] = [
     coins: 20,
     xp: 15,
     legacy: 10,
-    icon: '🎫'
+    icon: '🎫',
+    dutyType: 'wagon',
+    frame: 'wooden',
+    profession: 'explorer'
   },
 
   // ── HEALER OPERATIONS ──
@@ -253,7 +301,10 @@ const ACTIVITIES: Activity[] = [
     coins: 20,
     xp: 20,
     legacy: 15,
-    icon: '🌿'
+    icon: '🌿',
+    dutyType: 'boiler',
+    frame: 'scholar',
+    profession: 'healer'
   },
   {
     id: 'healer-herbs',
@@ -267,7 +318,10 @@ const ACTIVITIES: Activity[] = [
     coins: 35,
     xp: 25,
     legacy: 15,
-    icon: '🍵'
+    icon: '🍵',
+    dutyType: 'steam',
+    frame: 'clipboard',
+    profession: 'healer'
   },
   {
     id: 'healer-cots',
@@ -281,7 +335,10 @@ const ACTIVITIES: Activity[] = [
     coins: 20,
     xp: 15,
     legacy: 10,
-    icon: '🛏️'
+    icon: '🛏️',
+    dutyType: 'boiler',
+    frame: 'clipboard',
+    profession: 'healer'
   },
   {
     id: 'healer-music',
@@ -295,7 +352,10 @@ const ACTIVITIES: Activity[] = [
     coins: 15,
     xp: 10,
     legacy: 15,
-    icon: '🎵'
+    icon: '🎵',
+    dutyType: 'adventure',
+    frame: 'theater',
+    profession: 'healer'
   },
   {
     id: 'healer-ducks',
@@ -309,7 +369,10 @@ const ACTIVITIES: Activity[] = [
     coins: 15,
     xp: 10,
     legacy: 15,
-    icon: '🦆'
+    icon: '🦆',
+    dutyType: 'adventure',
+    frame: 'clipboard',
+    profession: 'healer'
   }
 ];
 
@@ -434,6 +497,43 @@ export const GG_TravellerDeck_Places: React.FC<GG_TravellerDeck_PlacesProps> = (
   const progressBlocks = Math.round(levelInfo.progressPct / 10);
   const progressStr = '█'.repeat(progressBlocks) + '░'.repeat(10 - progressBlocks);
 
+  const getDutyMetadataForActivity = (activityName: string, skill: string) => {
+    const nameLower = activityName.toLowerCase();
+    
+    if (nameLower.includes('gear') || nameLower.includes('clock') || nameLower.includes('spire mechanical')) {
+      return { dutyType: 'gear', frame: 'wooden', profession: 'builder' };
+    }
+    if (nameLower.includes('cargo') || nameLower.includes('unload') || nameLower.includes('crate') || nameLower.includes('delivery') || nameLower.includes('deliver') || nameLower.includes('contract') || nameLower.includes('survey documents') || nameLower.includes('trade')) {
+      const isLedger = nameLower.includes('trade') || nameLower.includes('document') || nameLower.includes('survey') || nameLower.includes('contract');
+      return { dutyType: 'wagon', frame: isLedger ? 'ledger' : 'wooden', profession: skill === 'explorer' ? 'explorer' : 'builder' };
+    }
+    if (nameLower.includes('scaffold') || nameLower.includes('build') || nameLower.includes('tower') || nameLower.includes('construction') || nameLower.includes('carpentry')) {
+      return { dutyType: 'scaffolding', frame: 'wooden', profession: 'builder' };
+    }
+    if (nameLower.includes('boiler') || nameLower.includes('heating') || nameLower.includes('furnace') || nameLower.includes('sanitize') || nameLower.includes('clean') || nameLower.includes('outbreak') || nameLower.includes('cots')) {
+      const isAcademy = nameLower.includes('academy') || nameLower.includes('classroom');
+      return { dutyType: 'boiler', frame: isAcademy ? 'scholar' : 'clipboard', profession: 'healer' };
+    }
+    if (nameLower.includes('steam') || nameLower.includes('leak') || nameLower.includes('pipe') || nameLower.includes('dredge') || nameLower.includes('herbs')) {
+      const isClinic = nameLower.includes('clinic') || nameLower.includes('herbs');
+      return { dutyType: 'steam', frame: isClinic ? 'clipboard' : 'wooden', profession: 'healer' };
+    }
+    if (nameLower.includes('monorail') || nameLower.includes('train') || nameLower.includes('transit') || nameLower.includes('rail')) {
+      return { dutyType: 'monorail', frame: 'wooden', profession: skill === 'explorer' ? 'explorer' : 'builder' };
+    }
+    if (nameLower.includes('bakery') || nameLower.includes('baking') || nameLower.includes('loaf') || nameLower.includes('cake') || nameLower.includes('pastry') || nameLower.includes('cook') || nameLower.includes('croissant') || nameLower.includes('honey-bun')) {
+      return { dutyType: 'bakery', frame: 'hearth', profession: 'baker' };
+    }
+    
+    if (skill === 'builder') {
+      return { dutyType: 'scaffolding', frame: 'wooden', profession: 'builder' };
+    } else if (skill === 'healer') {
+      return { dutyType: 'boiler', frame: 'clipboard', profession: 'healer' };
+    } else {
+      return { dutyType: 'adventure', frame: 'theater', profession: 'explorer' };
+    }
+  };
+
   const handleTravelToPlace = (
     placeName: string,
     distance: number,
@@ -444,7 +544,10 @@ export const GG_TravellerDeck_Places: React.FC<GG_TravellerDeck_PlacesProps> = (
     rewardXPCat: string,
     rewardLegacy: number,
     icon: string,
-    actionId: string
+    actionId: string,
+    actDutyType?: string,
+    actFrame?: string,
+    actProfession?: string
   ) => {
     const isTrain = (currentLocation === 'home' || currentLocation === 'health' || currentLocation === 'classroom' || currentLocation === 'newspaper' || currentLocation === 'workshop' || currentLocation === 'transport') &&
       (placeName.includes('Clinic') || placeName.includes('Classroom') || placeName.includes('Newspaper') || placeName.includes('Workshop') || placeName.includes('Cottage') || placeName.includes('Station'));
@@ -460,6 +563,20 @@ export const GG_TravellerDeck_Places: React.FC<GG_TravellerDeck_PlacesProps> = (
 
     const speedMult = TRANSPORT_SPEEDS[activeTransport] || 40;
     const travelDuration = Math.max(2000, Math.round((distance / speedMult) * 1000));
+
+    // Resolve duty metadata
+    let dutyType = actDutyType;
+    let frame = actFrame;
+    let profession = actProfession;
+
+    if (!dutyType) {
+      const meta = getDutyMetadataForActivity(actionName, rewardXPCat);
+      dutyType = meta.dutyType;
+      frame = meta.frame;
+      profession = meta.profession;
+    }
+
+    const hasMiniGame = !!dutyType;
     
     startResidencyTaskFlow({
       travelTask: {
@@ -487,6 +604,10 @@ export const GG_TravellerDeck_Places: React.FC<GG_TravellerDeck_PlacesProps> = (
         icon,
         targetText: placeName,
         actionId,
+        hasMiniGame,
+        dutyType,
+        frame,
+        profession,
       },
       startDeductions: {
         coins: finalFare,
@@ -737,7 +858,10 @@ export const GG_TravellerDeck_Places: React.FC<GG_TravellerDeck_PlacesProps> = (
                       currentActivity.skill, 
                       currentActivity.legacy, 
                       currentActivity.icon, 
-                      `place-featured-act-${currentActivity.id}`
+                      `place-featured-act-${currentActivity.id}`,
+                      currentActivity.dutyType,
+                      currentActivity.frame,
+                      currentActivity.profession
                     )}
                     className="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-brand text-[10px] uppercase tracking-wider rounded-xl transition font-black flex items-center justify-between px-4 shadow-md"
                     style={{ fontFamily: '"Josefin Sans", sans-serif' }}

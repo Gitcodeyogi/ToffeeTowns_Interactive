@@ -1,6 +1,6 @@
 import React from 'react';
-import { FONT } from '../../../pages/TravellersDesk';
-import type { SubPage } from '../../../pages/TravellersDesk';
+import { FONT } from '../../../lib/uiConstants';
+import type { SubPage } from '../../../lib/uiConstants';
 
 interface MatterItem {
   id: string;
@@ -19,6 +19,7 @@ interface HomeBox3_ChroniclesProps {
   setPage: (page: any) => void;
   setSubPage: (page: SubPage) => void;
   completedSeriesSteps?: string[];
+  setShowWorkdayJournalsModal: (show: boolean) => void;
 }
 
 const HomeBox3_Chronicles: React.FC<HomeBox3_ChroniclesProps> = ({
@@ -32,6 +33,7 @@ const HomeBox3_Chronicles: React.FC<HomeBox3_ChroniclesProps> = ({
   setPage,
   setSubPage,
   completedSeriesSteps = [],
+  setShowWorkdayJournalsModal,
 }) => {
   const stepsCompleted = completedSeriesSteps.length;
   const isSeriesDone = stepsCompleted >= 15;
@@ -69,6 +71,13 @@ const HomeBox3_Chronicles: React.FC<HomeBox3_ChroniclesProps> = ({
               style={{ fontFamily: '"Josefin Sans", sans-serif' }}
             >
               <span>🎬</span> Theatre
+            </button>
+            <button
+              onClick={() => setShowWorkdayJournalsModal(true)}
+              className="px-3 py-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:scale-105 active:scale-95 text-white font-black text-[9px] uppercase tracking-wider rounded-xl transition shadow-md flex items-center gap-1"
+              style={{ fontFamily: '"Josefin Sans", sans-serif' }}
+            >
+              <span>📔</span> Chronicles
             </button>
           </div>
         </div>
