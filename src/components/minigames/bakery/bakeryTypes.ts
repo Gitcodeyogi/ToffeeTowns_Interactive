@@ -25,9 +25,12 @@ export interface Recipe {
   phrases: string[];
   category: 'pastry' | 'dessert' | 'loaf';
   afterHoursOnly?: boolean;
+  ingredientsNeeded?: Record<string, number>; // e.g. { 'sugar-beets': 1 }
 }
 
 export interface OvenState {
+  id?: string;
+  type?: 'stone' | 'copper' | 'brick';
   recipe: Recipe | null; currentTemp: number;
   bakeProgress: number; preheatProgress: number;
   status: OvenStatus; lastDriftTick: number;
@@ -38,11 +41,17 @@ export interface OvenState {
 }
 
 export interface OrderGroup {
-  id: string; customer: string; icon: string; face: string;
+  id: string; 
+  customer: string; 
+  customerName?: string;
+  customerDialogue?: string;
+  avatarImage?: string;
+  icon: string; face: string;
   need: number; done: number; patience: number;
   category: 'pastry' | 'dessert' | 'loaf';
   comment: string;
   isGolden?: boolean;  // after-hours: golden order = ×5 score
+  ingredientsNeeded?: Record<string, number>;
 }
 
 export interface GameEvent {

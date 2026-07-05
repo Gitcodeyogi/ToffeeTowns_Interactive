@@ -1,807 +1,831 @@
-// AfterHoursBakery.tsx  — v2  (15-minute session)
+/* eslint-disable react-refresh/only-export-components */
+// AfterHoursBakery.tsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Phase system + Order waves + Flash orders + Pause + Hint icon
-// Phase 1 (0–5 min)  : Open Kitchen   — 3 orders,  normal drift
-// Phase 2 (5–10 min) : Midnight Rush  — 4 orders,  drift ×1.2, 1 golden
-// Phase 3 (10–14 min): Deep Night     — 5 orders,  drift ×1.4, 2 golden
-// Phase 4 (last 60s) : CHAOS          — drift ×2,  bake ×1.5
-// Flash orders at 7-min and 12-min marks (45s window, 3× score)
+// Level 3 — After-Hours Bakery: the infinite evening session.
+// Phase system + Order waves + Flash orders + Ovens with personalities.
 // ─────────────────────────────────────────────────────────────────────────────
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FONT } from '../../../lib/uiConstants';
 import { useTTStore } from '../../../store/useTTStore';
 import { pickRotatingWallpaper } from '../../../constants/wallpapers';
-import type { OvenState, OrderGroup, GameEvent, PulledItem } from './bakeryTypes';
-import { RECIPES, POSSIBLE_EVENTS, AFTER_HOURS_ORDER_POOL } from './bakeryData';
+import type { OvenState, OrderGroup, GameEvent, PulledItem, GamePhase, Recipe } from './bakeryTypes';
+import { RECIPES, AFTER_HOURS_ORDER_POOL, BAKERY_CUSTOMERS } from './bakeryData';
 import {
-  shuffle, makeOven, faceFor, qualityFor, starsFor, qualityLabel,
-  tempColor, tempBarColor, formatTime, scoreForQuality,
+  shuffle, tempColor, tempBarColor, formatTime,
   GOLDEN_START, GOLDEN_END, PREHEAT_TICKS, DRIFT_EVERY,
   AFTER_HOURS_ENTRY_FEE, AFTER_HOURS_SECONDS,
   AFTER_HOURS_PHASE2_AT, AFTER_HOURS_PHASE3_AT, AFTER_HOURS_PHASE4_AT,
   FLASH_ORDER_1_AT, FLASH_ORDER_2_AT, FLASH_ORDER_DURATION,
-  getTodayModifiers,
   loadBakeryStats, saveBakeryStats, mergeBakeryStats,
+  faceFor, EXIT_PENALTY,
 } from './bakeryEngine';
-import { BAKERY_ACHIEVEMENTS } from './bakeryData';
-import { HintPanel } from './HintPanel';
-import type { ActiveHints } from './HintPanel';
-import { ComboMeter, ScoreDisplay } from './ComboMeter';
-import { AfterHoursResult } from './AfterHoursResult';
-import { EventPopup } from './BakeryShift';
+import { EventPopup, ShiftReportChalkboard, ExitConfirm } from './BakeryShift';
+import { cozyAudio } from '../../../utils/audioHelper';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// CSS keyframes injector
+const KF_ID = 'bakery-overhaul-kf';
+if (typeof document !== 'undefined' && !document.getElementById(KF_ID)) {
+  const s = document.createElement('style');
+  s.id = KF_ID;
+  s.textContent = `
+    @keyframes hdgBoom { 0%{transform:scale(1)} 30%{transform:scale(1.15)} 65%{transform:scale(.95)} 100%{transform:scale(1)} }
+    @keyframes hdgShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px) rotate(-1deg)} 40%{transform:translateX(8px) rotate(1deg)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+    @keyframes steamUp { 0%{opacity:0;transform:translateY(0) scale(1)} 50%{opacity:0.6;transform:translateY(-15px) scale(1.3)} 100%{opacity:0;transform:translateY(-30px) scale(1.6)} }
+    @keyframes goldPulse { 0%,100%{box-shadow: 0 0 10px rgba(251,191,36,0.3); border-color: rgba(251,191,36,0.4); } 50%{box-shadow: 0 0 25px rgba(251,191,36,0.7); border-color: rgba(251,191,36,0.9); } }
+    
+    .animate-boom { animation: hdgBoom 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+    .animate-shake { animation: hdgShake 0.5s ease-in-out forwards; }
+    .animate-gold-pulse { animation: goldPulse 2s infinite; }
+  `;
+  document.head.appendChild(s);
+}
+
 type AfterPhase = 1 | 2 | 3 | 4;
 
 interface FlashOrder {
   id: string; icon: string; customer: string; category: 'pastry' | 'dessert' | 'loaf';
   need: number; done: number; timeLeft: number; active: boolean;
+  avatarImage: string; customerDialogue: string;
 }
 
-interface AfterHoursBakeryProps { onClose: () => void; }
-
-// ── Wave builder ──────────────────────────────────────────────────────────────
-function buildWave(wave: 1 | 2 | 3): OrderGroup[] {
-  const pool = shuffle([...AFTER_HOURS_ORDER_POOL]);
-  const count = wave === 1 ? 3 : wave === 2 ? 4 : 5;
-  const goldenCount = wave === 1 ? 0 : wave === 2 ? 1 : 2;
-  return pool.slice(0, count).map((o, i) => ({
-    ...o, done: 0, comment: '', face: '😊', patience: 100,
-    isGolden: i < goldenCount,
-  }));
-}
-
-// ── Flash order pool ──────────────────────────────────────────────────────────
-const FLASH_POOL = [
-  { id:'flash1', customer:'Midnight Express 🚂', icon:'🚂', category:'loaf'   as const, need:2 },
-  { id:'flash2', customer:'Palace Kitchen 🏰',   icon:'🏰', category:'pastry' as const, need:2 },
-  { id:'flash3', customer:'Opera House 🎭',       icon:'🎭', category:'dessert'as const, need:2 },
-];
-
-// ── Phase config ──────────────────────────────────────────────────────────────
 const PHASE_CONFIG: Record<AfterPhase, {
   name: string; icon: string;
   accentColor: string; borderColor: string;
   driftMult: number; bakeSpeedMult: number;
-  eventIntervalTicks: number;
 }> = {
-  1: { name: 'Open Kitchen',  icon: '🌿', accentColor: '#10b981', borderColor: 'rgba(16,185,129,0.25)', driftMult:1.0, bakeSpeedMult:1.0, eventIntervalTicks:450 },
-  2: { name: 'Midnight Rush', icon: '🌙', accentColor: '#6366f1', borderColor: 'rgba(99,102,241,0.30)', driftMult:1.2, bakeSpeedMult:1.1, eventIntervalTicks:300 },
-  3: { name: 'Deep Night',    icon: '🔥', accentColor: '#f59e0b', borderColor: 'rgba(245,158,11,0.30)', driftMult:1.4, bakeSpeedMult:1.2, eventIntervalTicks:225 },
-  4: { name: 'CHAOS!',        icon: '⛈️', accentColor: '#ef4444', borderColor: 'rgba(239,68,68,0.45)', driftMult:2.0, bakeSpeedMult:1.5, eventIntervalTicks:150 },
+  1: { name: 'Open Kitchen',  icon: '🌿', accentColor: '#10b981', borderColor: 'rgba(16,185,129,0.25)', driftMult:1.0, bakeSpeedMult:1.0 },
+  2: { name: 'Midnight Rush', icon: '🌙', accentColor: '#6366f1', borderColor: 'rgba(99,102,241,0.30)', driftMult:1.2, bakeSpeedMult:1.1 },
+  3: { name: 'Deep Night',    icon: '🔥', accentColor: '#f59e0b', borderColor: 'rgba(245,158,11,0.30)', driftMult:1.4, bakeSpeedMult:1.2 },
+  4: { name: 'CHAOS!',        icon: '⛈️', accentColor: '#ef4444', borderColor: 'rgba(239,68,68,0.45)', driftMult:2.0, bakeSpeedMult:1.5 },
 };
 
-// ── Phase announcement banner ─────────────────────────────────────────────────
-const PhaseBanner: React.FC<{ phase: AfterPhase }> = ({ phase }) => {
-  const cfg = PHASE_CONFIG[phase];
-  const [visible, setVisible] = useState(true);
-  useEffect(() => { const t = setTimeout(() => setVisible(false), 3200); return () => clearTimeout(t); }, [phase]);
-  if (!visible) return null;
-  return (
-    <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30 pointer-events-none animate-fade-in">
-      <div className="px-8 py-3 rounded-2xl border text-center"
-        style={{ borderColor: cfg.borderColor, background: 'rgba(5,2,0,0.92)', boxShadow: `0 0 40px ${cfg.accentColor}33` }}>
-        <p className="text-xs font-black uppercase tracking-[0.3em]" style={{ color: cfg.accentColor }}>
-          {cfg.icon} Phase {phase}: {cfg.name}
-        </p>
-        {phase === 2 && <p className="text-[10px] text-white/50 mt-0.5">New wave of orders! Drift increasing.</p>}
-        {phase === 3 && <p className="text-[10px] text-white/50 mt-0.5">Deep Night — VIP orders active. Stay sharp!</p>}
-        {phase === 4 && <p className="text-[10px] text-white/50 mt-0.5">🔥 CHAOS — everything speeds up. Final minute!</p>}
-      </div>
-    </div>
-  );
-};
+// ── Flash order templates ───────────────────────────────────────────────────
+const FLASH_POOL_TEMPLATES = [
+  { id:'flash1', customerName:'Midnight Express 🚂', icon:'🚂', category:'loaf' as const, need:2 },
+  { id:'flash2', customerName:'Palace Kitchen 🏰',   icon:'🏰', category:'pastry' as const, need:2 },
+  { id:'flash3', customerName:'Opera House 🎭',       icon:'🎭', category:'dessert' as const, need:2 },
+];
 
-// ── Wave complete banner ──────────────────────────────────────────────────────
-const WaveBanner: React.FC<{ wave: number; bonus: number }> = ({ wave, bonus }) => {
-  const [visible, setVisible] = useState(true);
-  useEffect(() => { const t = setTimeout(() => setVisible(false), 2800); return () => clearTimeout(t); }, [wave]);
-  if (!visible) return null;
-  return (
-    <div className="absolute top-28 left-1/2 -translate-x-1/2 z-30 pointer-events-none animate-fade-in">
-      <div className="px-6 py-2.5 rounded-2xl border border-emerald-500/40 text-center"
-        style={{ background: 'rgba(2,12,5,0.95)', boxShadow: '0 0 30px rgba(16,185,129,0.25)' }}>
-        <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">✅ Wave {wave} Complete! +{bonus} pts</p>
-        {wave < 3 && <p className="text-[10px] text-white/45 mt-0.5">New orders incoming…</p>}
-      </div>
-    </div>
-  );
-};
+interface AfterHoursBakeryProps { onClose: () => void; }
 
-// ── Flash order notice ────────────────────────────────────────────────────────
-const FlashOrderBadge: React.FC<{ flash: FlashOrder; onFill?: () => void }> = ({ flash }) => {
-  const pct = (flash.timeLeft / FLASH_ORDER_DURATION) * 100;
-  return (
-    <div className="animate-fade-in p-2.5 rounded-2xl border border-yellow-400/50 bg-yellow-950/25"
-      style={{ boxShadow: '0 0 20px rgba(234,179,8,0.2)' }}>
-      <div className="flex items-center justify-between mb-1">
-        <p className="text-[9px] font-black uppercase text-yellow-400 tracking-widest">⚡ Flash Order!</p>
-        <p className="text-[9px] font-mono text-yellow-300">{flash.timeLeft}s · 3×pts</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="text-lg">{flash.icon}</span>
-        <div className="flex-1">
-          <p className="text-[10px] font-black text-white">{flash.customer}</p>
-          <p className="text-[9px] text-white/40">{flash.need} {flash.category}s → {flash.done}/{flash.need}</p>
-        </div>
-      </div>
-      <div className="h-1.5 bg-white/8 rounded-full mt-1.5 overflow-hidden">
-        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct < 30 ? '#ef4444' : '#eab308' }} />
-      </div>
-    </div>
-  );
-};
-
-// ── Pause Panel ───────────────────────────────────────────────────────────────
-const PausePanel: React.FC<{
-  phase: AfterPhase; score: number; timeLeft: number;
-  onResume: () => void; onQuit: () => void;
-}> = ({ phase, score, timeLeft, onResume, onQuit }) => {
-  const cfg = PHASE_CONFIG[phase];
-  return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="max-w-3xl w-full mx-4 animate-fade-in overflow-hidden"
-        style={{ borderRadius: '2.5rem', border: `1px solid ${cfg.borderColor}`, background: 'rgba(8,3,15,0.98)',
-          boxShadow: `0 0 60px ${cfg.accentColor}22` }}>
-        <div className="h-1 rounded-t-[2.5rem]" style={{ background: `linear-gradient(90deg, transparent, ${cfg.accentColor}, transparent)` }} />
-        <div className="p-8 space-y-6">
-          <div className="text-center">
-            <p className="text-[10px] uppercase tracking-[0.35em] text-white/30 font-black">PAUSED</p>
-            <h2 className="text-4xl font-black text-white mt-1" style={{ fontFamily: FONT }}>⏸ After-Hours</h2>
-            <p className="text-sm text-white/40 mt-1">{cfg.icon} {cfg.name} · Score: {score.toLocaleString()} · {formatTime(timeLeft)} left</p>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/25 font-black">Quick Reference</p>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                ['🟡', 'Golden Zone (72–90%)', 'Pull as soon as bar enters golden range'],
-                ['🌡️', 'Temperature drift',     'Adjust every few seconds — it drifts on its own'],
-                ['🔥', 'Burns',                  'Costs −50pts each. Pull early when unsure.'],
-                ['⚡', 'Flash Orders',           'Appear twice per session — 3× score for 45s'],
-                ['🍬', 'Sugar Rush',             '5 perfect bakes in a row → 1.5× bake speed'],
-                ['🛒', 'Bakery Shelf',           'Spend coins for Freeze Oven, Auto Stir, Lucky Clover'],
-              ].map(([icon, title, desc]) => (
-                <div key={title} className="flex gap-3 p-3 bg-white/3 border border-white/6 rounded-2xl">
-                  <span className="text-lg shrink-0">{icon}</span>
-                  <div>
-                    <p className="text-[12px] font-black text-white">{title}</p>
-                    <p className="text-[11px] text-white/40 leading-snug">{desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/25 font-black">Phases tonight</p>
-            <div className="grid grid-cols-2 gap-3">
-              {(Object.entries(PHASE_CONFIG) as [string, typeof PHASE_CONFIG[1]][]).map(([p, c]) => (
-                <div key={p} className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl border ${Number(p) === phase ? 'border-white/20 bg-white/6' : 'border-white/5'}`}>
-                  <span className="text-base">{c.icon}</span>
-                  <p className="text-[12px] font-bold text-white flex-1">Phase {p}: {c.name}</p>
-                  {Number(p) < phase && <span className="text-[10px] text-emerald-400 font-black">✓ Done</span>}
-                  {Number(p) === phase && <span className="text-[10px] font-black animate-pulse" style={{ color: c.accentColor }}>NOW</span>}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <button onClick={onQuit}
-              className="py-3 rounded-xl border border-white/10 text-white/50 text-sm font-bold hover:bg-white/5 transition cursor-pointer"
-              style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic' }}>
-              Quit Session
-            </button>
-            <button onClick={onResume}
-              className="py-3 rounded-xl font-black text-sm text-white cursor-pointer hover:scale-[1.02] transition-all"
-              style={{ fontFamily: 'Josefin Sans,sans-serif',
-                background: `linear-gradient(135deg, ${cfg.accentColor}, ${cfg.accentColor}99)`,
-                boxShadow: `0 0 20px ${cfg.accentColor}44` }}>
-              ▶ Resume
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ═══════════════════════════════════════════════════════════════════════════════
 export const AfterHoursBakery: React.FC<AfterHoursBakeryProps> = ({ onClose }) => {
-  const { spendCoins } = useTTStore();
-  const coins = useTTStore(s => s.coins ?? 0);
+  const { spendCoins, addCoins } = useTTStore();
 
-  const modifiers = useMemo(() => getTodayModifiers(), []);
-  const freeAutoStir = modifiers.some(m => m.id === 'apprentice');
-
-  const [gameState, setGameState] = useState<'gate' | 'playing' | 'result'>('gate');
+  const [phase, setPhase] = useState<GamePhase>('briefing');
+  const phaseRef = useRef<GamePhase>('briefing');
   const [paused, setPaused] = useState(false);
   const pausedRef = useRef(false);
+  const togglePause = () => setPaused(p => { pausedRef.current = !p; return !p; });
+
   const [, forceUpdate] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(AFTER_HOURS_SECONDS);
+  const [activeEvent, setActiveEvent] = useState<GameEvent | null>(null);
+  const [showExit, setShowExit] = useState(false);
 
-  // ── Phase + Wave state ─────────────────────────────────────────────────────
-  const [phase, setPhase]               = useState<AfterPhase>(1);
-  const [phaseChanged, setPhaseChanged] = useState<AfterPhase | null>(null);
-  const [waveCompleted, setWaveCompleted] = useState<{wave:number;bonus:number}|null>(null);
-  const currentWave = useRef<1|2|3>(1);
-  const phaseRef    = useRef<AfterPhase>(1);
-
-  // ── Flash orders ───────────────────────────────────────────────────────────
-  const [flashOrder, setFlashOrder]     = useState<FlashOrder | null>(null);
-  const flashRef    = useRef<FlashOrder | null>(null);
-  const flash1Fired = useRef(false);
-  const flash2Fired = useRef(false);
-
-  // ── Game refs ──────────────────────────────────────────────────────────────
-  const ovensRef        = useRef<OvenState[]>([makeOven(), makeOven(), makeOven(), makeOven()]);
-  const ordersRef       = useRef<OrderGroup[]>([]);
-  const tickRef         = useRef(0);
-  const timeRef         = useRef(AFTER_HOURS_SECONDS);
-  const burnsRef        = useRef(0);
-  const comboRef        = useRef(0);
-  const comboMaxRef     = useRef(0);
-  const scoreRef        = useRef(0);
-  const sugarRushFill   = useRef(0);
-  const sugarRushTicks  = useRef(0);
-  const pulledItemsRef  = useRef<PulledItem[]>([]);
-  const goldenOrdersRef = useRef(0);
-  const nextEventTick   = useRef(300);
-  const gamePhaseRef    = useRef<'playing'|'event'>('playing');
-  const calledEnd       = useRef(false);
-  const startTimeRef    = useRef(Date.now());
-  const recipeQueue     = useRef<typeof RECIPES[0][]>(shuffle([...RECIPES]));
-  const nextRecipeIdx   = useRef(0);
-  const luckyClover     = useRef(false);
-  const waveBonuses     = useRef([150, 300, 500]);
-
-  // ── Display state ──────────────────────────────────────────────────────────
-  const [timeLeft, setTimeLeft]         = useState(AFTER_HOURS_SECONDS);
-  const [logLines, setLogLines]         = useState<string[]>(['🌙 The bakery is yours. 15 minutes. Make it count.']);
-  const [activeEvent, setActiveEvent]   = useState<GameEvent | null>(null);
-  const [activeHints, setActiveHints]   = useState<ActiveHints>({
-    freezeOven: false, masterTimer: false, chefAssist: false,
-    instantClean: false, luckyClover: false, autoStir: false,
+  // ── Pantry Stock state ──
+  const [pantry, setPantry] = useState<Record<string, number>>(() => {
+    const saved = localStorage.getItem('tt_market_produce_inventory');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return {
+      'cocoa-pods': 15, 'honey-syrup': 10, 'sweetbread': 15, 'sugar-beets': 8,
+      'butterscotch-blossoms': 8, 'marshmallow-strawberries': 10,
+      'caramelized-roses': 6, 'ganache-cherries': 6, 'peppermint-orchids': 6,
+      'glazed-carrots': 8
+    };
   });
-  const [sugarRushFillPct, setSugarRushFillPct] = useState(0);
-  const [sugarRushActive, setSugarRushActive]   = useState(false);
-  const [scoreDisplay, setScoreDisplay]         = useState(0);
-  const [personalBest] = useState(() => loadBakeryStats().lifetimeBestScore);
 
-  const addLog = useCallback((msg: string) => setLogLines(p => [msg, ...p].slice(0, 16)), []);
+  const savePantry = (nextPantry: Record<string, number>) => {
+    setPantry(nextPantry);
+    localStorage.setItem('tt_market_produce_inventory', JSON.stringify(nextPantry));
+  };
 
-  // ── Toggle pause ───────────────────────────────────────────────────────────
-  const togglePause = useCallback(() => {
-    setPaused(p => { pausedRef.current = !p; return !p; });
+  const topupPantryItem = (key: string) => {
+    const cost = 15;
+    const storeCoins = useTTStore.getState().coins;
+    if (storeCoins < cost) {
+      addLog("❌ Not enough Cocoa Coins to buy ingredients!");
+      cozyAudio.playFailure();
+      return;
+    }
+    spendCoins(cost, `Purchased ${key} at bakery counter`);
+    const next = { ...pantry, [key]: (pantry[key] || 0) + 1 };
+    savePantry(next);
+    cozyAudio.playCoins();
+    addLog(`🛒 Purchased 1x ${key.replace('-', ' ')} for 15 🪙.`);
+  };
+
+  // ── Ovens State ──
+  const ovensRef = useRef<OvenState[]>([
+    { id: 'stone', type: 'stone', recipe: null, currentTemp: 60, bakeProgress: 0, preheatProgress: 0, status: 'empty', lastDriftTick: 0, feedback: null, pulledQuality: null },
+    { id: 'copper', type: 'copper', recipe: null, currentTemp: 60, bakeProgress: 0, preheatProgress: 0, status: 'empty', lastDriftTick: 0, feedback: null, pulledQuality: null },
+    { id: 'brick', type: 'brick', recipe: null, currentTemp: 60, bakeProgress: 0, preheatProgress: 0, status: 'empty', lastDriftTick: 0, feedback: null, pulledQuality: null },
+  ]);
+
+  // ── Game Stats & References ──
+  const tickRef = useRef(0);
+  const timeRef = useRef(AFTER_HOURS_SECONDS);
+  const scoreRef = useRef(0);
+  const burnsRef = useRef(0);
+  const comboRef = useRef(0);
+  const comboMaxRef = useRef(0);
+  const pulledItemsRef = useRef<PulledItem[]>([]);
+  const activeEventRef = useRef<GameEvent | null>(null);
+  const nextEventTick = useRef(80);
+  const calledCbRef = useRef(false);
+  const exitedRef = useRef(false);
+  const startTimeRef = useRef(Date.now());
+
+  // ── Atmosphere & Messiness ──
+  const [mess, setMess] = useState(0);
+  const [cleaning, setCleaning] = useState(false);
+  const [afterHoursPhase, setAfterHoursPhase] = useState<AfterPhase>(1);
+  const [displayCounter, setDisplayCounter] = useState<string[]>([]);
+  const [brambleState, setBrambleState] = useState<'idle' | 'inspecting' | 'proud' | 'sooty' | 'harmony'>('idle');
+  const [brambleSays, setBrambleSays] = useState('Apron on, ovens clean! Ready for a cozy day of baking. 🌾');
+  const [assistantBell, setAssistantBell] = useState<string | null>(null);
+
+  // ── Customer & Flash Queue ──
+  const [customerQueue, setCustomerQueue] = useState<OrderGroup[]>([]);
+  const [currentCustomerIndex, setCurrentCustomerIndex] = useState(0);
+  const [acceptedOrders, setAcceptedOrders] = useState<OrderGroup[]>([]);
+  const [flashOrder, setFlashOrder] = useState<FlashOrder | null>(null);
+
+  const addLog = useCallback((msg: string) => {
+    setBrambleSays(msg);
   }, []);
 
-  // ── Load recipe into oven ──────────────────────────────────────────────────
-  const loadInto = useCallback((idx: number) => {
-    const q = recipeQueue.current;
-    const r = q[nextRecipeIdx.current % q.length];
-    nextRecipeIdx.current++;
-    ovensRef.current[idx] = {
-      ...makeOven(), recipe: r, currentTemp: 60 + Math.floor(Math.random() * 20),
-      status: 'preheating', lastDriftTick: tickRef.current,
-    };
-    addLog(`Oven ${idx + 1}: ${r.name} loaded`);
-  }, [addLog]);
+  const getBrambleEmoji = () => {
+    if (brambleState === 'proud') return '👨‍🍳✨';
+    if (brambleState === 'sooty') return '😭🌫️';
+    if (brambleState === 'harmony') return '🥰🎶';
+    if (brambleState === 'inspecting') return '🔍🧐';
+    return '👨‍🍳🧹';
+  };
 
-  // ── Load new order wave ────────────────────────────────────────────────────
-  const loadWave = useCallback((wave: 1|2|3, bonus: number) => {
-    ordersRef.current = buildWave(wave);
-    currentWave.current = wave;
-    scoreRef.current += bonus;
-    setScoreDisplay(scoreRef.current);
-    setWaveCompleted({ wave: wave - 1, bonus });
-    addLog(`🌊 Wave ${wave} orders loaded! (+${bonus} pts wave bonus)`);
-    setTimeout(() => setWaveCompleted(null), 3000);
-  }, [addLog]);
+  const handleMorningBriefingClose = () => {
+    const storeCoins = useTTStore.getState().coins;
+    if (storeCoins < AFTER_HOURS_ENTRY_FEE) {
+      addLog("❌ Need 50 🪙 Cocoa Coins to enter the Midnight shift!");
+      cozyAudio.playFailure();
+      return;
+    }
+    spendCoins(AFTER_HOURS_ENTRY_FEE, 'After-Hours entry fee — Ganache Grove Bakery');
+    
+    phaseRef.current = 'playing';
+    setPhase('playing');
+    startTimeRef.current = Date.now();
+    
+    // Seed initial customer queue
+    const queue = [];
+    const pool = shuffle([...BAKERY_CUSTOMERS]);
+    const recipes = RECIPES;
+    for (let i = 0; i < 6; i++) {
+      const cust = pool[i % pool.length];
+      const rec = recipes[i % recipes.length];
+      queue.push({
+        id: `ord-endless-${i}-${Math.random().toString(36).slice(2, 6)}`,
+        customer: cust.name,
+        customerName: cust.name,
+        avatarImage: cust.avatar,
+        customerDialogue: cust.dialogues[Math.floor(Math.random() * cust.dialogues.length)],
+        icon: rec.icon,
+        face: '😊',
+        need: 1 + Math.floor(Math.random() * 2),
+        done: 0,
+        patience: 100,
+        category: rec.category,
+        comment: rec.name,
+        ingredientsNeeded: rec.ingredientsNeeded ?? { 'sweetbread': 1 }
+      });
+    }
+    setCustomerQueue(queue);
+    setCurrentCustomerIndex(0);
+    setAcceptedOrders([]);
+    
+    cozyAudio.playSuccess();
+  };
 
-  // ── Adjust temp ────────────────────────────────────────────────────────────
+  const acceptCustomerOrder = () => {
+    const cust = customerQueue[currentCustomerIndex];
+    if (!cust) return;
+
+    // Check ingredients
+    const req = cust.ingredientsNeeded || {};
+    let ok = true;
+    for (const [key, amt] of Object.entries(req)) {
+      if ((pantry[key] || 0) < amt) ok = false;
+    }
+
+    if (!ok) {
+      addLog("❌ Missing required pantry ingredients! Tap pantry item to buy.");
+      cozyAudio.playFailure();
+      return;
+    }
+
+    // Deduct ingredients
+    const nextPantry = { ...pantry };
+    for (const [key, amt] of Object.entries(req)) {
+      nextPantry[key] = nextPantry[key] - amt;
+    }
+    savePantry(nextPantry);
+
+    // Accept order into active list
+    setAcceptedOrders(prev => [...prev, { ...cust }]);
+    setCustomerQueue(prev => prev.filter((_, idx) => idx !== currentCustomerIndex));
+    addLog(`👍 Accepted ${cust.customer}'s order for ${cust.need}x ${cust.comment}!`);
+    cozyAudio.playCoins();
+
+    setBrambleState('inspecting');
+    setTimeout(() => setBrambleState('idle'), 2000);
+  };
+
+  const passCustomerOrder = () => {
+    const cust = customerQueue[currentCustomerIndex];
+    if (!cust) return;
+    scoreRef.current = Math.max(0, scoreRef.current - 10);
+    setCustomerQueue(prev => prev.filter((_, idx) => idx !== currentCustomerIndex));
+    addLog(`Not today for ${cust.customerName}. Reputation adjusted.`);
+    cozyAudio.playFailure();
+  };
+
+  const acceptFlashOrder = () => {
+    if (!flashOrder) return;
+    scoreRef.current += 100;
+    addLog("⚡ Flash order accepted! Fill it quickly for x3 score!");
+    cozyAudio.playCoins();
+  };
+
   const adjustTemp = useCallback((idx: number, delta: number) => {
+    if (phaseRef.current !== 'playing') return;
     const o = ovensRef.current[idx];
-    if (!o.recipe || ['empty','burnt','done'].includes(o.status)) return;
-    ovensRef.current[idx] = { ...o, currentTemp: Math.max(50, Math.min(250, o.currentTemp + delta)) };
+    if (!o.recipe || o.status === 'empty' || o.status === 'burnt' || o.status === 'done') return;
+    
+    const finalDelta = o.type === 'copper' ? delta * 1.5 : delta;
+    ovensRef.current[idx] = { ...o, currentTemp: Math.max(50, Math.min(250, o.currentTemp + finalDelta)) };
+    
+    setBrambleState('inspecting');
     forceUpdate(n => n + 1);
   }, []);
 
-  // ── Pull item ──────────────────────────────────────────────────────────────
+  const loadIntoOven = useCallback((idx: number, recipe: Recipe) => {
+    if (phaseRef.current !== 'playing') return;
+    const o = ovensRef.current[idx];
+    if (o.recipe) return;
+
+    ovensRef.current[idx] = {
+      ...o,
+      recipe,
+      currentTemp: 60 + Math.floor(Math.random() * 20),
+      status: 'preheating',
+      lastDriftTick: tickRef.current,
+      preheatProgress: 0,
+      bakeProgress: 0
+    };
+    addLog(`Loading ${recipe.icon} ${recipe.name} into the ${o.type} oven.`);
+  }, []);
+
   const pullOut = useCallback((idx: number) => {
-    if (gamePhaseRef.current !== 'playing' || pausedRef.current) return;
+    if (phaseRef.current !== 'playing') return;
     const o = ovensRef.current[idx];
     if (o.status !== 'golden' || !o.recipe) return;
-
     const diff = o.currentTemp - o.recipe.requiredTemp;
-    const quality = qualityFor(diff, o.bakeProgress);
-    const ql = qualityLabel(quality);
+    const quality = o.bakeProgress >= 76 && o.bakeProgress <= 86 ? 'perfect' as const : 'great' as const;
+    
+    // Match with accepted/flash orders
+    let matched = false;
 
-    // Check flash order first
-    let isFlash = false;
-    if (flashRef.current?.active && flashRef.current.category === o.recipe.category && flashRef.current.done < flashRef.current.need) {
-      flashRef.current = { ...flashRef.current, done: flashRef.current.done + 1 };
-      setFlashOrder({ ...flashRef.current });
-      isFlash = true;
-      addLog(`⚡ Flash Order filled! (${flashRef.current.done}/${flashRef.current.need})`);
+    // First try matching flash order
+    if (flashOrder && flashOrder.category === o.recipe.category && flashOrder.done < flashOrder.need) {
+      setFlashOrder(f => f ? { ...f, done: f.done + 1 } : null);
+      scoreRef.current += 300; // x3 score bonus
+      addLog(`⚡ Flash Order progress: ${flashOrder.done + 1}/${flashOrder.need}!`);
+      cozyAudio.playCoins();
+      matched = true;
     }
 
-    // Check regular order
-    const matchOrder = ordersRef.current.find(ord => ord.category === o.recipe!.category && ord.done < ord.need);
-    const isGolden = matchOrder?.isGolden ?? luckyClover.current;
-    luckyClover.current = false;
+    if (!matched) {
+      let matchIdx = -1;
+      for (let i = 0; i < acceptedOrders.length; i++) {
+        if (acceptedOrders[i].category === o.recipe.category && acceptedOrders[i].done < acceptedOrders[i].need) {
+          matchIdx = i;
+          break;
+        }
+      }
 
-    if (matchOrder) matchOrder.done++;
-
-    // Score
-    const flashMult = isFlash ? 3 : 1;
-    const modMult = modifiers.reduce((m, mod) => m * (mod.effects.scoreMultiplier ?? 1), 1);
-    const comboMult = comboRef.current >= 3 ? 1.5 : 1;
-    const pts = scoreForQuality(quality, isGolden, comboMult * flashMult, modMult);
-    scoreRef.current += pts;
-    setScoreDisplay(scoreRef.current);
-
-    addLog(`${ql.icon} ${ql.label} — ${o.recipe.name} +${pts}pts${isFlash ? ' ⚡3×' : ''}${isGolden ? ' 🌟' : ''}`);
-
-    if (quality === 'perfect' || quality === 'great') {
-      comboRef.current++;
-      if (comboRef.current > comboMaxRef.current) comboMaxRef.current = comboRef.current;
-      if (comboRef.current >= 3) addLog(`🔥 COMBO ×${comboRef.current}!`);
-    } else { comboRef.current = 0; }
-
-    if (quality === 'perfect') {
-      sugarRushFill.current = Math.min(100, sugarRushFill.current + 20);
-      setSugarRushFillPct(sugarRushFill.current);
-      if (sugarRushFill.current >= 100 && !sugarRushTicks.current) {
-        sugarRushTicks.current = 250; setSugarRushActive(true);
-        addLog('🍬 SUGAR RUSH! 1.5× bake speed for 10 seconds!');
-        sugarRushFill.current = 0; setSugarRushFillPct(0);
+      if (matchIdx !== -1) {
+        const nextAccepted = [...acceptedOrders];
+        nextAccepted[matchIdx].done++;
+        
+        if (nextAccepted[matchIdx].done >= nextAccepted[matchIdx].need) {
+          const servedCust = nextAccepted[matchIdx];
+          addLog(`😊 Served ${servedCust.customerName}! They left happily.`);
+          setDisplayCounter(prev => [...prev, o.recipe!.icon].slice(-8));
+          nextAccepted.splice(matchIdx, 1);
+          scoreRef.current += 150;
+          cozyAudio.playSuccess();
+        } else {
+          addLog(`Baking ${o.recipe.name}: order progress ${nextAccepted[matchIdx].done}/${nextAccepted[matchIdx].need}.`);
+          cozyAudio.playCoins();
+        }
+        setAcceptedOrders(nextAccepted);
+        matched = true;
       }
     }
 
-    if (isGolden && matchOrder) goldenOrdersRef.current++;
+    if (!matched) {
+      addLog(`Baked ${o.recipe.name} (${quality}), but no active counter order.`);
+    }
+
     pulledItemsRef.current.push({ quality, recipeName: o.recipe.name });
 
-    ovensRef.current[idx] = { ...makeOven(), status: 'done', feedback: { quality, name: o.recipe.name }, pulledQuality: quality };
-    setTimeout(() => { if (ovensRef.current[idx].status === 'done') { ovensRef.current[idx] = makeOven(); forceUpdate(n => n + 1); } }, 2000);
-    forceUpdate(n => n + 1);
-
-    // Check wave completion
-    const allDone = ordersRef.current.every(o => o.done >= o.need);
-    if (allDone && currentWave.current < 3) {
-      const nextWave = (currentWave.current + 1) as 2|3;
-      setTimeout(() => loadWave(nextWave, waveBonuses.current[nextWave - 1]), 800);
+    if (quality === 'perfect') {
+      comboRef.current++;
+      scoreRef.current += 50;
+      if (comboRef.current > comboMaxRef.current) comboMaxRef.current = comboRef.current;
+      setBrambleState('proud');
+      if (comboRef.current >= 3) {
+        setBrambleState('harmony');
+        addLog(`🎶 Oven Harmony activated! (Combo ×${comboRef.current})`);
+      }
+    } else {
+      comboRef.current = 0;
+      setBrambleState('idle');
     }
-  }, [modifiers, addLog, loadWave]);
 
-  // ── Hint handler ───────────────────────────────────────────────────────────
-  const handleHint = useCallback((hint: keyof ActiveHints, cost: number) => {
-    if (cost > 0) spendCoins(cost, `After-Hours hint: ${hint}`);
-    if (hint === 'freezeOven') {
-      ovensRef.current = ovensRef.current.map(o => ({ ...o, frozen: true }));
-      setActiveHints(h => ({ ...h, freezeOven: true }));
-      setTimeout(() => { ovensRef.current = ovensRef.current.map(o => ({ ...o, frozen: false })); setActiveHints(h => ({ ...h, freezeOven: false })); }, 5000);
-    } else if (hint === 'masterTimer') {
-      ovensRef.current = ovensRef.current.map(o => ({ ...o, masterTimer: true }));
-      setActiveHints(h => ({ ...h, masterTimer: true }));
-      setTimeout(() => { ovensRef.current = ovensRef.current.map(o => ({ ...o, masterTimer: false })); setActiveHints(h => ({ ...h, masterTimer: false })); }, 10000);
-    } else if (hint === 'chefAssist') {
-      if (activeEvent) { setActiveEvent(null); gamePhaseRef.current = 'playing'; scoreRef.current += 50; setScoreDisplay(scoreRef.current); addLog('👨‍🍳 Chef Assist! +50pts'); }
-      setActiveHints(h => ({ ...h, chefAssist: false }));
-    } else if (hint === 'luckyClover') {
-      luckyClover.current = true; setActiveHints(h => ({ ...h, luckyClover: false })); addLog('🍀 Next order is GOLDEN!');
-    } else if (hint === 'autoStir') {
-      const emptyIdx = ovensRef.current.findIndex(o => o.status === 'empty');
-      if (emptyIdx >= 0) { loadInto(emptyIdx); forceUpdate(n => n + 1); }
-      setActiveHints(h => ({ ...h, autoStir: false }));
-    } else if (hint === 'instantClean') {
-      setActiveHints(h => ({ ...h, instantClean: false })); addLog('🧹 Cleaned!');
+    ovensRef.current[idx] = { ...o, recipe: null, status: 'done', feedback: { quality, name: o.recipe.name }, pulledQuality: quality };
+    setTimeout(() => {
+      if (ovensRef.current[idx].status === 'done') {
+        ovensRef.current[idx].status = 'empty';
+        forceUpdate(n => n + 1);
+      }
+    }, 2000);
+    forceUpdate(n => n + 1);
+  }, [acceptedOrders, flashOrder, addLog]);
+
+  const cleanKitchen = () => {
+    if (cleaning) return;
+    setCleaning(true);
+    setBrambleState('idle');
+    setBrambleSays("🧹 Bramble Mortimer is wiping the baking workspace...");
+    cozyAudio.playTradeEconomySound();
+    setTimeout(() => {
+      setMess(0);
+      setCleaning(false);
+      setBrambleSays("✨ Workplace is clean as a whistle!");
+      cozyAudio.playSuccess();
+    }, 3000);
+  };
+
+  const handleAssistantBell = () => {
+    if (!assistantBell) return;
+    const req = assistantBell;
+    if ((pantry[req] || 0) < 1) {
+      addLog(`❌ We need ${req.replace('-', ' ')} to assist Bramble! Tap pantry to top-up.`);
+      return;
     }
-    forceUpdate(n => n + 1);
-  }, [spendCoins, activeEvent, loadInto, addLog]);
+    const nextPantry = { ...pantry, [req]: pantry[req] - 1 };
+    savePantry(nextPantry);
+    setAssistantBell(null);
+    scoreRef.current += 100;
+    setBrambleState('proud');
+    setBrambleSays("👨‍🍳 Mortimer: Thanks, apprentice! Perfect teamwork.");
+    cozyAudio.playSuccess();
+  };
 
-  // ── Event choice ───────────────────────────────────────────────────────────
-  const handleEventChoice = useCallback((good: boolean) => {
-    setActiveEvent(null);
-    gamePhaseRef.current = 'playing';
-    nextEventTick.current = tickRef.current + PHASE_CONFIG[phaseRef.current].eventIntervalTicks;
-    if (good) { scoreRef.current += 25; setScoreDisplay(scoreRef.current); addLog('✅ Good call! +25pts'); }
-    else { ordersRef.current.forEach(o => { o.patience = Math.max(0, o.patience - 15); }); addLog('⚠️ Kitchen took a hit.'); }
-    forceUpdate(n => n + 1);
-  }, [addLog]);
+  const endGame = useCallback((win: boolean) => {
+    if (calledCbRef.current) return;
+    calledCbRef.current = true;
+    phaseRef.current = 'result';
+    setPhase('result');
 
-  // ── End game ───────────────────────────────────────────────────────────────
-  const endGame = useCallback(() => {
-    if (calledEnd.current) return;
-    calledEnd.current = true;
+    // Calculate coin and XP earnings
+    const coinsEarned = Math.max(0, Math.round(scoreRef.current * 0.15) - burnsRef.current * 4);
+    const xpEarned = Math.round(scoreRef.current * 0.2);
+    
+    if (win) {
+      addCoins(coinsEarned, 'After-Hours Shift Success');
+      useTTStore.getState().addSkillXP('healer', xpEarned);
+    }
+
+    // Save stats
+    const stats = loadBakeryStats();
     const mins = Math.round((Date.now() - startTimeRef.current) / 60000);
     const perfects = pulledItemsRef.current.filter(p => p.quality === 'perfect').length;
-    const stats = loadBakeryStats();
-    const newStats = mergeBakeryStats(stats, perfects, burnsRef.current, comboMaxRef.current, scoreRef.current, goldenOrdersRef.current, mins, false);
-    BAKERY_ACHIEVEMENTS.forEach(a => {
-      if (!newStats.earnedAchievements.includes(a.id) && a.check(newStats, burnsRef.current, comboMaxRef.current)) {
-        newStats.earnedAchievements.push(a.id);
-      }
-    });
+    const newStats = mergeBakeryStats(stats, perfects, burnsRef.current, comboMaxRef.current, scoreRef.current, 0, mins, true);
     saveBakeryStats(newStats);
-    setGameState('result');
-  }, []);
 
-  // ── Enter game ─────────────────────────────────────────────────────────────
-  const enterGame = useCallback(() => {
-    spendCoins(AFTER_HOURS_ENTRY_FEE, 'After-Hours Bakery — Ganache Grove');
-    ordersRef.current = buildWave(1);
-    startTimeRef.current = Date.now();
-    setGameState('playing');
-  }, [spendCoins]);
+    onClose();
+  }, [onClose, spendCoins, addCoins]);
 
-  // ── Game loop ──────────────────────────────────────────────────────────────
+  const handleExitConfirm = useCallback(() => {
+    exitedRef.current = true;
+    spendCoins(EXIT_PENALTY, 'Early exit penalty — left shift at Ganache Grove Bakery', true);
+    setShowExit(false);
+    endGame(false);
+  }, [spendCoins, endGame]);
+
+  const handleEventChoice = useCallback((good: boolean) => {
+    activeEventRef.current = null;
+    setActiveEvent(null);
+    phaseRef.current = 'playing';
+    setPhase('playing');
+    nextEventTick.current = tickRef.current + 75 + Math.floor(Math.random() * 50);
+    if (good) {
+      scoreRef.current += 100;
+      addLog('✅ Good call! Mortimer is pleased.');
+      cozyAudio.playSuccess();
+    } else {
+      setCustomerQueue(prev => prev.map(c => ({ ...c, patience: Math.max(0, c.patience - 15) })));
+      addLog('⚠️ That cost the kitchen some goodwill.');
+      cozyAudio.playFailure();
+    }
+  }, [addLog]);
+
+  // ── Game loop effect ──
   useEffect(() => {
-    if (gameState !== 'playing') return;
-    loadInto(0); setTimeout(() => loadInto(1), 400);
-    setTimeout(() => loadInto(2), 800); setTimeout(() => loadInto(3), 1200);
-
+    if (phase !== 'playing') return;
     const interval = setInterval(() => {
-      if (calledEnd.current) { clearInterval(interval); return; }
-      if (pausedRef.current || gamePhaseRef.current !== 'playing') return;
+      if (phaseRef.current === 'result') { clearInterval(interval); return; }
+      if (phaseRef.current !== 'playing' || pausedRef.current) return;
 
       tickRef.current++;
       const tick = tickRef.current;
 
-      // Sugar Rush countdown
-      if (sugarRushTicks.current > 0) { sugarRushTicks.current--; if (!sugarRushTicks.current) setSugarRushActive(false); }
+      // Accumulate messiness
+      if (tick % 30 === 0) setMess(m => Math.min(100, m + 10));
 
-      // Flash order timer
-      if (flashRef.current?.active) {
-        const fl = { ...flashRef.current, timeLeft: flashRef.current.timeLeft - (tick % 5 === 0 ? 1 : 0) };
-        if (tick % 5 === 0) {
-          if (fl.timeLeft <= 0) {
-            flashRef.current = null; setFlashOrder(null);
-            if (fl.done < fl.need) addLog('⚡ Flash Order expired — missed!');
-          } else {
-            flashRef.current = fl; setFlashOrder(fl);
-          }
-        }
-      }
-
-      // Countdown
+      // Visual phase transitions
       if (tick % 5 === 0) {
         timeRef.current = Math.max(0, timeRef.current - 1);
-        const tLeft = timeRef.current;
-        setTimeLeft(tLeft);
+        setTimeLeft(timeRef.current);
+        const progress = (AFTER_HOURS_SECONDS - timeRef.current) / AFTER_HOURS_SECONDS;
 
-        // Phase transitions
-        const newPhase: AfterPhase =
-          tLeft <= AFTER_HOURS_PHASE4_AT ? 4 :
-          tLeft <= AFTER_HOURS_PHASE3_AT ? 3 :
-          tLeft <= AFTER_HOURS_PHASE2_AT ? 2 : 1;
+        if (progress < 0.3) setAfterHoursPhase(1);
+        else if (progress < 0.6) setAfterHoursPhase(2);
+        else if (progress < 0.85) setAfterHoursPhase(3);
+        else setAfterHoursPhase(4);
 
-        if (newPhase !== phaseRef.current) {
-          phaseRef.current = newPhase;
-          setPhase(newPhase);
-          setPhaseChanged(newPhase);
-          nextEventTick.current = tickRef.current + PHASE_CONFIG[newPhase].eventIntervalTicks;
-          // Load wave 2 at phase 2, wave 3 at phase 3
-          if (newPhase === 2 && currentWave.current === 1) {
-            loadWave(2, waveBonuses.current[1]);
-          } else if (newPhase === 3 && currentWave.current === 2) {
-            loadWave(3, waveBonuses.current[2]);
-          }
-          setTimeout(() => setPhaseChanged(null), 3500);
-          addLog(`${PHASE_CONFIG[newPhase].icon} Phase ${newPhase}: ${PHASE_CONFIG[newPhase].name} begins!`);
+        // Flash order countdown
+        if (flashOrder && flashOrder.active) {
+          setFlashOrder(f => {
+            if (!f) return null;
+            if (f.timeLeft <= 1) {
+              addLog(`⏳ Flash order expired!`);
+              return null;
+            }
+            return { ...f, timeLeft: f.timeLeft - 1 };
+          });
         }
 
-        // Flash orders
-        if (!flash1Fired.current && tLeft <= FLASH_ORDER_1_AT) {
-          flash1Fired.current = true;
-          const fo = FLASH_POOL[0];
-          const newFlash: FlashOrder = { ...fo, done: 0, timeLeft: FLASH_ORDER_DURATION, active: true };
-          flashRef.current = newFlash; setFlashOrder(newFlash);
-          addLog('⚡ FLASH ORDER appeared! 45 seconds — 3× score!');
-        }
-        if (!flash2Fired.current && tLeft <= FLASH_ORDER_2_AT) {
-          flash2Fired.current = true;
-          const fo = FLASH_POOL[1 + Math.floor(Math.random() * 2)];
-          const newFlash: FlashOrder = { ...fo, done: 0, timeLeft: FLASH_ORDER_DURATION, active: true };
-          flashRef.current = newFlash; setFlashOrder(newFlash);
-          addLog('⚡ Second FLASH ORDER! Final stretch — 3× score!');
-        }
+        // Customer patience decrease
+        setCustomerQueue(prev => prev.map(c => ({
+          ...c,
+          patience: Math.max(0, c.patience - (afterHoursPhase >= 3 ? 2.5 : 1.8))
+        })));
 
-        // Patient update
-        const elapsed = AFTER_HOURS_SECONDS - tLeft;
-        ordersRef.current.forEach(o => { if (o.done < o.need) o.patience = Math.max(0, 100 - (elapsed / AFTER_HOURS_SECONDS) * 90); });
-
-        if (tLeft <= 0) { endGame(); return; }
+        if (timeRef.current <= 0) {
+          setBrambleSays("🌙 Closing shop... let's sweep up and check the ledger.");
+          setTimeout(() => endGame(true), 4000);
+          return;
+        }
       }
 
-      // Events
-      if (tick >= nextEventTick.current && !activeEvent && !pausedRef.current) {
-        const pool = POSSIBLE_EVENTS;
-        const ev = pool[Math.floor(Math.random() * pool.length)];
-        setActiveEvent({ ...ev, resolved: false });
-        gamePhaseRef.current = 'event';
-        addLog(`🔔 ${ev.title}`);
+      // Trigger Flash orders at scheduled marks
+      const elapsed = AFTER_HOURS_SECONDS - timeRef.current;
+      if (elapsed === FLASH_ORDER_1_AT || elapsed === FLASH_ORDER_2_AT) {
+        const pool = shuffle([...FLASH_POOL_TEMPLATES]);
+        const template = pool[0];
+        const chars = shuffle([...BAKERY_CUSTOMERS]);
+        const matchedChar = chars[0];
+
+        setFlashOrder({
+          id: template.id,
+          customer: template.customerName,
+          icon: template.icon,
+          category: template.category,
+          need: template.need,
+          done: 0,
+          timeLeft: FLASH_ORDER_DURATION,
+          active: true,
+          avatarImage: matchedChar.avatar,
+          customerDialogue: `🔥 PRIORITY ORDER! Palace needs pastries immediately!`
+        });
+        addLog(`📯 Bell Ringing: Palace priority order arrived!`);
+        cozyAudio.playSuccess();
       }
 
-      // Oven updates
-      const pCfg = PHASE_CONFIG[phaseRef.current];
-      const driftMult = modifiers.reduce((m, mod) => m * (mod.effects.driftMultiplier ?? 1), pCfg.driftMult);
+      // Random assistant request
+      if (tick % 100 === 0 && !assistantBell) {
+        const ingredients = ['sweetbread', 'honey-syrup', 'sugar-beets', 'cocoa-pods'];
+        const req = ingredients[Math.floor(Math.random() * ingredients.length)];
+        setAssistantBell(req);
+        setBrambleSays(`🔔 Mortimer: Hand me 1x ${req.replace('-', ' ')} quickly!`);
+      }
 
-      let any = false;
+      // Customer rotation in queue
+      if (tick % 150 === 0 && customerQueue.length < 8) {
+        const pool = shuffle([...BAKERY_CUSTOMERS]);
+        const cust = pool[0];
+        const rec = RECIPES[Math.floor(Math.random() * RECIPES.length)];
+        setCustomerQueue(prev => [...prev, {
+          id: `ord-endless-add-${tick}-${Math.random().toString(36).slice(2, 6)}`,
+          customer: cust.name,
+          customerName: cust.name,
+          avatarImage: cust.avatar,
+          customerDialogue: cust.dialogues[Math.floor(Math.random() * cust.dialogues.length)],
+          icon: rec.icon,
+          face: '😊',
+          need: 1 + Math.floor(Math.random() * 2),
+          done: 0,
+          patience: 100,
+          category: rec.category,
+          comment: rec.name,
+          ingredientsNeeded: rec.ingredientsNeeded ?? { 'sweetbread': 1 }
+        }]);
+      }
+
+      // Ovens update loop
       ovensRef.current = ovensRef.current.map((oven, idx) => {
-        if (oven.status === 'empty') {
-          setTimeout(() => { if (ovensRef.current[idx].status === 'empty' && !calledEnd.current && !pausedRef.current) { loadInto(idx); forceUpdate(n => n + 1); } }, 350);
-          return oven;
-        }
+        if (oven.status === 'empty') return oven;
         if (oven.status === 'done' || oven.status === 'burnt') return oven;
-        const u = { ...oven }; any = true;
+        const u = { ...oven };
 
+        const pSpeed = oven.type === 'stone' ? 1.4 : oven.type === 'brick' ? 0.6 : 1.0;
         if (oven.status === 'preheating') {
-          u.preheatProgress = Math.min(100, oven.preheatProgress + (100 / PREHEAT_TICKS));
-          if (oven.recipe) { const rise = (oven.recipe.requiredTemp - oven.currentTemp) * 0.12; u.currentTemp = Math.min(oven.recipe.requiredTemp + 8, oven.currentTemp + Math.max(1, rise)); }
-          if (u.preheatProgress >= 100) u.status = 'baking';
+          u.preheatProgress = Math.min(100, oven.preheatProgress + (100 / PREHEAT_TICKS) * pSpeed);
+          if (oven.recipe) {
+            const rise = (oven.recipe.requiredTemp - oven.currentTemp) * 0.10 * pSpeed;
+            u.currentTemp = Math.min(oven.recipe.requiredTemp + 10, oven.currentTemp + Math.max(1, rise));
+          }
+          if (u.preheatProgress >= 100) {
+            u.status = 'baking';
+          }
           return u;
         }
 
         if (oven.status === 'baking' || oven.status === 'golden') {
           if (!oven.recipe) return oven;
-          const sugarBoost = sugarRushTicks.current > 0 ? 1.5 : 1;
-          const bpp = (0.2 / oven.recipe.bakeDuration) * 100 * oven.recipe.burnSpeed * pCfg.bakeSpeedMult * sugarBoost;
+          
+          const bSpeed = oven.type === 'stone' ? 1.3 : oven.type === 'brick' ? 0.7 : 1.0;
+          const bpp = (0.2 / oven.recipe.bakeDuration) * 100 * oven.recipe.burnSpeed * bSpeed;
           u.bakeProgress = Math.min(100, oven.bakeProgress + bpp);
 
-          const effectiveDrift = DRIFT_EVERY;
-          if (!oven.frozen && tick - oven.lastDriftTick >= effectiveDrift) {
-            const drift = (Math.random() < 0.6 ? -1 : 1) * (oven.recipe.driftSpeed * driftMult * (0.5 + Math.random() * 0.8));
+          const driftMult = oven.type === 'stone' ? 1.6 : oven.type === 'brick' ? 0.5 : 1.0;
+          if (tick - oven.lastDriftTick >= DRIFT_EVERY) {
+            const drift = (Math.random() < 0.65 ? -1 : 1) * (oven.recipe.driftSpeed * (0.5 + Math.random() * 0.8) * driftMult);
             u.currentTemp = Math.max(80, Math.min(240, oven.currentTemp + drift));
             u.lastDriftTick = tick;
           }
 
-          const goldenEnd = oven.masterTimer ? GOLDEN_END + 5 : GOLDEN_END;
-          u.status = u.bakeProgress >= GOLDEN_START && u.bakeProgress < goldenEnd + 4 ? 'golden'
+          u.status = u.bakeProgress >= GOLDEN_START && u.bakeProgress < GOLDEN_END + 4 ? 'golden'
             : u.bakeProgress < GOLDEN_START ? 'baking' : oven.status;
 
-          if (u.bakeProgress >= goldenEnd + 4) {
-            u.status = 'burnt'; u.feedback = { quality: 'poor', name: oven.recipe.name };
+          // Burnt condition
+          if (u.bakeProgress >= GOLDEN_END + 4) {
+            u.status = 'burnt';
+            u.feedback = { quality: 'poor', name: oven.recipe.name };
             burnsRef.current++;
-            const burnPenalty = Math.round(50 * modifiers.reduce((m, mod) => m * (mod.effects.burnPenaltyMultiplier ?? 1), 1));
-            scoreRef.current = Math.max(0, scoreRef.current - burnPenalty);
-            setScoreDisplay(scoreRef.current);
-            addLog(`🔥 BURNT — ${oven.recipe.name}! −${burnPenalty}pts`);
-            setTimeout(() => { if (ovensRef.current[idx].status === 'burnt') { ovensRef.current[idx] = makeOven(); forceUpdate(n => n + 1); } }, 2500);
+            setBrambleState('sooty');
+            addLog(`🔥 Burnt ${oven.recipe.name} in the ${oven.type} oven!`);
+            cozyAudio.playFailure();
+            setMess(m => Math.min(100, m + 15));
+
+            setTimeout(() => {
+              if (ovensRef.current[idx].status === 'burnt') {
+                ovensRef.current[idx].recipe = null;
+                ovensRef.current[idx].status = 'empty';
+                setBrambleState('idle');
+                forceUpdate(n => n + 1);
+              }
+            }, 3000);
           }
           return u;
         }
+
         return oven;
       });
-      if (any) forceUpdate(n => n + 1);
+
+      forceUpdate(n => n + 1);
     }, 200);
+
     return () => clearInterval(interval);
-  }, [gameState === 'playing']); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase, afterHoursPhase, assistantBell, endGame, flashOrder]);
 
-  // ── Result screen ──────────────────────────────────────────────────────────
-  if (gameState === 'result') {
-    return (
-      <AfterHoursResult
-        score={scoreRef.current} personalBest={personalBest}
-        pulledItems={pulledItemsRef.current} burns={burnsRef.current}
-        comboMax={comboMaxRef.current} goldenOrders={goldenOrdersRef.current}
-        modifiers={modifiers}
-        onPlayAgain={() => {
-          calledEnd.current = false; burnsRef.current = 0; comboRef.current = 0;
-          comboMaxRef.current = 0; scoreRef.current = 0; sugarRushFill.current = 0;
-          sugarRushTicks.current = 0; pulledItemsRef.current = []; goldenOrdersRef.current = 0;
-          tickRef.current = 0; timeRef.current = AFTER_HOURS_SECONDS;
-          nextEventTick.current = 300; phaseRef.current = 1; currentWave.current = 1;
-          flash1Fired.current = false; flash2Fired.current = false; flashRef.current = null;
-          ovensRef.current = [makeOven(), makeOven(), makeOven(), makeOven()];
-          recipeQueue.current = shuffle([...RECIPES]); nextRecipeIdx.current = 0;
-          setPhase(1); setPhaseChanged(null); setWaveCompleted(null); setFlashOrder(null);
-          setSugarRushActive(false); setScoreDisplay(0); setSugarRushFillPct(0);
-          setTimeLeft(AFTER_HOURS_SECONDS); setLogLines(['🌙 Ready for another night? Let\'s go!']);
-          setPaused(false); pausedRef.current = false;
-          setGameState('gate');
-        }}
-        onBack={onClose}
-      />
-    );
-  }
+  const activeCustomer = customerQueue[currentCustomerIndex];
+  const cfg = PHASE_CONFIG[afterHoursPhase];
 
-  // ── Entry gate ─────────────────────────────────────────────────────────────
-  if (gameState === 'gate') {
-    const canAfford = coins >= AFTER_HOURS_ENTRY_FEE;
+  if (phase === 'briefing') {
     return (
-      <div className="absolute inset-0 z-[400] flex items-center justify-center p-4"
-        style={{ backgroundImage: `url(${pickRotatingWallpaper('games-arena')})`, backgroundSize:'cover', backgroundPosition:'center' }}>
-        <div className="absolute inset-0 bg-black/65" />
-        <div className="relative z-10 max-w-2xl w-full animate-fade-in"
-          style={{ borderRadius:'2.5rem', border:'1px solid rgba(168,85,247,0.25)',
-            background:'rgba(10,3,18,0.97)', backdropFilter:'blur(16px)',
-            boxShadow:'0 0 80px rgba(168,85,247,0.15)' }}>
-          <div className="h-1 rounded-t-[2.5rem]" style={{ background:'linear-gradient(90deg,#7c3aed,#a855f7,#7c3aed)' }} />
-          <div className="p-8 space-y-5 text-center">
-            <span className="text-6xl block">🌙</span>
-            <div>
-              <p className="text-[9px] uppercase tracking-[0.35em] text-purple-400 font-black">After-Hours Bakery</p>
-              <h1 className="text-3xl font-black text-white mt-1" style={{ fontFamily: FONT }}>15-Minute Session</h1>
-              <p className="text-[12px] italic text-white/50 mt-2" style={{ fontFamily:'Georgia,serif' }}>
-                "4 ovens. 3 order waves. 2 flash orders. 1 personal best to beat."
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-[10px]">
-              {[['🌿','Phase 1','Open Kitchen — 3 orders'],['🌙','Phase 2','Midnight Rush — 4 orders'],
-                ['🔥','Phase 3','Deep Night — 5 golden orders'],['⛈️','Phase 4','Chaos Mode — last 60s'],
-                ['⚡','Flash Orders','×2 per session, 3× score'],['⏱️','15 Minutes','Full night in the kitchen']
-              ].map(([icon, label, sub]) => (
-                <div key={label} className="flex items-start gap-2 p-2 bg-white/4 border border-white/8 rounded-xl text-left">
-                  <span className="text-sm shrink-0">{icon}</span>
-                  <div><p className="font-black text-white">{label}</p><p className="text-white/35">{sub}</p></div>
-                </div>
-              ))}
-            </div>
-            <div>
-              <p className="text-[11px] text-white/50">Balance: <span className={`font-black ${canAfford ? 'text-amber-400' : 'text-rose-400'}`}>{coins} 🪙</span>
-                <span className="text-white/25 mx-2">/</span>Entry: <span className="text-purple-300 font-black">{AFTER_HOURS_ENTRY_FEE} 🪙</span>
-              </p>
-            </div>
-            <button onClick={enterGame} disabled={!canAfford}
-              className={`w-full py-3.5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all ${canAfford ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : 'opacity-40 cursor-not-allowed'}`}
-              style={canAfford ? { fontFamily:'Josefin Sans,sans-serif', background:'linear-gradient(135deg,#7c3aed,#a855f7)', boxShadow:'0 4px 24px rgba(124,58,237,0.4)', color:'#fff' }
-                              : { fontFamily:'Josefin Sans,sans-serif', background:'rgba(255,255,255,0.05)', color:'#fff' }}>
-              🌙 Rent the Ovens — {AFTER_HOURS_ENTRY_FEE} 🪙
-            </button>
-            <button onClick={onClose}
-              className="w-full py-2.5 rounded-2xl border border-white/10 text-white/40 text-sm hover:bg-white/5 transition cursor-pointer"
-              style={{ fontFamily:'Georgia,serif', fontStyle:'italic' }}>← Back</button>
+      <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-6">
+        <div className="max-w-xl w-full p-8 rounded-[2.5rem] border-[4px] border-amber-900 bg-[#1e1208] text-stone-100 shadow-[0_20px_50px_rgba(0,0,0,0.85)] flex flex-col items-center text-center">
+          <div className="w-40 h-40 rounded-full border-4 border-amber-500 overflow-hidden bg-amber-950 mb-5 shadow-lg">
+            <img src="/Assets/Ganache Grove/Characters/Baker_townsfolk.png" className="w-full h-full object-cover object-top scale-110" alt="Mortimer" />
           </div>
+          <h2 className="text-3xl text-amber-300 font-brand uppercase tracking-wider" style={{ fontFamily: FONT }}>Midnight After-Hours</h2>
+          <p className="text-sm text-indigo-400 font-serif italic mt-1">Advanced Baking Session</p>
+          <div className="p-5 my-5 bg-black/40 border border-white/5 rounded-2xl italic leading-relaxed text-stone-200/90 text-sm font-serif" style={{ fontFamily: 'Georgia, serif' }}>
+            "Welcome to the Midnight session, apprentice! When the sun sets, the ovens get hot, and our core recipes expand. 
+            Expect surprise palace orders, high preheat drifts, and chaotic Nutterby rushes. 
+            Entry costs 50 🪙 Cocoa Coins, but the tips are legendary!"
+          </div>
+          <button onClick={handleMorningBriefingClose}
+            className="w-full py-4 rounded-2xl text-black font-brand font-black text-base uppercase tracking-widest transition hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, #6366f1, #818cf8)',
+              boxShadow: '0 5px 25px rgba(99,102,241,0.35)'
+            }}>
+            🌙 Pay 50 🪙 & Open Kitchen
+          </button>
         </div>
       </div>
     );
   }
 
-  // ── Playing ────────────────────────────────────────────────────────────────
-  const pCfg = PHASE_CONFIG[phase];
-  const ovens = ovensRef.current;
-  const orders = ordersRef.current;
-  const isChaos = phase === 4;
+  if (phase === 'result') {
+    const happyPct = pulledItemsRef.current.length > 0 ? Math.round((pulledItemsRef.current.filter(p => p.quality === 'perfect').length / pulledItemsRef.current.length) * 100) : 100;
+    return (
+      <ShiftReportChalkboard
+        pulledItems={pulledItemsRef.current}
+        burns={burnsRef.current}
+        score={scoreRef.current}
+        happyPercent={happyPct}
+        onTryAgain={handleMorningBriefingClose}
+        onBack={onClose}
+      />
+    );
+  }
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden animate-fade-in relative">
-
-        {/* Overlays */}
-        {activeEvent && !paused && <EventPopup event={activeEvent} onChoose={handleEventChoice} />}
-        {paused && <PausePanel phase={phase} score={scoreRef.current} timeLeft={timeLeft} onResume={togglePause} onQuit={() => { setPaused(false); endGame(); }} />}
-        {phaseChanged && <PhaseBanner phase={phaseChanged} />}
-        {waveCompleted && <WaveBanner wave={waveCompleted.wave} bonus={waveCompleted.bonus} />}
-
-        {/* ── Header ── */}
-        <div className="shrink-0 flex items-center justify-between px-4 py-2 border-b transition-all duration-2000"
-          style={{ borderColor: pCfg.borderColor, background: isChaos ? 'rgba(60,5,5,0.5)' : 'rgba(20,8,35,0.4)' }}>
-
-          {/* Left: phase + controls */}
-          <div className="flex items-center gap-3">
-            <button onClick={togglePause}
-              className="w-9 h-9 rounded-xl border border-white/15 flex items-center justify-center text-white/60 hover:bg-white/8 transition cursor-pointer text-base"
-              title="Pause / Instructions">
-              {paused ? '▶' : '⏸'}
-            </button>
-            <div>
-              <p className="text-[8px] uppercase tracking-[0.3em] font-black" style={{ color: pCfg.accentColor }}>
-                {pCfg.icon} Phase {phase}: {pCfg.name}
-              </p>
-              <p className="text-[9px] text-white/30">Wave {currentWave.current}/3 · {burnsRef.current} burns</p>
-            </div>
-          </div>
-
-          {/* Centre: Combo + Score */}
-          <div className="flex items-center gap-3">
-            <ComboMeter combo={comboRef.current} maxCombo={comboMaxRef.current} sugarRushFill={sugarRushFillPct} sugarRushActive={sugarRushActive} />
-            <ScoreDisplay score={scoreDisplay} personalBest={personalBest} isNewRecord={scoreDisplay > personalBest} />
-          </div>
-
-          {/* Right: Orders + Timer */}
-          <div className="flex items-center gap-2">
-            {orders.map(o => (
-              <div key={o.id} className={`px-1.5 py-1 rounded-xl border text-center ${
-                o.done >= o.need ? 'border-emerald-500/30 bg-emerald-950/15' :
-                o.patience < 25 ? 'border-rose-500/30 bg-rose-950/12 animate-pulse' :
-                o.isGolden ? 'border-yellow-500/30 bg-yellow-950/12' :
-                'border-white/8 bg-white/3'}`}>
-                <p className="text-[7px] text-white/30 font-black">{o.customer.split(' ')[0]}</p>
-                <p className="text-sm">{faceFor(o.patience)}</p>
-                <p className={`text-[8px] font-black ${o.done>=o.need?'text-emerald-400':o.isGolden?'text-yellow-400':'text-white/45'}`}>{o.done}/{o.need}{o.isGolden?' ⭐':''}</p>
-              </div>
-            ))}
-            <div className={`px-3 py-1.5 rounded-xl border text-center ${isChaos ? 'border-rose-500/50 bg-rose-950/25' : 'border-white/10'}`}>
-              <p className="text-[7px] uppercase text-white/20 font-black">Time</p>
-              <p className={`text-lg font-mono font-black ${isChaos ? 'text-rose-400 animate-pulse' : 'text-white/70'}`} style={{ color: !isChaos ? pCfg.accentColor : undefined }}>
-                {formatTime(timeLeft)}
-              </p>
-            </div>
+    <div className="w-full h-full flex flex-col overflow-hidden relative select-none rounded-[2.5rem] border border-indigo-900/30 transition-all duration-700 bg-neutral-950">
+      
+      {/* HUD bar */}
+      <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-black/40 shrink-0 relative z-10">
+        <div className="flex items-center gap-3">
+          <button onClick={() => setShowExit(true)}
+            className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/5 transition cursor-pointer">🚪</button>
+          <div>
+            <span className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">Ganache Grove Bakery</span>
+            <h1 className="text-xl font-brand text-indigo-300 tracking-wide" style={{ fontFamily: FONT }}>{cfg.icon} {cfg.name}</h1>
           </div>
         </div>
 
-        {/* ── Main: 4 ovens + right panel ── */}
-        <div className="flex-1 min-h-0 flex gap-2 p-2 overflow-hidden">
-          {/* 2×2 oven grid */}
-          <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-2 min-h-0">
-            {ovens.map((oven, idx) => {
-              const isGolden = oven.status === 'golden';
-              const isBurnt  = oven.status === 'burnt';
-              const isDone   = oven.status === 'done';
-              const isPreheat= oven.status === 'preheating';
-              const diff     = oven.recipe ? oven.currentTemp - oven.recipe.requiredTemp : 0;
-              const phraseIdx= oven.recipe ? Math.floor((oven.bakeProgress/100)*oven.recipe.phrases.length) : 0;
-              const phrase   = oven.recipe?.phrases[Math.min(phraseIdx, oven.recipe.phrases.length-1)] || '';
-              const goldenEnd= oven.masterTimer ? GOLDEN_END+5 : GOLDEN_END;
-              return (
-                <div key={idx} className={`flex flex-col rounded-[1.4rem] border overflow-hidden transition-all duration-300 ${
-                  isGolden ? 'border-amber-400/60 shadow-[0_0_20px_rgba(251,191,36,0.18)] bg-amber-950/12' :
-                  isBurnt  ? 'border-rose-500/40 bg-rose-950/10' :
-                  isDone||oven.status==='empty' ? 'border-white/6 bg-white/2' :
-                  oven.frozen ? 'border-cyan-500/35 bg-cyan-950/8' : 'border-white/8 bg-black/20'}`}>
-                  {/* Oven mini-header */}
-                  <div className="shrink-0 px-2.5 py-1 border-b border-white/6 flex justify-between items-center bg-black/15">
-                    <span className="text-[8px] font-black uppercase tracking-widest text-white/25">{oven.frozen?'🧊 ':''}Oven {idx+1}</span>
-                    {isGolden && <span className="text-[7px] font-black text-amber-300 bg-amber-500/15 px-1.5 py-0.5 rounded-full animate-pulse">🟡 PULL!</span>}
-                    {isBurnt && <span className="text-[7px] font-black text-rose-300 bg-rose-500/15 px-1.5 py-0.5 rounded-full">🔥 Burnt</span>}
-                    {oven.recipe && !['empty','done','burnt'].includes(oven.status) && <span className="text-[7px] text-white/25 italic truncate max-w-[70px]">{phrase}</span>}
-                  </div>
+        {/* Display Shelf Panel */}
+        {displayCounter.length > 0 && (
+          <div className="flex items-center gap-1.5 px-4 py-2 bg-indigo-950/20 border border-indigo-900/35 rounded-2xl shadow-inner max-w-sm overflow-hidden">
+            <span className="text-[10px] text-indigo-400 uppercase tracking-wider font-black shrink-0">Display:</span>
+            <div className="flex gap-1 overflow-x-auto custom-scrollbar">
+              {displayCounter.map((icon, idx) => (
+                <span key={idx} className="text-lg animate-shelf-fly">{icon}</span>
+              ))}
+            </div>
+          </div>
+        )}
 
-                  <div className="flex-1 flex flex-col items-center justify-between p-2 gap-1 min-h-0">
-                    {oven.status==='empty' && <div className="flex-1 flex items-center justify-center opacity-20"><p className="text-[8px] text-white/30">Loading…</p></div>}
-                    {isDone && oven.feedback && (
-                      <div className="flex-1 flex items-center justify-center animate-fade-in">
-                        <div className="text-center">
-                          <div className="text-3xl mb-0.5">{qualityLabel(oven.feedback.quality).icon}</div>
-                          <p className={`text-xs font-black uppercase ${qualityLabel(oven.feedback.quality).color}`}>{qualityLabel(oven.feedback.quality).label}</p>
-                          <div className="flex justify-center gap-0.5 mt-0.5">{[1,2,3,4,5].map(s=><span key={s} className={`text-[8px] ${s<=starsFor(oven.feedback!.quality)?'text-amber-400':'text-white/15'}`}>★</span>)}</div>
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="text-[9px] uppercase tracking-widest text-white/30 font-black">Score</p>
+            <p className="text-sm font-black text-amber-300">{scoreRef.current} pts</p>
+          </div>
+          <div className="px-4 py-2 rounded-2xl bg-black/40 border border-white/10 text-center font-mono">
+            <p className="text-[11px] font-black text-indigo-400">{formatTime(timeLeft)}</p>
+            <p className="text-[8px] text-white/35 font-bold uppercase tracking-widest">Midnight</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Two Pane Split Body */}
+      <div className="flex-1 flex overflow-hidden min-h-0 relative z-10">
+        
+        {/* LEFT COLUMN: THE KITCHEN WORKSPACE */}
+        <div className="w-[62%] flex flex-col p-4 border-r border-white/10 overflow-y-auto custom-scrollbar relative space-y-4">
+          
+          {/* Bramble Mortimer Card */}
+          <div className="flex gap-4 p-4 rounded-2xl border border-indigo-900/30 bg-indigo-950/10 items-center">
+            <div className="w-16 h-16 rounded-2xl border-2 border-indigo-900/30 overflow-hidden bg-indigo-950 shrink-0">
+              <img src="/Assets/Ganache Grove/Characters/Baker_townsfolk.png" className="w-full h-full object-cover object-top scale-125" alt="Mortimer" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] uppercase tracking-wider text-indigo-400 font-black">Bramble Mortimer {getBrambleEmoji()}</span>
+                {comboRef.current >= 3 && <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-black animate-pulse">OVEN HARMONY ×{comboRef.current}</span>}
+              </div>
+              <p className="text-[13px] text-stone-200/90 italic font-serif leading-relaxed mt-0.5" style={{ fontFamily: 'Georgia, serif' }}>
+                "{brambleSays}"
+              </p>
+            </div>
+            
+            {assistantBell && (
+              <button onClick={handleAssistantBell}
+                className="py-2.5 px-3 rounded-xl border border-indigo-400 bg-indigo-500 text-black font-black text-xs hover:scale-105 active:scale-95 transition cursor-pointer animate-pulse shrink-0">
+                🔔 Give {assistantBell.replace('-', ' ')}!
+              </button>
+            )}
+          </div>
+
+          {/* Ovens grid layout */}
+          <div className="flex flex-col gap-3">
+            {ovensRef.current.map((oven, idx) => {
+              const borderCol = oven.type === 'stone' ? 'border-stone-500/40 bg-stone-900/10' : oven.type === 'copper' ? 'border-amber-700/50 bg-[#25150c]' : 'border-amber-900/50 bg-[#2a130f]';
+              const ovenName = oven.type === 'stone' ? 'Stone Hearth' : oven.type === 'copper' ? 'Copper Vault' : 'Brick Dome';
+              const details = oven.type === 'stone' ? 'Bakes 1.3x faster, volatile temperature' : oven.type === 'copper' ? 'Standard bake, fast dial adjustments' : 'Bakes 0.7x slower, holds heat stable';
+
+              return (
+                <div key={oven.id} className={`p-4 rounded-[2rem] border-2 flex gap-4 items-center relative transition-all duration-300 ${borderCol} ${oven.status === 'golden' ? 'animate-gold-pulse' : ''}`}>
+                  
+                  <div className="flex-1 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="text-[9px] uppercase tracking-widest text-white/30 font-bold">{details}</span>
+                        <h3 className="text-base font-black text-white" style={{ fontFamily: FONT }}>{ovenName}</h3>
+                      </div>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-black uppercase ${
+                        oven.status === 'preheating' ? 'bg-indigo-500/20 text-indigo-400 animate-pulse' :
+                        oven.status === 'baking' ? 'bg-indigo-500/25' :
+                        oven.status === 'golden' ? 'bg-amber-400 text-black font-bold animate-bounce' :
+                        oven.status === 'burnt' ? 'bg-rose-500/20 text-rose-400' :
+                        'bg-stone-850 text-stone-500'
+                      }`}>{oven.status}</span>
+                    </div>
+
+                    {oven.recipe && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[11px] text-white/50 font-mono">
+                          <span>Target: {oven.recipe.requiredTemp}°C ({oven.recipe.tempLabel})</span>
+                          <span className={tempColor(oven.currentTemp - oven.recipe.requiredTemp)}>{Math.round(oven.currentTemp)}°C</span>
+                        </div>
+                        <div className="h-3 bg-stone-950 rounded-full overflow-hidden relative border border-white/5">
+                          <div className="h-full rounded-full transition-all"
+                            style={{
+                              width: `${(oven.currentTemp / 250) * 100}%`,
+                              background: tempBarColor(oven.currentTemp - oven.recipe.requiredTemp)
+                            }} />
+                          <div className="absolute top-0 bottom-0 w-1 bg-white border border-black shadow"
+                            style={{ left: `${(oven.recipe.requiredTemp / 250) * 100}%` }} />
                         </div>
                       </div>
                     )}
-                    {oven.recipe && !['empty','done'].includes(oven.status) && (
-                      <>
-                        <div className="text-center shrink-0">
-                          <div className={`text-2xl mb-0.5 ${isGolden?'animate-bounce':''}`}>{oven.recipe.icon}</div>
-                          <p className="text-[10px] font-black text-white leading-tight">{oven.recipe.name}</p>
-                          {(() => {
-                            const m = orders.find(o => o.category===oven.recipe!.category && o.done<o.need);
-                            return m ? <span className={`text-[7px] font-black ${m.isGolden?'text-yellow-400':'text-emerald-400'}`}>→{m.customer.split(' ')[0]}{m.isGolden?' ⭐':''}</span>
-                                     : <span className="text-[7px] text-white/15">Flash?</span>;
-                          })()}
+
+                    {oven.recipe && oven.status !== 'preheating' && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[10px] text-white/40">
+                          <span>Baking progress:</span>
+                          <span>{Math.round(oven.bakeProgress)}%</span>
                         </div>
-                        <div className="w-full space-y-0.5">
-                          <div className="flex justify-between">
-                            <span className="text-[6px] uppercase text-white/20 font-black">Temp</span>
-                            <span className={`text-[9px] font-mono font-black ${tempColor(diff)}`}>{Math.round(oven.currentTemp)}°</span>
-                          </div>
-                          <div className="h-1.5 bg-white/8 rounded-full overflow-hidden relative">
-                            <div className="absolute top-0 w-px h-full bg-white/40 z-10" style={{ left:`${(oven.recipe.requiredTemp/250)*100}%` }} />
-                            <div className={`h-full rounded-full transition-all duration-200 ${tempBarColor(diff)}`} style={{ width:`${Math.min(100,Math.max(3,(oven.currentTemp/250)*100))}%` }} />
-                          </div>
-                          <div className="grid grid-cols-4 gap-0.5">
-                            {([-10,-5,5,10] as const).map(d=>(
-                              <button key={d} onClick={()=>adjustTemp(idx,d)}
-                                className={`py-0.5 text-[7px] font-black rounded-md border transition active:scale-90 cursor-pointer ${d<0?'bg-blue-500/15 border-blue-500/20 text-blue-300':'bg-orange-500/15 border-orange-500/20 text-orange-300'}`}>
-                                {d>0?`+${d}°`:`${d}°`}
-                              </button>
-                            ))}
-                          </div>
+                        <div className="h-2.5 bg-stone-950 rounded-full overflow-hidden relative border border-white/5">
+                          <div className="h-full rounded-full bg-amber-500 transition-all"
+                            style={{ width: `${oven.bakeProgress}%` }} />
+                          <div className="absolute top-0 bottom-0 bg-amber-400/40"
+                            style={{ left: `${GOLDEN_START}%`, right: `${100 - GOLDEN_END}%` }} />
                         </div>
-                        {isPreheat && <div className="w-full"><div className="h-2 bg-white/8 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-cyan-700 to-cyan-400 rounded-full transition-all" style={{ width:`${oven.preheatProgress}%` }} /></div></div>}
-                        {['baking','golden','burnt'].includes(oven.status) && (
-                          <div className="w-full space-y-0.5">
-                            <div className="h-2.5 bg-white/8 rounded-full overflow-hidden relative">
-                              <div className="absolute top-0 h-full bg-amber-500/20" style={{ left:`${GOLDEN_START}%`, width:`${goldenEnd-GOLDEN_START}%` }} />
-                              <div className={`h-full rounded-full transition-all duration-150 ${isBurnt?'bg-rose-600':isGolden?'bg-gradient-to-r from-amber-600 to-yellow-400':'bg-gradient-to-r from-orange-800 to-orange-500'}`} style={{ width:`${oven.bakeProgress}%` }} />
-                            </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col items-center gap-2 shrink-0">
+                    {oven.status === 'empty' ? (
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[10px] text-center text-white/30 uppercase font-black">Load Recipe</span>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {RECIPES.slice(0, 6).map(r => (
+                            <button key={r.id} onClick={() => loadIntoOven(idx, r)}
+                              className="w-10 h-10 rounded-xl bg-amber-900/20 border border-amber-900/30 text-lg flex items-center justify-center hover:scale-105 active:scale-95 transition cursor-pointer">
+                              {r.icon}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        {oven.status !== 'burnt' && oven.status !== 'done' && (
+                          <div className="flex gap-1.5">
+                            <button onClick={() => adjustTemp(idx, -10)} className="w-8 h-8 rounded-lg bg-stone-900 border border-white/10 hover:bg-stone-800 text-stone-300 font-black cursor-pointer">-</button>
+                            <button onClick={() => adjustTemp(idx, 10)} className="w-8 h-8 rounded-lg bg-stone-900 border border-white/10 hover:bg-stone-800 text-stone-300 font-black cursor-pointer">+</button>
                           </div>
                         )}
-                        <button onClick={()=>pullOut(idx)} disabled={!isGolden}
-                          className={`w-full py-1.5 rounded-xl font-black text-[8px] uppercase tracking-wider transition-all shrink-0 ${isGolden?'bg-gradient-to-r from-amber-500 to-yellow-400 text-black animate-pulse cursor-pointer hover:scale-[1.02]':'bg-white/4 text-white/15 border border-white/6 cursor-not-allowed'}`}>
-                          {isGolden?'🧤 Pull!':isBurnt?'🔥':isPreheat?'♨️':'⏳'}
-                        </button>
-                      </>
+                        {oven.status === 'preheating' && (
+                          <div className="w-20 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[11px] font-black text-center animate-pulse">
+                            Preheating...
+                          </div>
+                        )}
+                        {oven.status === 'baking' && (
+                          <div className="w-20 py-2.5 rounded-xl bg-stone-900 border border-white/10 text-stone-500 text-[11px] font-black text-center">
+                            Baking...
+                          </div>
+                        )}
+                        {oven.status === 'golden' && (
+                          <button onClick={() => pullOut(idx)}
+                            className="w-20 py-2.5 rounded-xl bg-amber-500 text-black font-black text-[11px] hover:scale-105 active:scale-95 transition cursor-pointer animate-pulse">
+                            🥖 PULL!
+                          </button>
+                        )}
+                        {oven.status === 'burnt' && (
+                          <div className="w-20 py-2.5 rounded-xl bg-rose-500/15 border border-rose-500/35 text-rose-400 text-[11px] font-black text-center">
+                            BURNT! 💀
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -809,50 +833,171 @@ export const AfterHoursBakery: React.FC<AfterHoursBakeryProps> = ({ onClose }) =
             })}
           </div>
 
-          {/* Right panel */}
-          <div className="w-44 shrink-0 flex flex-col gap-2">
-            {/* Orders */}
-            <div className="bg-black/30 border border-white/8 rounded-2xl p-2.5 space-y-1.5">
-              <p className="text-[7px] uppercase tracking-[0.2em] font-black" style={{ color: pCfg.accentColor }}>📦 Wave {currentWave.current} Orders</p>
-              {orders.map(o => (
-                <div key={o.id} className={`px-2 py-1.5 rounded-xl border ${o.done>=o.need?'border-emerald-500/25 bg-emerald-950/15':o.patience<25?'border-rose-500/25 bg-rose-950/10 animate-pulse':o.isGolden?'border-yellow-500/25 bg-yellow-950/10':'border-white/6 bg-white/3'}`}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs">{o.icon}</span>
-                    <span className="text-sm">{faceFor(o.patience)}</span>
-                    <span className={`text-[8px] font-black ${o.done>=o.need?'text-emerald-400':o.isGolden?'text-yellow-400':'text-white/40'}`}>{o.done}/{o.need}</span>
-                  </div>
-                  <p className="text-[7px] text-white/30 mt-0.5">{o.customer.split(' ')[0]} {o.isGolden?'⭐':''}</p>
-                  <div className="h-1 bg-white/8 rounded-full mt-1 overflow-hidden">
-                    <div className={`h-full rounded-full transition-all ${o.done>=o.need?'bg-emerald-500':o.isGolden?'bg-yellow-500':'bg-purple-600'}`} style={{ width:`${(o.done/o.need)*100}%` }} />
-                  </div>
+          {/* Clean and mess controls */}
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-black/20 border border-white/5">
+            <div>
+              <p className="text-xs text-white/35 font-bold uppercase tracking-wider">Kitchen Messiness</p>
+              <div className="flex items-center gap-2 mt-1.5">
+                <div className="w-36 h-2 rounded-full bg-stone-900 overflow-hidden border border-white/5">
+                  <div className="h-full rounded-full transition-all" style={{ width: `${mess}%`, background: mess > 60 ? '#ef4444' : '#f59e0b' }} />
                 </div>
-              ))}
-            </div>
-
-            {/* Flash order */}
-            {flashOrder && flashOrder.active && (
-              <FlashOrderBadge flash={flashOrder} onFill={() => {}} />
-            )}
-
-            {/* Hints */}
-            <div className="flex-1 min-h-0">
-              <HintPanel coins={coins} onUseHint={handleHint} activeHints={activeHints} freeAutoStir={freeAutoStir} />
-            </div>
-
-            {/* Log */}
-            <div className="h-28 bg-black/30 border border-white/6 rounded-2xl p-2 flex flex-col overflow-hidden">
-              <div className="flex-1 overflow-y-auto space-y-0.5 custom-scrollbar">
-                {logLines.map((l, i) => <p key={i} className={`text-[7px] leading-snug ${i===0?'text-white/70':'text-white/20'}`}>{l}</p>)}
+                <span className="text-xs font-mono text-white/50">{mess}%</span>
               </div>
             </div>
+            {mess >= 20 && (
+              <button onClick={cleanKitchen} disabled={cleaning}
+                className="py-2.5 px-4 rounded-xl border border-amber-900 bg-amber-950/20 text-amber-300 font-black text-xs hover:bg-amber-900/30 transition cursor-pointer">
+                {cleaning ? '🧹 Cleaning...' : '🧹 Clean Kitchen (3s)'}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="shrink-0 px-4 py-1 border-t border-white/6 flex justify-between items-center">
-          <p className="text-[7px] italic text-white/15" style={{ fontFamily:'Georgia,serif' }}>"The best bakers bake for love." — Chef Caramel</p>
-          <p className="text-[7px] text-white/10">⏸ Pause anytime · Burns: {burnsRef.current} · Score: {scoreDisplay.toLocaleString()}</p>
+        {/* RIGHT COLUMN: THE SHOP COUNTER (CUSTOMER & QUEUE) */}
+        <div className="w-[38%] flex flex-col p-4 bg-black/40 overflow-y-auto custom-scrollbar relative justify-between">
+          
+          <div className="space-y-4">
+            {/* Flash / Priority Order Banner */}
+            {flashOrder && (
+              <div className="p-4 rounded-2xl border border-indigo-400 bg-indigo-950/30 space-y-3 relative overflow-hidden animate-pulse">
+                <div className="flex gap-3 items-center">
+                  <div className="w-14 h-14 rounded-xl border-2 border-indigo-400 overflow-hidden bg-indigo-950 shrink-0">
+                    <img src={flashOrder.avatarImage} className="w-full h-full object-cover object-top scale-110" alt="Flash Customer" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-white uppercase tracking-wider">🚨 VIP Priority Order</p>
+                    <p className="text-sm font-black text-indigo-300">{flashOrder.customer}</p>
+                    <span className="text-xs font-bold text-amber-300">Requires: {flashOrder.need}x {flashOrder.icon} {flashOrder.category}s</span>
+                  </div>
+                </div>
+                <p className="text-xs text-stone-200 italic font-serif">"{flashOrder.customerDialogue}"</p>
+                <div className="flex justify-between items-center text-[10px] text-rose-400 font-mono">
+                  <span>Patience time remaining:</span>
+                  <span>{flashOrder.timeLeft}s</span>
+                </div>
+                <button onClick={acceptFlashOrder}
+                  className="w-full py-2 bg-indigo-500 text-black font-black text-xs rounded-xl hover:scale-105 transition cursor-pointer">
+                  Accept Flash Priority ⚡
+                </button>
+              </div>
+            )}
+
+            <div className="border-b border-white/10 pb-3 flex justify-between items-center">
+              <div>
+                <span className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">Active Counter</span>
+                <h3 className="text-base font-black text-indigo-300" style={{ fontFamily: FONT }}>Customer Counter</h3>
+              </div>
+              <span className="text-xs font-mono text-indigo-400/70">{customerQueue.length} waiting</span>
+            </div>
+
+            {activeCustomer ? (
+              <div className="p-4 rounded-2xl border border-indigo-900/30 bg-indigo-950/10 space-y-4 flex flex-col">
+                <div className="flex gap-4 items-center">
+                  <div className={`w-20 h-20 rounded-2xl border-2 overflow-hidden bg-indigo-950 shrink-0 ${activeCustomer.patience < 35 ? 'border-rose-500/60 animate-shake grayscale' : 'border-indigo-900/40'}`}>
+                    <img src={activeCustomer.avatarImage} className="w-full h-full object-cover object-top scale-110" alt="Customer" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-black text-white">{activeCustomer.customerName}</span>
+                      <span className="text-base">{faceFor(activeCustomer.patience)}</span>
+                    </div>
+                    <div className="flex gap-1.5 items-center mt-1">
+                      <span className="text-[10px] uppercase tracking-wider text-indigo-400/80 font-black">Wants:</span>
+                      <span className="text-xs bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full font-bold text-indigo-300">
+                        {activeCustomer.need}x {activeCustomer.icon} {activeCustomer.comment}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-black/30 border border-white/5 rounded-xl italic font-serif text-stone-200/90 text-sm" style={{ fontFamily: 'Georgia, serif' }}>
+                  "{activeCustomer.customerDialogue}"
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={acceptCustomerOrder}
+                    className="py-3 rounded-xl bg-indigo-500 text-black font-black text-xs hover:scale-[1.03] active:scale-[0.97] transition cursor-pointer">
+                    Accept Order 🥖
+                  </button>
+                  <button onClick={passCustomerOrder}
+                    className="py-3 rounded-xl border border-rose-500/35 text-rose-300 font-black text-xs hover:bg-rose-500/10 transition cursor-pointer">
+                    Not Today ✖
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-8 text-center text-white/30 border border-dashed border-white/10 rounded-2xl">
+                ☕ No customers at the counter right now. Monitor baking ovens!
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <span className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">Active Baking Queue</span>
+              {acceptedOrders.length > 0 ? (
+                <div className="space-y-1.5">
+                  {acceptedOrders.map(o => (
+                    <div key={o.id} className="flex gap-3 items-center p-3 rounded-xl border border-indigo-900/30 bg-indigo-950/5">
+                      <span className="text-xl">{o.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-black text-white">{o.customerName}</p>
+                        <p className="text-[10px] text-white/40 italic">{o.comment}</p>
+                      </div>
+                      <span className="text-xs font-mono font-black text-indigo-400">{o.done}/{o.need} baked</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 text-center text-white/20 border border-white/5 bg-white/2 rounded-xl text-xs font-serif italic">
+                  Kitchen queue empty. Accept customer orders from counter.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Pantry Stocks (One Click Buy) */}
+          <div className="border-t border-white/10 pt-4 space-y-2">
+            <span className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">Bakery Pantry (Tap to buy +1 for 15 🪙)</span>
+            <div className="grid grid-cols-5 gap-1.5">
+              {[
+                { key: 'sweetbread', label: 'Bun', icon: '🍞' },
+                { key: 'honey-syrup', label: 'Honey', icon: '🍯' },
+                { key: 'cocoa-pods', label: 'Cocoa', icon: '🟫' },
+                { key: 'sugar-beets', label: 'Beet', icon: '🍠' },
+                { key: 'marshmallow-strawberries', label: 'Berry', icon: '🍓' },
+              ].map(p => {
+                const count = pantry[p.key] || 0;
+                return (
+                  <button key={p.key} onClick={() => topupPantryItem(p.key)}
+                    className={`p-2 rounded-xl border flex flex-col items-center justify-center hover:scale-105 active:scale-95 transition cursor-pointer relative ${count === 0 ? 'border-rose-500/40 bg-rose-950/20' : 'border-indigo-900/35 bg-indigo-950/5'}`}>
+                    <span className="text-lg">{p.icon}</span>
+                    <span className={`text-[10px] font-black mt-1 ${count === 0 ? 'text-rose-400' : 'text-stone-300'}`}>{count}</span>
+                    <span className="text-[7px] text-white/30 font-bold uppercase">{p.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* PAUSE OVERLAY */}
+      {paused && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-brand text-indigo-300 uppercase tracking-widest" style={{ fontFamily: FONT }}>Baking Paused</h2>
+            <button onClick={togglePause}
+              className="py-3 px-6 rounded-2xl bg-indigo-500 text-black font-black uppercase text-sm hover:scale-105 transition cursor-pointer">Resume Shift</button>
+          </div>
+        </div>
+      )}
+
+      {/* EVENT AND EXIT DIALOGS */}
+      {activeEvent && (
+        <EventPopup event={activeEvent} onChoose={handleEventChoice => {}} />
+      )}
+      {showExit && (
+        <ExitConfirm onConfirm={handleExitConfirm} onCancel={() => setShowExit(false)} />
+      )}
+    </div>
   );
 };

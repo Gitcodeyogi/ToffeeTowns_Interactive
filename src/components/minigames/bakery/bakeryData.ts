@@ -10,57 +10,157 @@ import type {
 } from './bakeryTypes';
 
 // ── Recipes (8 existing + 2 After-Hours exclusives) ───────────────────────────
+// ── Recipes (8 existing + 2 After-Hours exclusives) ───────────────────────────
 export const RECIPES: Recipe[] = [
-  { id:1, name:'Toffee Sponge',     icon:'🍮', requiredTemp:160, bakeDuration:28, tempLabel:'LOW',
+  { id:1, name:'Midday Golden Bun',   icon:'🥯', requiredTemp:160, bakeDuration:28, tempLabel:'LOW',
     driftSpeed:6,  burnSpeed:1.0, goldenWidth:20, category:'dessert',
     phrases:['Rising...','Puffing up...','Almost set...','Setting nicely...'],
-    story:"Lady Butterscotch's afternoon tea" },
-  { id:2, name:'Cocoa Loaf',        icon:'🍫', requiredTemp:200, bakeDuration:38, tempLabel:'HIGH',
+    story:"Lady Butterscotch's afternoon tea",
+    ingredientsNeeded: { 'sweetbread': 1 } },
+  { id:2, name:'Old Oak Honey Loaf',  icon:'🍯', requiredTemp:200, bakeDuration:38, tempLabel:'HIGH',
     driftSpeed:10, burnSpeed:1.3, goldenWidth:16, category:'loaf',
     phrases:['Rising...','Crust forming...','Browning...','Nearly ready...'],
-    story:'Festival Committee centrepiece' },
-  { id:3, name:'Caramel Flan',      icon:'🍰', requiredTemp:175, bakeDuration:22, tempLabel:'MEDIUM',
+    story:'Festival Committee centrepiece',
+    ingredientsNeeded: { 'honey-syrup': 1, 'sweetbread': 1 } },
+  { id:3, name:'Caramel Drizzle Tart', icon:'🍮', requiredTemp:175, bakeDuration:22, tempLabel:'MEDIUM',
     driftSpeed:7,  burnSpeed:0.9, goldenWidth:22, category:'dessert',
     phrases:['Custard setting...','Caramel bubbling...','Almost there...','Setting...'],
-    story:'Oakenhart Clinic dessert round' },
-  { id:4, name:'Hazelnut Tart',     icon:'🥐', requiredTemp:190, bakeDuration:26, tempLabel:'HIGH',
+    story:'Oakenhart Clinic dessert round',
+    ingredientsNeeded: { 'caramelized-roses': 1, 'honey-syrup': 1 } },
+  { id:4, name:'Cozy Butter Croissant', icon:'🥐', requiredTemp:190, bakeDuration:26, tempLabel:'HIGH',
     driftSpeed:14, burnSpeed:1.4, goldenWidth:14, category:'pastry',
     phrases:['Rising fast!','Layers forming...','Browning quickly!','Almost golden!'],
-    story:"Traveller's Inn morning batch" },
-  { id:5, name:'Mossberry Crumble', icon:'🫐', requiredTemp:185, bakeDuration:32, tempLabel:'MEDIUM',
+    story:"Traveller's Inn morning batch",
+    ingredientsNeeded: { 'sugar-beets': 1, 'butterscotch-blossoms': 1 } },
+  { id:5, name:'Blueberry Forest Pie', icon:'🫐', requiredTemp:185, bakeDuration:32, tempLabel:'MEDIUM',
     driftSpeed:8,  burnSpeed:1.0, goldenWidth:18, category:'dessert',
     phrases:['Bubbling...','Berry steam rising...','Crumble crisping...','Nearly done...'],
-    story:'Gossip Corner evening special' },
-  { id:6, name:'Sugar Wafer',       icon:'🍪', requiredTemp:168, bakeDuration:14, tempLabel:'LOW',
+    story:'Gossip Corner evening special',
+    ingredientsNeeded: { 'honey-syrup': 1, 'marshmallow-strawberries': 1 } },
+  { id:6, name:'Glazed Wafer',         icon:'🍪', requiredTemp:168, bakeDuration:14, tempLabel:'LOW',
     driftSpeed:5,  burnSpeed:1.8, goldenWidth:12, category:'pastry',
-    phrases:['Crisping fast!','Browning quickly!','Watch it!','Almost done!'],
-    story:"Schoolchildren's treat boxes" },
-  { id:7, name:'Ganache Torte',     icon:'🎂', requiredTemp:210, bakeDuration:44, tempLabel:'VERY HIGH',
+    phrases:['Crisping fast!','Browning quickly!','Watch it!','Almost done...'],
+    story:"Schoolchildren's treat boxes",
+    ingredientsNeeded: { 'sugar-beets': 1 } },
+  { id:7, name:'Ganache Birthday Cake', icon:'🎂', requiredTemp:210, bakeDuration:44, tempLabel:'VERY HIGH',
     driftSpeed:12, burnSpeed:1.1, goldenWidth:16, category:'loaf',
     phrases:['Deep heating...','Setting slowly...','Chocolate setting...','Crust forming...'],
-    story:"Sir Goldwhistle's birthday" },
-  { id:8, name:'Cinnamon Roll',     icon:'🌸', requiredTemp:172, bakeDuration:20, tempLabel:'LOW',
+    story:"Sir Goldwhistle's birthday",
+    ingredientsNeeded: { 'cocoa-pods': 1, 'sugar-beets': 2 } },
+  { id:8, name:'Cinnamon Roll',        icon:'🌀', requiredTemp:172, bakeDuration:20, tempLabel:'LOW',
     driftSpeed:7,  burnSpeed:1.2, goldenWidth:18, category:'pastry',
     phrases:['Dough puffing...','Rising nicely...','Cinnamon fragrance!','Nearly ready...'],
-    story:'Morning rush at Canal Café' },
+    story:'Morning rush at Canal Café',
+    ingredientsNeeded: { 'sugar-beets': 1 } },
   // After-Hours exclusives
-  { id:9, name:'Midnight Éclair',   icon:'🌙', requiredTemp:195, bakeDuration:24, tempLabel:'HIGH',
+  { id:9, name:'Chocolate Swirl Pastry', icon:'🍫', requiredTemp:195, bakeDuration:24, tempLabel:'HIGH',
     driftSpeed:16, burnSpeed:1.5, goldenWidth:10, category:'pastry',
     phrases:['Dark chocolate rising...','Choux puffing!','Almost there...','Delicate now!'],
-    story:"After-Hours special \u2014 Chef Caramel's secret recipe",
-    afterHoursOnly: true },
-  { id:10, name:'Golden Brioche',   icon:'✨', requiredTemp:180, bakeDuration:36, tempLabel:'MEDIUM',
+    story:"After-Hours special — Chef Caramel's secret recipe",
+    afterHoursOnly: true,
+    ingredientsNeeded: { 'cocoa-pods': 1, 'ganache-cherries': 1 } },
+  { id:10, name:'Golden Brioche',        icon:'✨', requiredTemp:180, bakeDuration:36, tempLabel:'MEDIUM',
     driftSpeed:6,  burnSpeed:0.8, goldenWidth:24, category:'loaf',
     phrases:['Rich dough rising...','Butter melting in...','Golden crust forming...','Almost perfect!'],
     story:'The legendary midnight bake',
-    afterHoursOnly: true },
+    afterHoursOnly: true,
+    ingredientsNeeded: { 'sweetbread': 1, 'honey-syrup': 1 } },
+];
+
+// Seasonal Recipes (inserted dynamically based on active season in engine)
+export const SEASONAL_RECIPES = {
+  spring: { name: 'Cozy Berry Tart', icon: '🍓', requiredTemp: 170, bakeDuration: 24, driftSpeed: 7, burnSpeed: 1.1, goldenWidth: 20, category: 'dessert' as const, story: 'Spring Equinox celebration sweet', ingredientsNeeded: { 'sugar-beets': 1, 'butterscotch-blossoms': 1 } },
+  summer: { name: 'Citrus Lemon Cake', icon: '🍋', requiredTemp: 180, bakeDuration: 26, driftSpeed: 8, burnSpeed: 1.0, goldenWidth: 18, category: 'dessert' as const, story: 'Midsummer Solstice cool bake', ingredientsNeeded: { 'sugar-beets': 1, 'honey-syrup': 1 } },
+  autumn: { name: 'Glazed Apple Pie', icon: '🍎', requiredTemp: 190, bakeDuration: 30, driftSpeed: 9, burnSpeed: 0.9, goldenWidth: 22, category: 'dessert' as const, story: 'Harvest festival special pie', ingredientsNeeded: { 'glazed-carrots': 1, 'honey-syrup': 1 } },
+  winter: { name: 'Hot Chocolate Roll', icon: '🟫', requiredTemp: 205, bakeDuration: 34, driftSpeed: 11, burnSpeed: 1.2, goldenWidth: 16, category: 'pastry' as const, story: 'Frostbite shelter warmth bread', ingredientsNeeded: { 'cocoa-pods': 1, 'marshmallow-strawberries': 1 } },
+};
+
+// ── Bakery Customer Base ───────────────────────────────────────────────────────
+export interface BakeryCustomerTemplate {
+  id: string;
+  name: string;
+  avatar: string;
+  dialogues: string[];
+}
+
+export const BAKERY_CUSTOMERS: BakeryCustomerTemplate[] = [
+  {
+    id: 'marshal',
+    name: 'Marshal Frill',
+    avatar: '/Assets/Ganache Grove/Characters/Marshal_Frill_townsfolk.png',
+    dialogues: [
+      'Hearty Old Oak Honey Loaf keeps my energy up on forest patrol!',
+      'I need a warm croissant before patrol duty.',
+      'A quick bite, Chef, the borders are busy!'
+    ]
+  },
+  {
+    id: 'pipkin',
+    name: 'Pipkin',
+    avatar: '/Assets/Ganache Grove/Characters/Pipkin_Nutterby_townsfolk.png',
+    dialogues: [
+      "Bramble's tarts are the talk of the Nutterby clan!",
+      'Mmm... sweetbread rolls! Can I get three?',
+      'A perfect bake makes my hazelnut tail twitch!'
+    ]
+  },
+  {
+    id: 'professor',
+    name: 'Professor Oats',
+    avatar: '/Assets/Ganache Grove/Characters/Teacher_townsfolk.png',
+    dialogues: [
+      'Ah, bakery sciences! A Cinnamon Roll for cerebral fuel.',
+      'I\'m researching local yeasts, let me inspect a slice.',
+      'A quick bun, Chef, the academy bell is about to ring!'
+    ]
+  },
+  {
+    id: 'innkeeper',
+    name: 'Innkeeper',
+    avatar: '/Assets/Ganache Grove/Characters/Innkeeper_townsfolk.png',
+    dialogues: [
+      'Our travelers won\'t stop asking for your Blueberry Pies!',
+      'Need a large batch for the morning room service.',
+      'A fresh loaf, Lady Butterscotch just checked in!'
+    ]
+  },
+  {
+    id: 'vendor',
+    name: 'Vegetable Vendor',
+    avatar: '/Assets/Ganache Grove/Characters/vegetablevendor_townsfolk.png',
+    dialogues: [
+      'Bake it sweet! I traded my best carrots for this tart.',
+      'A sweetbread for energy, it\'s market day!',
+      'Looking for a caramelized rose dessert today.'
+    ]
+  },
+  {
+    id: 'explorer',
+    name: 'Explorer',
+    avatar: '/Assets/Ganache Grove/Characters/Explorer1_townsfolk.png',
+    dialogues: [
+      'A Cinnamon Roll to pack for the Mossberry expedition!',
+      'I need a dense honey loaf that won\'t spoil in my bag.',
+      'A quick pastry before I head past the whispering trees.'
+    ]
+  },
+  {
+    id: 'beggar',
+    name: 'Beggar',
+    avatar: '/Assets/Ganache Grove/Characters/Begger_townsfolk.png',
+    dialogues: [
+      'Smells like heaven in here... any warm buns to spare?',
+      'Thank you, Chef, a waft of this bread is a warm hug.',
+      'A simple sweetbread roll would bless my morning.'
+    ]
+  }
 ];
 
 // ── Standard shift orders ──────────────────────────────────────────────────────
 export const INITIAL_ORDERS: OrderGroup[] = [
-  { id:'inn',      customer:"Traveller's Inn",    icon:'🏨', face:'😊', need:3, done:0, patience:100, category:'pastry',  comment:'' },
-  { id:'clinic',   customer:'Oakenhart Clinic',   icon:'⚕️', face:'😊', need:2, done:0, patience:100, category:'dessert', comment:'' },
-  { id:'festival', customer:'Festival Committee', icon:'🎪', face:'😊', need:4, done:0, patience:100, category:'loaf',    comment:'' },
+  { id:'inn',      customer:"Traveller's Inn",    customerName: 'Innkeeper',      avatarImage: '/Assets/Ganache Grove/Characters/Innkeeper_townsfolk.png',      customerDialogue: "Our travelers won't stop asking for your Blueberry Pies!", icon:'🏨', face:'😊', need:3, done:0, patience:100, category:'pastry',  comment:'', ingredientsNeeded: { 'sugar-beets': 1 } },
+  { id:'clinic',   customer:'Oakenhart Clinic',   customerName: 'Professor Oats',  avatarImage: '/Assets/Ganache Grove/Characters/Teacher_townsfolk.png',        customerDialogue: "Ah, bakery sciences! A Cinnamon Roll for cerebral fuel.",  icon:'⚕️', face:'😊', need:2, done:0, patience:100, category:'dessert', comment:'', ingredientsNeeded: { 'sugar-beets': 1 } },
+  { id:'festival', customer:'Festival Committee', customerName: 'Marshal Frill',   avatarImage: '/Assets/Ganache Grove/Characters/Marshal_Frill_townsfolk.png',   customerDialogue: "Hearty Old Oak Honey Loaf keeps my energy up on forest patrol!", icon:'🎪', face:'😊', need:4, done:0, patience:100, category:'loaf',    comment:'', ingredientsNeeded: { 'sweetbread': 1 } },
 ];
 
 // ── After-Hours order templates (shuffled per session) ─────────────────────────
